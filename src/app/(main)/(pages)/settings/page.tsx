@@ -1,3 +1,6 @@
+import ProfileForm from '@/components/forms/profile-form';
+import ProfilePicture from './_components/profile-picture';
+
 const Settings = async () => {
   return (
     <div className="flex flex-col gap-4">
@@ -8,9 +11,11 @@ const Settings = async () => {
         <div>
           <h2 className="text-2xl font-bold">User Profile</h2>
           <p className="text-base text-white/50">
-            Add or update your information now
+            Add or update your information
           </p>
         </div>
+        <ProfilePicture userImage={''} />
+        <ProfileForm />
       </div>
     </div>
   );

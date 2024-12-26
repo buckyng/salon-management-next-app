@@ -1,6 +1,6 @@
 {
-  "name": "My awesome PWA app",
-  "short_name": "PWA App",
+  "name": "Salon Management App",
+  "short_name": "SM App",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
