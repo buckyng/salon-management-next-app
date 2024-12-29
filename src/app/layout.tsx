@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { ClerkProvider } from '@clerk/nextjs';
+import { ToastContainer } from 'react-toastify';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -80,6 +81,7 @@ export default function RootLayout({
           >
             {children}
           </ThemeProvider>
+          <ToastContainer position="top-right" autoClose={3000} />
         </body>
       </html>
     </ClerkProvider>
