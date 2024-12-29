@@ -10,73 +10,28 @@ export const WorkflowFormSchema = z.object({
   description: z.string().min(1, 'Required'),
 });
 
-export type ConnectionTypes = 'Google Drive' | 'Notion' | 'Slack' | 'Discord';
-
-export type EditorCanvasTypes =
-  | 'Email'
-  | 'Condition'
-  | 'AI'
-  | 'Slack'
-  | 'Google Drive'
-  | 'Notion'
-  | 'Custom Webhook'
-  | 'Google Calendar'
-  | 'Trigger'
-  | 'Action'
-  | 'Wait';
-
-export type EditorCanvasCardType = {
-  title: string;
-  description: string;
-  completed: boolean;
-  current: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: any;
-  type: EditorCanvasTypes;
-};
-
-export type EditorNodeType = {
+export interface UserType {
   id: string;
-  type: EditorCanvasCardType['type'];
-  position: {
-    x: number;
-    y: number;
-  };
-  data: EditorCanvasCardType;
-};
+  firstName: string;
+  lastName: string;
+  email: string;
+  createdAt: Date;
+  photoURL?: string;
+}
 
-export type EditorNode = EditorNodeType;
+export interface SaleData {
+  id: string;
+  orgId: string;
+  employeeId: string;
+  employeeName?: string;
+  amount: number;
+  comboNum?: number;
+  note?: string | null;
+  createdAt: string;
+  paid?: boolean;
+}
 
-export type EditorActions =
-  | {
-      type: 'LOAD_DATA';
-      payload: {
-        elements: EditorNode[];
-        edges: {
-          id: string;
-          source: string;
-          target: string;
-        }[];
-      };
-    }
-  | {
-      type: 'UPDATE_NODE';
-      payload: {
-        elements: EditorNode[];
-      };
-    }
-  | { type: 'REDO' }
-  | { type: 'UNDO' }
-  | {
-      type: 'SELECTED_ELEMENT';
-      payload: {
-        element: EditorNode;
-      };
-    };
-
-export const nodeMapper: Record<string, string> = {
-  Notion: 'notionNode',
-  Slack: 'slackNode',
-  Discord: 'discordNode',
-  'Google Drive': 'googleNode',
-};
+export interface RouteRolePermission {
+  name: string;
+  route: string;
+}

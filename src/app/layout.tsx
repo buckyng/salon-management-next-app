@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: APP_TITLE_TEMPLATE,
   },
   description: APP_DESCRIPTION,
-  manifest: '/manifest.json',
+  // manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -66,8 +66,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-    >
+    <ClerkProvider>
       <html lang="en" suppressHydrationWarning={true}>
         <body
           suppressHydrationWarning={true}
