@@ -8,20 +8,19 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SaveClientInput } from '@/lib/types';
-import { useOrganization } from '@clerk/nextjs';
 import { queryClientByPhone, saveClient } from '@/lib/client/clientService';
 import { saveCheckIn } from '@/lib/client/checkInService';
 import { toast } from 'react-toastify';
+import { useOrganizationContext } from '@/context/OrganizationContext';
 
 const CheckInPage = () => {
-  const { organization } = useOrganization();
+  const { dbOrganizationId, organizationName } = useOrganizationContext();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [client, setClient] = useState<SaveClientInput | null>(null);
   const [step, setStep] = useState(1);
   const [message, setMessage] = useState<string | null>(null);
 
-  const orgId = organization?.id;
-  const organizationName = organization?.name;
+  const orgId = dbOrganizationId;
 
   const resetForm = () => {
     setPhoneNumber('');
@@ -54,15 +53,15 @@ const CheckInPage = () => {
         throw new Error('Missing organizationId');
       }
       const transformedClientData = {
-        firstname: clientData.firstName,
-        lastname: clientData.lastName,
+        firstName: clientData.firstName,
+        lastName: clientData.lastName,
         phone: clientData.phone,
         email: clientData.email,
-        agreetoterms: clientData.agreeToTerms,
+        agreeToTerms: clientData.agreeToTerms,
       };
       // Save new client and handle check-in
       const clientId = await saveClient({
-        organizationid: orgId,
+        organizationId: orgId,
         clientData: transformedClientData,
       });
       await handleCheckIn(clientId);
@@ -79,15 +78,14 @@ const CheckInPage = () => {
         throw new Error('Missing organizationId or client');
       }
       const transformedClientData = {
-        firstname: updatedClient.firstName,
-        lastname: updatedClient.lastName,
-        phone: updatedClient.phone,
+        firstName: updatedClient.firstName,
+        lastName: updatedClient.lastName,
         email: updatedClient.email,
-        agreetoterms: updatedClient.agreeToTerms,
+        agreeToTerms: updatedClient.agreeToTerms,
       };
       // Save or update client and handle check-in
       const clientId = await saveClient({
-        organizationid: orgId,
+        organizationId: orgId,
         clientId: client.id,
         clientData: transformedClientData,
       });
