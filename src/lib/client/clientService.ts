@@ -1,16 +1,16 @@
-import { SaveClientInput } from '../types';
+import { SaveClientInput, SaveClientParams } from '../types';
 
 export async function queryClientByPhone(
-  organizationid: string,
+  organizationId: string,
   phone: string
 ): Promise<SaveClientInput | null> {
   try {
-    const response = await fetch('/api/prisma/query-client', {
+    const response = await fetch('/api/prisma/client', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ organizationid, phone }),
+      body: JSON.stringify({ action: 'queryByPhone', organizationId, phone }),
     });
 
     if (response.status === 404) {
@@ -31,31 +31,20 @@ export async function queryClientByPhone(
   }
 }
 
-interface SaveClientParams {
-  organizationid: string;
-  clientData: {
-    firstname: string;
-    lastname: string;
-    phone: string;
-    email?: string;
-    agreetoterms: boolean;
-  };
-  clientId?: string; // Optional for updates
-}
-
 export async function saveClient({
-  organizationid,
+  organizationId,
   clientData,
   clientId,
 }: SaveClientParams): Promise<string> {
   try {
-    const response = await fetch('/api/prisma/save-client', {
+    const response = await fetch('/api/prisma/client', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        organizationid,
+        action: 'saveClient',
+        organizationId,
         clientData,
         clientId,
       }),

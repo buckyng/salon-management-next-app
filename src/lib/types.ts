@@ -57,6 +57,17 @@ export type SaveClientInput = Pick<
   'firstName' | 'lastName' | 'phone' | 'email' | 'agreeToTerms' | 'id'
 >;
 
+export type UpdateClientInput = Pick<
+  Client,
+  'firstName' | 'lastName' | 'email' | 'agreeToTerms'
+>;
+
+export interface SaveClientParams {
+  organizationId: string;
+  clientData: SaveClientInput | UpdateClientInput;
+  clientId?: string; //optional for update
+}
+
 export interface CheckIn {
   id: string; // Unique identifier for the check-in record
   clientId: string; // ID of the client associated with the check-in
