@@ -14,23 +14,27 @@ const DashboardPage = () => {
   const [activeOrg, setActiveOrg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoaded || !userMemberships) return;
+    try {
+      if (!isLoaded || !userMemberships) return;
 
-    // User doesn't belong to any organizations
-    if (userMemberships.count === 0) return;
+      // User doesn't belong to any organizations
+      if (userMemberships.count === 0) return;
 
-    //check if the user has any active organization then set that value of the selection
-    if (orgId) {
-      setActiveOrg(orgId);
-    } else {
-      // if no active org, set the active organization to the first one in the list
-      const defaultOrg = userMemberships.data[0];
-      setActiveOrg(defaultOrg.organization.id);
+      //check if the user has any active organization then set that value of the selection
+      if (orgId) {
+        setActiveOrg(orgId);
+      } else {
+        // if no active org, set the active organization to the first one in the list
+        const defaultOrg = userMemberships.data[0];
+        setActiveOrg(defaultOrg.organization.id);
 
-      // Set the active organization
-      setActive({ organization: defaultOrg.organization.id }).catch((error) =>
-        console.error('Failed to set active organization:', error)
-      );
+        // Set the active organization
+        setActive({ organization: defaultOrg.organization.id }).catch((error) =>
+          console.error('Failed to set active organization:', error)
+        );
+      }
+    } catch (error) {
+      console.error('An error occurred in the useEffect:', error);
     }
   }, [isLoaded, orgId, setActive, userMemberships]);
 
@@ -40,7 +44,9 @@ const DashboardPage = () => {
 
   if (userMemberships.count === 0) {
     return (
-      <p>You don&apos;t belong to any organizations. Please contact support.</p>
+      <p className="p-6">
+        You don&apos;t belong to any organizations. Please contact support.
+      </p>
     );
   }
 

@@ -10,6 +10,10 @@ export const WorkflowFormSchema = z.object({
   description: z.string().min(1, 'Required'),
 });
 
+export const inviteUserSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+});
+
 export interface UserType {
   id: string;
   firstName: string;
