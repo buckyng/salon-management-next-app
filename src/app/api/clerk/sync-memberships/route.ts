@@ -4,9 +4,9 @@ import { clerkClient } from '@/lib/clerk';
 
 export async function POST(request: Request) {
   try {
-    const { organizationid } = await request.json();
+    const { organizationId } = await request.json();
 
-    if (!organizationid) {
+    if (!organizationId) {
       return NextResponse.json(
         { error: 'Missing organizationId' },
         { status: 400 }
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const membershipsResponse =
       await clerkClient.organizations.getOrganizationMembershipList({
-        organizationId: organizationid,
+        organizationId,
       });
 
     // Extract the `data` array from the response
@@ -33,17 +33,17 @@ export async function POST(request: Request) {
       }
       prisma.organizationMembership.upsert({
         where: {
-          userid_organizationid: {
-            userid: membership.publicUserData.userId,
-            organizationid,
+          userId_organizationId: {
+            userId: membership.publicUserData.userId,
+            organizationId,
           },
         },
         update: {
           role: membership.role,
         },
         create: {
-          userid: membership.publicUserData.userId,
-          organizationid,
+          userId: membership.publicUserData.userId,
+          organizationId,
           role: membership.role,
         },
       });

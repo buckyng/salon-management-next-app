@@ -30,13 +30,14 @@ export async function POST() {
         where: { id: org.id },
         update: {
           name: org.name,
-          logourl: logoUrl,
+          logoUrl,
         },
         create: {
           id: org.id,
           name: org.name,
-          createdat: new Date(org.createdAt),
-          logourl: logoUrl,
+          createdAt: new Date(org.createdAt),
+          logoUrl: logoUrl || '',
+          clerkId: org.id, 
         },
       });
     });
