@@ -73,6 +73,7 @@ export default function RootLayout({
           suppressHydrationWarning={true}
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+          <ToastContainer position="top-right" autoClose={3000} />
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
@@ -81,7 +82,6 @@ export default function RootLayout({
           >
             {children}
           </ThemeProvider>
-          <ToastContainer position="top-right" autoClose={3000} />
         </body>
       </html>
     </ClerkProvider>
