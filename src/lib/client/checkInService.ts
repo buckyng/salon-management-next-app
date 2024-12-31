@@ -27,3 +27,54 @@ export async function saveCheckIn({
     throw error;
   }
 }
+
+export const fetchCheckIns = async (organizationId: string) => {
+  try {
+    const response = await fetch(`/api/prisma/checkin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action: 'fetchCheckIns', organizationId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch check-ins');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching check-ins:', error);
+    return [];
+  }
+};
+
+export const updateCheckInService = async (
+  organizationId: string,
+  checkInId: string,
+  isInService: boolean
+) => {
+  try {
+    const response = await fetch(`/api/prisma/checkin`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'updateCheckInService',
+        organizationId,
+        checkInId,
+        isInService,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update check-in');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating check-in:', error);
+    return [];
+  }
+};

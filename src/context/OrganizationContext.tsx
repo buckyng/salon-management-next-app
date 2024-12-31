@@ -18,14 +18,21 @@ const OrganizationContext = createContext<OrganizationContextProps>({
 export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { organization } = useOrganization();
+  const { organization, isLoaded } = useOrganization();
   const [dbOrganizationId, setDbOrganizationId] = useState<string | null>(null);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDbOrganizationId = async () => {
+      if (!isLoaded) {
+        setLoading(true);
+        return;
+      }
+
       if (!organization?.id) {
+        setDbOrganizationId(null);
+        setOrganizationName(null);
         setLoading(false);
         return;
       }
@@ -44,10 +51,12 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (response.ok) {
           const data = await response.json();
-          setDbOrganizationId(data.dbOrganizationId);
+          setDbOrganizationId(data.dbOrganizationId || null);
           setOrganizationName(organization.name || null);
         } else {
           console.error('Failed to fetch dbOrganizationId');
+          setDbOrganizationId(null);
+          setOrganizationName(null);
         }
       } catch (error) {
         console.error('Error fetching dbOrganizationId:', error);
@@ -57,11 +66,15 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     fetchDbOrganizationId();
-  }, [organization]);
+  }, [isLoaded, organization]);
 
   return (
     <OrganizationContext.Provider
-      value={{ dbOrganizationId, organizationName, loading }}
+      value={{
+        dbOrganizationId,
+        organizationName,
+        loading,
+      }}
     >
       {children}
     </OrganizationContext.Provider>

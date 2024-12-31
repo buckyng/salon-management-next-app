@@ -1,4 +1,4 @@
-import { SaveClientInput, SaveClientParams } from '../types';
+import { Client, SaveClientInput, SaveClientParams } from '../types';
 
 export async function queryClientByPhone(
   organizationId: string,
@@ -62,6 +62,39 @@ export async function saveClient({
     return savedClientId; // Return the saved client's ID
   } catch (error) {
     console.error('Error saving client:', error);
+    throw error;
+  }
+}
+
+export async function getClientDetails(
+  clientId: string,
+  organizationId: string
+): Promise<Client | null> {
+  try {
+    const response = await fetch('/api/prisma/client', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'getClientDetails',
+        clientId,
+        organizationId,
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null; // Return null if client is not found
+      }
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch client details.');
+    }
+
+    const clientDetails = await response.json();
+    return clientDetails as Client;
+  } catch (error) {
+    console.error('Error fetching client details:', error);
     throw error;
   }
 }

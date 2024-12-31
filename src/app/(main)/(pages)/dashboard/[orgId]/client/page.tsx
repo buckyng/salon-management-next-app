@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { SaveClientInput } from '@/lib/types';
 import { queryClientByPhone, saveClient } from '@/lib/client/clientService';
 import { saveCheckIn } from '@/lib/client/checkInService';
-import { toast } from 'react-toastify';
 import { useOrganizationContext } from '@/context/OrganizationContext';
 
 const CheckInPage = () => {
@@ -38,8 +37,6 @@ const CheckInPage = () => {
         setClient(foundClient);
         setStep(2); // Proceed to next step
       } else {
-        // Display a user-friendly message
-        toast('No client found. Please enter your details.');
         setStep(2); // Redirect to a new client form or appropriate UI
       }
     } catch (error) {

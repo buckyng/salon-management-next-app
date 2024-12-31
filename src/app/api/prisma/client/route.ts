@@ -96,6 +96,50 @@ export async function POST(request: Request) {
       }
     }
 
+    if (action === 'getClientDetails') {
+      // Validate required fields for fetching a client
+      if (!organizationId || !clientId) {
+        return NextResponse.json(
+          { error: 'Missing organizationId or clientId' },
+          { status: 400 }
+        );
+      }
+
+      const client = await prisma.client.findFirst({
+        where: { id: clientId, organizationId },
+        include: {
+          CheckIn: true,
+          Feedback: true,
+        },
+      });
+
+      if (!client) {
+        return NextResponse.json(null, { status: 404 });
+      }
+
+      return NextResponse.json({
+        id: client.id,
+        firstName: client.firstName,
+        lastName: client.lastName,
+        phone: client.phone,
+        email: client.email || undefined,
+        numberOfVisits: client.numberOfVisits || 0,
+        lastVisitRating: client.lastVisitRating || undefined,
+        agreeToTerms: client.agreeToTerms,
+        checkIns: client.CheckIn.map((checkIn) => ({
+          id: checkIn.id,
+          createdAt: checkIn.createdAt,
+          isInService: checkIn.isInService,
+        })),
+        feedbacks: client.Feedback.map((feedback) => ({
+          id: feedback.id,
+          createdAt: feedback.createdAt,
+          rating: feedback.rating,
+          comment: feedback.description || undefined,
+        })),
+      });
+    }
+
     // If action is not recognized
     return NextResponse.json(
       { error: 'Invalid action parameter' },

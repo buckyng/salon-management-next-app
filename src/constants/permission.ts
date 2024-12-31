@@ -12,6 +12,7 @@ export const rolePermissions: Record<Role, RouteRolePermission[]> = {
   ],
   cashier: [
     { name: 'Cashier Dashboard', route: '/dashboard/[orgId]/cashier' },
+    { name: 'Check-In Dashboard', route: '/dashboard/[orgId]/checkin' },
     { name: 'End of Day Report', route: '/dashboard/[orgId]/cashier/eod' },
   ],
   client: [{ name: 'Client Dashboard', route: '/dashboard/[orgId]/client' }],
