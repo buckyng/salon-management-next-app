@@ -80,10 +80,18 @@ export async function POST(req: Request) {
       case 'user.deleted': {
         const { id } = data;
 
-        await prisma.user.delete({
+        const existingUser = await prisma.user.findUnique({
           where: { clerkId: id },
         });
-        console.log(`Processed user deletion for Clerk ID: ${id}`);
+
+        if (existingUser) {
+          await prisma.user.delete({
+            where: { clerkId: id },
+          });
+          console.log(`Processed user deletion for Clerk ID: ${id}`);
+        } else {
+          console.warn(`User with Clerk ID ${id} does not exist.`);
+        }
         break;
       }
 
@@ -111,10 +119,18 @@ export async function POST(req: Request) {
       case 'organization.deleted': {
         const { id } = data;
 
-        await prisma.organization.delete({
+        const existingOrg = await prisma.organization.findUnique({
           where: { clerkId: id },
         });
-        console.log('Processed organization deletion event.');
+
+        if (existingOrg) {
+          await prisma.organization.delete({
+            where: { clerkId: id },
+          });
+          console.log(`Processed organization deletion for Clerk ID: ${id}`);
+        } else {
+          console.warn(`Organization with Clerk ID ${id} does not exist.`);
+        }
         break;
       }
 

@@ -69,7 +69,9 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email</label>
+        <label className="block text-sm font-medium text-gray-700">
+          Email (Optional)
+        </label>
         <Input
           type="email"
           value={email}

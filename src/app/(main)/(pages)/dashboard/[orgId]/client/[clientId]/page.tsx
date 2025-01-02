@@ -73,8 +73,7 @@ const ClientPage = () => {
         <ul>
           {clientData.checkIns.map((checkIn) => (
             <li key={checkIn.id}>
-              {new Date(checkIn.createdAt).toLocaleString()} -{' '}
-              {checkIn.isInService ? 'In Service' : 'Completed'}
+              {new Date(checkIn.createdAt).toLocaleString()}
             </li>
           ))}
         </ul>

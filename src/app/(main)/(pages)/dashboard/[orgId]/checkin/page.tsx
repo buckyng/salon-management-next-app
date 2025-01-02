@@ -7,43 +7,95 @@ import {
   updateCheckInService,
 } from '@/lib/client/checkInService';
 import { useOrganizationContext } from '@/context/OrganizationContext';
+import { getPusherClient } from '@/lib/pusher-client';
+import { FormattedCheckInResponse } from '@/lib/types';
 
 const CheckInPage = () => {
   const { dbOrganizationId } = useOrganizationContext();
-  const [checkIns, setCheckIns] = useState([]);
+  const [checkIns, setCheckIns] = useState<FormattedCheckInResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const orgId = dbOrganizationId;
+  const pusher = getPusherClient();
 
   useEffect(() => {
-    const loadCheckIns = async () => {
-      if (!orgId) return;
+    if (!dbOrganizationId) return;
 
-      setLoading(true);
-      const data = await fetchCheckIns(orgId);
-      setCheckIns(data);
-      setLoading(false);
+    // Fetch initial check-ins
+    const fetchData = async () => {
+      try {
+        const data = await fetchCheckIns(dbOrganizationId);
+        setCheckIns(data);
+      } catch (error) {
+        console.error('Error fetching check-ins:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    loadCheckIns();
-  }, [orgId]);
+    fetchData();
+
+    // Subscribe to Pusher for real-time updates
+    const channel = pusher.subscribe(`organization-${dbOrganizationId}`);
+
+    channel.bind('check-in-added', (newCheckIn: FormattedCheckInResponse) => {
+      setCheckIns((prevCheckIns) => {
+        const updatedCheckIns = prevCheckIns.filter(
+          (checkIn) => checkIn.id !== newCheckIn.id
+        );
+        return [...updatedCheckIns, newCheckIn];
+      });
+    });
+
+    channel.bind('check-in-updated', (data: FormattedCheckInResponse) => {
+      setCheckIns((prevCheckIns) =>
+        prevCheckIns.map((checkIn) => (checkIn.id === data.id ? data : checkIn))
+      );
+    });
+
+    // Cleanup
+    // return () => {
+    //   pusher.unsubscribe(`organization-${dbOrganizationId}`);
+    //   pusher.disconnect();
+    // };
+  }, [dbOrganizationId, pusher]);
 
   const handleToggle = async (checkInId: string, isInService: boolean) => {
-    const updatedCheckIns = await updateCheckInService(
-      orgId!,
-      checkInId,
-      isInService
-    );
-    setCheckIns(updatedCheckIns);
+    try {
+      const updatedCheckIn = await updateCheckInService(
+        dbOrganizationId!,
+        checkInId,
+        isInService
+      );
+
+      setCheckIns((prevCheckIns) =>
+        prevCheckIns.map((checkIn) =>
+          checkIn.id === updatedCheckIn.id ? updatedCheckIn : checkIn
+        )
+      );
+    } catch (error) {
+      console.error('Error updating check-in:', error);
+    }
   };
 
   if (loading) {
     return <p>Loading check-ins...</p>;
   }
 
+  const sortedCheckIns = [...checkIns].sort((a, b) => {
+    // Sort by isInService first
+    if (a.isInService !== b.isInService) {
+      return a.isInService ? 1 : -1;
+    }
+
+    // Then by createdAt
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateA - dateB;
+  });
+
   return (
     <div className="container mx-auto mt-8">
       <h1 className="text-2xl font-bold mb-4">Check-In Management</h1>
-      <CheckInTable checkIns={checkIns} onToggle={handleToggle} />
+      <CheckInTable checkIns={sortedCheckIns} onToggle={handleToggle} />
     </div>
   );
 };
