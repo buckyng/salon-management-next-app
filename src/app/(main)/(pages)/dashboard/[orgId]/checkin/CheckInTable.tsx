@@ -12,22 +12,10 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-
-interface CheckIn {
-  id: string;
-  createdAt: string;
-  clientId: string;
-  clientName: string;
-  clientPhone: string;
-  clientEmail: string;
-  checkInHistory: { createdAt: string; isInService: boolean }[];
-  numberOfVisits: number;
-  lastCheckInRating: number;
-  isInService: boolean;
-}
+import { FormattedCheckInResponse } from '@/lib/types';
 
 interface CheckInTableProps {
-  checkIns: CheckIn[];
+  checkIns: FormattedCheckInResponse[];
   onToggle: (checkInId: string, isInService: boolean) => void;
 }
 
@@ -53,7 +41,9 @@ export const CheckInTable: React.FC<CheckInTableProps> = ({
         {checkIns.map((checkIn) => (
           <TableRow key={checkIn.id} className="cursor-pointer">
             <TableCell>
-              {new Date(checkIn.createdAt).toLocaleTimeString()}
+              {checkIn.createdAt
+                ? new Date(checkIn.createdAt).toLocaleTimeString()
+                : ''}
             </TableCell>
             <TableCell
               onClick={() =>

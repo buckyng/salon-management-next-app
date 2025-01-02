@@ -73,8 +73,56 @@ export interface CheckIn {
   clientId: string; // ID of the client associated with the check-in
   organizationId: string; // ID of the organization associated with the check-in
   createdAt: string; //date and time of checkin
-  createdDate: string; //date of checkin only
   isInService: boolean; // Current status of the check-in
+}
+
+export interface CheckInExtra {
+  id: string;
+  createdAt: string;
+  clientId: string;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string;
+  checkInHistory: { createdAt: string }[];
+  numberOfVisits: number;
+  lastCheckInRating: number;
+  isInService: boolean;
+}
+
+// Define the structure of a CheckIn with Client details
+export interface CheckInClientDetails {
+  id: string;
+  createdAt: Date | null;
+  clientId: string;
+  isInService: boolean;
+  Client: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email: string | null;
+    numberOfVisits: number | null;
+    lastVisitRating: number | null;
+    CheckIn: {
+      createdAt: Date | null;
+    }[];
+  };
+}
+
+// Return type of the formatted response
+export interface FormattedCheckInResponse {
+  id: string;
+  createdAt: Date | null;
+  clientId: string;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string | null;
+  numberOfVisits: number;
+  lastCheckInRating: number | null;
+  isInService: boolean;
+  checkInHistory: {
+    createdAt: Date | null;
+  }[];
 }
 
 export type SaveCheckInParams = Pick<CheckIn, 'organizationId' | 'clientId'>;

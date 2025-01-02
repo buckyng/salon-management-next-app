@@ -22,13 +22,9 @@ const RootPage = () => {
         <h1 className="text-xl font-bold">Salon Management App</h1>
         <nav>
           {isSignedIn ? (
-            <Button variant="ghost" onClick={handleDashboard}>
-              Go to Dashboard
-            </Button>
+            <Button onClick={handleDashboard}>Dashboard</Button>
           ) : (
-            <Button variant="outline" onClick={handleSignIn}>
-              Sign In
-            </Button>
+            <Button onClick={handleSignIn}>Sign In</Button>
           )}
         </nav>
       </header>

@@ -56,7 +56,7 @@ export const updateCheckInService = async (
 ) => {
   try {
     const response = await fetch(`/api/prisma/checkin`, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },

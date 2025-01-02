@@ -9,38 +9,32 @@ datasource db {
 }
 
 model Organization {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  clerkId   String    @unique
+  id        String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId   String                   @unique
   name      String
   logoUrl   String?
-  createdAt DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt DateTime? @default(now()) @db.Timestamp(6)
-
-  CheckIn  CheckIn[]
-  Client   Client[]
-  Feedback Feedback[]
-  members  OrganizationMembership[]
+  createdAt DateTime?                @default(now()) @db.Timestamp(6)
+  updatedAt DateTime?                @default(now()) @db.Timestamp(6)
+  CheckIn   CheckIn[]
+  Client    Client[]
+  Feedback  Feedback[]
+  members   OrganizationMembership[]
 }
 
 model User {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  clerkId   String  @unique
-  email     String  @unique
-  firstName String?
-  lastName  String?
-  photoUrl  String?
-
-  createdAt DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt DateTime? @default(now()) @db.Timestamp(6)
-
+  id          String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId     String                   @unique
+  email       String                   @unique
+  firstName   String?
+  lastName    String?
+  photoUrl    String?
+  createdAt   DateTime?                @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime?                @default(now()) @db.Timestamp(6)
   memberships OrganizationMembership[]
 }
 
 model OrganizationMembership {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   role           String
   createdAt      DateTime     @default(now()) @db.Timestamp(6)
   organizationId String       @db.Uuid
@@ -52,45 +46,41 @@ model OrganizationMembership {
 }
 
 model Client {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   firstName       String
   lastName        String
-  phone           String    @unique
+  phone           String       @unique
   email           String?
-  numberOfVisits  Int?      @default(0)
+  numberOfVisits  Int?         @default(0)
   lastVisitRating Int?
   agreeToTerms    Boolean
-  createdAt       DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt       DateTime? @default(now()) @db.Timestamp(6)
-  organizationId  String    @db.Uuid
-
-  CheckIn      CheckIn[]
-  Organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  Feedback     Feedback[]
+  createdAt       DateTime?    @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime?    @default(now()) @db.Timestamp(6)
+  organizationId  String       @db.Uuid
+  CheckIn         CheckIn[]
+  Organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  Feedback        Feedback[]
 }
 
 model CheckIn {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clientId       String       @db.Uuid
   organizationId String       @db.Uuid
   createdAt      DateTime?    @default(now()) @db.Timestamp(6)
-  createdDate    DateTime     @db.Date
   isInService    Boolean      @default(false)
   Client         Client       @relation(fields: [clientId], references: [id])
   Organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([createdAt])
 }
 
 model Feedback {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clientId       String       @db.Uuid
   organizationId String       @db.Uuid
   createdAt      DateTime?    @default(now()) @db.Timestamp(6)
   rating         Int
   description    String?
-  
   Client         Client       @relation(fields: [clientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
