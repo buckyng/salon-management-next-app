@@ -1,26 +1,42 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import { updateSession } from '@/lib/supabase/middleware';
 
-const isPublicRoute = createRouteMatcher([
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/',
-  '/manifest.json',
-  '/favicon.ico',
-  '/icons(.*)', // Exclude all icons folder files
-  '/api/clerk-webhook(.*)',
-]);
+// Define public routes
+const isPublicRoute = (url: string) => {
+  const publicRoutes = [
+    '/sign-in',
+    '/sign-up',
+    '/',
+    '/manifest.json',
+    '/favicon.ico',
+    '/icons',
+    '/api/clerk-webhook',
+  ];
 
-export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect();
+  return publicRoutes.some((route) => url.startsWith(route));
+};
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Skip authentication for public routes
+  if (isPublicRoute(pathname)) {
+    return NextResponse.next();
   }
-});
+
+  // Perform session update for non-public routes
+  return await updateSession(request);
+}
 
 export const config = {
   matcher: [
-    // Match everything except Next.js internals and static assets
-    '/((?!_next/|favicon.ico|manifest.json|icons/|.*\\.(?:html?|css|js|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)$).*)',
-    // Always apply middleware for API routes
-    '/(api|trpc)(.*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * Feel free to modify this pattern to include more paths.
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

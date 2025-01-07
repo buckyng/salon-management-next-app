@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-import { SignedIn, UserButton } from '@clerk/nextjs';
 import { ModeToggle } from '../global/mode-toggle';
 import {
   Tooltip,
@@ -56,9 +55,7 @@ const InfoBar = () => {
       </div>
       <div className="flex flex-row justify-end gap-6 items-center px-4 py-4 w-full dark:bg-black ">
         <ModeToggle />
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
+        {/* TODO: User Profile*/}
       </div>
     </div>
   );

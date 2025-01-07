@@ -1,33 +1,18 @@
-'use client';
+import Navbar from '@/components/global/navbar';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
-import { useAuth } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+const RootPage = async () => {
+  const supabase = await createClient();
 
-const RootPage = () => {
-  const { isSignedIn } = useAuth();
-  const router = useRouter();
-
-  const handleSignIn = () => {
-    router.push('/sign-in');
-  };
-
-  const handleDashboard = () => {
-    router.push('/dashboard');
-  };
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) {
+    redirect('/login');
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-gray-800 text-white px-4 py-2 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Salon Management App</h1>
-        <nav>
-          {isSignedIn ? (
-            <Button onClick={handleDashboard}>Dashboard</Button>
-          ) : (
-            <Button onClick={handleSignIn}>Sign In</Button>
-          )}
-        </nav>
-      </header>
+      <Navbar />
       <main className="flex-grow flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-3xl font-semibold">
@@ -36,11 +21,6 @@ const RootPage = () => {
           <p className="mt-2 text-gray-600">
             Manage your salon effortlessly with our user-friendly platform.
           </p>
-          {!isSignedIn && (
-            <Button className="mt-4" onClick={handleSignIn}>
-              Get Started
-            </Button>
-          )}
         </div>
       </main>
     </div>

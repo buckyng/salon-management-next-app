@@ -2,51 +2,87 @@
 
 import React, { useEffect, useState } from 'react';
 import { CustomOrganizationPicker } from '@/components/global/CustomOrganizationPicker';
-import { useAuth, useOrganizationList } from '@clerk/nextjs';
 import RoleBasedActions from '@/components/global/RoleBasedActions';
+import { Database } from '@/lib/supabase-types';
+
+export type MembershipRow =
+  Database['public']['Tables']['organizationmemberships']['Row'];
+
+type MembershipWithOrganization = {
+  organizations: {
+    id: string;
+    name: string;
+  };
+} & MembershipRow;
 
 const DashboardPage = () => {
-  const { userMemberships, isLoaded, setActive } = useOrganizationList({
-    userMemberships: true,
-  });
-
-  const { orgId } = useAuth();
+  const [memberships, setMemberships] = useState<
+    MembershipWithOrganization[] | null
+  >(null);
   const [activeOrg, setActiveOrg] = useState<string | null>(null);
+  const [activeRole, setActiveRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      if (!isLoaded || !userMemberships) return;
+    const fetchMemberships = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/memberships');
+        const data = await res.json();
 
-      // User doesn't belong to any organizations
-      if (userMemberships.count === 0) return;
+        if (res.ok) {
+          setMemberships(data);
+          // Set the active organization if not already selected
+          const storedActiveOrg = localStorage.getItem('activeOrg');
+          const storedActiveRole = localStorage.getItem('activeRole');
+          if (storedActiveOrg && storedActiveRole) {
+            setActiveOrg(storedActiveOrg);
+            setActiveRole(storedActiveRole);
+          } else if (data.length > 0) {
+            const defaultOrg = data[0].organizations.id;
+            const defaultRole = data[0].role;
+            setActiveOrg(defaultOrg);
+            setActiveRole(defaultRole);
 
-      //check if the user has any active organization then set that value of the selection
-      if (orgId) {
-        setActiveOrg(orgId);
-      } else {
-        // if no active org, set the active organization to the first one in the list
-        const defaultOrg = userMemberships.data[0];
-        setActiveOrg(defaultOrg.organization.id);
-
-        // Set the active organization
-        setActive({ organization: defaultOrg.organization.id }).catch((error) =>
-          console.error('Failed to set active organization:', error)
-        );
+            localStorage.setItem('activeOrg', defaultOrg);
+            localStorage.setItem('activeRole', defaultRole);
+          }
+        } else {
+          console.error('Failed to fetch memberships:', data.error);
+        }
+      } catch (error) {
+        console.error('Error fetching memberships:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('An error occurred in the useEffect:', error);
-    }
-  }, [isLoaded, orgId, setActive, userMemberships]);
+    };
 
-  if (!isLoaded) {
+    fetchMemberships();
+  }, []);
+
+  const handleOrgChange = (orgId: string) => {
+    setActiveOrg(orgId);
+    localStorage.setItem('activeOrg', orgId);
+
+    // Find and update the role for the selected organization
+    const selectedMembership = memberships?.find(
+      (membership) => membership.organizations.id === orgId
+    );
+    if (selectedMembership) {
+      setActiveRole(selectedMembership.role);
+      localStorage.setItem('activeRole', selectedMembership.role);
+    } else {
+      console.error(`No role found for organization ID: ${orgId}`);
+    }
+  };
+
+  if (loading) {
     return <p>Loading...</p>;
   }
 
-  if (userMemberships.count === 0) {
+  if (!memberships) {
     return (
-      <p className="p-6">
-        You don&apos;t belong to any organizations. Please contact support.
-      </p>
+      <p>You don’t belong to any organizations. Please contact support.</p>
     );
   }
 
@@ -57,12 +93,14 @@ const DashboardPage = () => {
       </h1>
       <h2> Select Organization </h2>
       <CustomOrganizationPicker
-        organizations={userMemberships.data}
+        organizations={memberships.map((m) => ({
+          id: m.organizations.id,
+          name: m.organizations.name,
+        }))}
         activeOrg={activeOrg}
-        setActiveOrg={setActiveOrg}
-        setActive={setActive}
+        handleOrgChange={handleOrgChange}
       />
-      {activeOrg && <RoleBasedActions orgId={activeOrg} />}
+      {activeOrg && <RoleBasedActions orgId={activeOrg} orgRole={activeRole} />}
     </div>
   );
 };
