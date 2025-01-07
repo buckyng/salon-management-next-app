@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useOrganization } from '@clerk/nextjs';
 import {
   Form,
   FormItem,
@@ -21,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useRoles } from '@/hooks/useRoles';
 
 // Validation schema using zod
 const inviteSchema = z.object({
@@ -30,16 +30,8 @@ const inviteSchema = z.object({
 
 type InviteFormValues = z.infer<typeof inviteSchema>;
 
-export const InviteMember = () => {
-  const { isLoaded, organization, invitations } = useOrganization({
-    invitations: {
-      pageSize: 5,
-      keepPreviousData: true,
-    },
-  });
-
-  const [fetchedRoles, setFetchedRoles] = useState<string[]>([]);
-  const isPopulated = useRef(false);
+export const InviteMember = ({ orgId }: { orgId: string }) => {
+  const { roles, loading: loadingRoles } = useRoles(orgId);
 
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteSchema),
@@ -49,30 +41,27 @@ export const InviteMember = () => {
     },
   });
 
-  useEffect(() => {
-    if (isPopulated.current || !organization) return;
-
-    organization
-      .getRoles({ pageSize: 20, initialPage: 1 })
-      .then((res) => {
-        setFetchedRoles(res.data.map((role) => role.key));
-        isPopulated.current = true;
-      })
-      .catch((error) => console.error('Error fetching roles:', error));
-  }, [organization]);
-
-  if (!isLoaded || !organization) {
+  if (loadingRoles) {
     return <p>Loading...</p>;
   }
 
   const handleSubmit = async (data: InviteFormValues) => {
     try {
-      await organization.inviteMember({
-        emailAddress: data.email,
-        role: data.role,
+      const res = await fetch('/api/invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
       });
-      await invitations?.revalidate?.();
-      form.reset();
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error('Error inviting member:', error);
+      } else {
+        form.reset();
+        alert('Invitation sent successfully!');
+      }
     } catch (error) {
       console.error('Error inviting member:', error);
     }
@@ -100,7 +89,7 @@ export const InviteMember = () => {
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                {fetchedRoles.map((role) => (
+                {roles.map((role) => (
                   <SelectItem key={role} value={role}>
                     {role}
                   </SelectItem>

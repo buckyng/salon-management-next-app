@@ -1,16 +1,17 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useOrganization } from '@clerk/nextjs';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { getOrganizationDetails } from '@/actions/organizations';
 
 interface OrganizationContextProps {
-  dbOrganizationId: string | null;
+  activeOrgId: string | null;
   organizationName: string | null;
   loading: boolean;
 }
 
 const OrganizationContext = createContext<OrganizationContextProps>({
-  dbOrganizationId: null,
+  activeOrgId: null,
   organizationName: null,
   loading: true,
 });
@@ -18,60 +19,53 @@ const OrganizationContext = createContext<OrganizationContextProps>({
 export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { organization, isLoaded } = useOrganization();
-  const [dbOrganizationId, setDbOrganizationId] = useState<string | null>(null);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [activeOrgId, setActiveOrgId] = useState<string | null>(null);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDbOrganizationId = async () => {
-      if (!isLoaded) {
-        setLoading(true);
-        return;
-      }
-
-      if (!organization?.id) {
-        setDbOrganizationId(null);
-        setOrganizationName(null);
-        setLoading(false);
-        return;
-      }
+    const fetchOrganization = async () => {
+      setLoading(true);
 
       try {
-        const response = await fetch('/api/prisma/organization', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'getDbOrganizationId',
-            clerkId: organization.id,
-          }),
-        });
+        // Get activeOrgId from URL params, localStorage, or dashboard props
+        const paramOrgId = searchParams.get('orgId');
+        const storedOrgId = localStorage.getItem('activeOrg');
+        const currentOrgId = paramOrgId || storedOrgId;
 
-        if (response.ok) {
-          const data = await response.json();
-          setDbOrganizationId(data.dbOrganizationId || null);
-          setOrganizationName(organization.name || null);
-        } else {
-          console.error('Failed to fetch dbOrganizationId');
-          setDbOrganizationId(null);
+        if (!currentOrgId) {
+          setActiveOrgId(null);
           setOrganizationName(null);
+          setLoading(false);
+          return;
         }
+
+        setActiveOrgId(currentOrgId);
+
+        // Fetch organization details via server action
+        const orgData = await getOrganizationDetails(currentOrgId);
+        setOrganizationName(orgData.name);
+
+        // Save the activeOrgId to localStorage
+        localStorage.setItem('activeOrg', currentOrgId);
       } catch (error) {
-        console.error('Error fetching dbOrganizationId:', error);
+        console.error('Error fetching organization details:', error);
+        setActiveOrgId(null);
+        setOrganizationName(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDbOrganizationId();
-  }, [isLoaded, organization]);
+    fetchOrganization();
+  }, [searchParams, pathname]);
 
   return (
     <OrganizationContext.Provider
       value={{
-        dbOrganizationId,
+        activeOrgId,
         organizationName,
         loading,
       }}

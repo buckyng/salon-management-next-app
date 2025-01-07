@@ -1,6 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef, ChangeEventHandler } from 'react';
-import { useOrganization } from '@clerk/nextjs';
+import React, { ChangeEventHandler } from 'react';
 import {
   Select,
   SelectContent,
@@ -8,36 +7,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useRoles } from '@/hooks/useRoles';
 
 type SelectRoleProps = {
+  orgId: string;
   fieldName?: string;
   isDisabled?: boolean;
   onChange?: ChangeEventHandler<HTMLSelectElement>;
   defaultRole?: string;
 };
 export const SelectRole = (props: SelectRoleProps) => {
-  const { isDisabled = false, onChange, defaultRole } = props;
-  const { organization } = useOrganization();
-  const [fetchedRoles, setFetchedRoles] = useState<string[]>([]);
-  const isPopulated = useRef(false);
-
-  useEffect(() => {
-    if (isPopulated.current) return;
-    organization
-      ?.getRoles({
-        pageSize: 20,
-        initialPage: 1,
-      })
-      .then((res) => {
-        isPopulated.current = true;
-        setFetchedRoles(res.data.map((role) => role.key));
-      });
-  }, [organization]);
+  const { isDisabled = false, onChange, defaultRole, orgId } = props;
+  const { roles, loading } = useRoles(orgId);
 
   return (
     <Select
       defaultValue={defaultRole || ''}
-      disabled={isDisabled}
+      disabled={isDisabled || loading}
       onValueChange={(value) =>
         onChange?.({
           target: { value },
@@ -45,10 +31,10 @@ export const SelectRole = (props: SelectRoleProps) => {
       }
     >
       <SelectTrigger>
-        <SelectValue placeholder="Select Role" />
+        <SelectValue placeholder={loading ? 'Loading...' : 'Select Role'} />
       </SelectTrigger>
       <SelectContent>
-        {fetchedRoles.map((role) => (
+        {roles.map((role) => (
           <SelectItem key={role} value={role}>
             {role}
           </SelectItem>
