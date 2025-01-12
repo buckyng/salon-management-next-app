@@ -30,7 +30,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
       setLoading(true);
 
       try {
-        // Get activeOrgId from URL params, localStorage, or dashboard props
+        // Get activeOrgId from URL params or localStorage
         const paramOrgId = searchParams.get('orgId');
         const storedOrgId = localStorage.getItem('activeOrg');
         const currentOrgId = paramOrgId || storedOrgId;
@@ -46,6 +46,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // Fetch organization details via server action
         const orgData = await getOrganizationDetails(currentOrgId);
+        console.log('orgData:', orgData);
         setOrganizationName(orgData.name);
 
         // Save the activeOrgId to localStorage

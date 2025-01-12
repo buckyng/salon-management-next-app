@@ -3,10 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { CustomOrganizationPicker } from '@/components/global/CustomOrganizationPicker';
 import RoleBasedActions from '@/components/global/RoleBasedActions';
-import { Database } from '@/lib/supabase-types';
+import { Tables } from '@/lib/database.types';
 
-export type MembershipRow =
-  Database['public']['Tables']['organizationmemberships']['Row'];
+export type MembershipRow = Tables<'organization_memberships'>;
 
 type MembershipWithOrganization = {
   organizations: {
@@ -68,11 +67,13 @@ const DashboardPage = () => {
     const selectedMembership = memberships?.find(
       (membership) => membership.organizations.id === orgId
     );
-    if (selectedMembership) {
-      setActiveRole(selectedMembership.role);
-      localStorage.setItem('activeRole', selectedMembership.role);
+    if (selectedMembership && selectedMembership.role_id) {
+      setActiveRole(selectedMembership.role_id);
+      localStorage.setItem('activeRole', selectedMembership.role_id);
     } else {
       console.error(`No role found for organization ID: ${orgId}`);
+      setActiveRole(null);
+      localStorage.removeItem('activeRole');
     }
   };
 

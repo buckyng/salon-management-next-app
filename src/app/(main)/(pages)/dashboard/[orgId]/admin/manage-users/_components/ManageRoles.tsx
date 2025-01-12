@@ -25,23 +25,24 @@ type Membership = {
 };
 
 export const ManageRoles = () => {
-  const { user } = useUserContext();
+  const { user, dbUserId } = useUserContext();
   const { activeOrgId } = useOrganizationContext();
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user || !activeOrgId || !dbUserId) return;
+
     const fetchMemberships = async () => {
-      if (!activeOrgId) return;
       try {
         setLoading(true);
-        console.log('activeOrgId:', activeOrgId);
         const res = await fetch(`/api/memberships?orgId=${activeOrgId}`);
         const data = await res.json();
 
+        console.log('data:', data);
         if (res.ok) {
           setMemberships(
-            data.filter((mem: Membership) => mem.user_id !== user?.id)
+            data.filter((mem: Membership) => mem.users.id !== dbUserId) // dont show the current user in the list
           );
         } else {
           console.error('Failed to fetch memberships:', data.error);
@@ -54,7 +55,7 @@ export const ManageRoles = () => {
     };
 
     fetchMemberships();
-  }, [activeOrgId, user]);
+  }, [activeOrgId, dbUserId, user]);
 
   const handleRoleChange = async (
     membershipId: string,
@@ -120,7 +121,7 @@ export const ManageRoles = () => {
           <CardHeader>
             <p>
               <strong>User:</strong> {mem.users.email}{' '}
-              {mem.user_id === user?.id && '(You)'}
+              {mem.user_id === dbUserId && '(You)'}
             </p>
             <p>
               <strong>Joined:</strong>{' '}

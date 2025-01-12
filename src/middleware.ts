@@ -10,7 +10,6 @@ const isPublicRoute = (url: string) => {
     '/manifest.json',
     '/favicon.ico',
     '/icons',
-    '/api/clerk-webhook',
   ];
 
   return publicRoutes.some((route) => url.startsWith(route));

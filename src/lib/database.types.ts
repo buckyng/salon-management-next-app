@@ -7,68 +7,50 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
-      organizationmemberships: {
+      organization_memberships: {
         Row: {
           created_at: string | null
           id: string
-          organization_id: string
-          role: string
+          organization_id: string | null
+          role_id: string | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
-          organization_id: string
-          role: string
+          organization_id?: string | null
+          role_id?: string | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
-          organization_id?: string
-          role?: string
+          organization_id?: string | null
+          role_id?: string | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "organizationmemberships_organization_id_fkey"
+            foreignKeyName: "organization_memberships_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "organizationmemberships_user_id_fkey"
+            foreignKeyName: "organization_memberships_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_memberships_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -97,41 +79,44 @@ export type Database = {
         }
         Relationships: []
       }
-      rolepermissions: {
+      permissions: {
         Row: {
-          created_at: string | null
           id: string
-          organization_id: string
-          permission: string
-          role_id: string
-          updated_at: string | null
+          name: string
         }
         Insert: {
-          created_at?: string | null
           id?: string
-          organization_id: string
-          permission: string
-          role_id: string
-          updated_at?: string | null
+          name: string
         }
         Update: {
-          created_at?: string | null
           id?: string
-          organization_id?: string
-          permission?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          permission_id: string
+          role_id: string
+        }
+        Insert: {
+          permission_id: string
+          role_id: string
+        }
+        Update: {
+          permission_id?: string
           role_id?: string
-          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "rolepermissions_organization_id_fkey"
-            columns: ["organization_id"]
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "permissions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "rolepermissions_role_id_fkey"
+            foreignKeyName: "role_permissions_role_id_fkey"
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "roles"
@@ -141,27 +126,22 @@ export type Database = {
       }
       roles: {
         Row: {
-          created_at: string | null
           id: string
           name: string
-          updated_at: string | null
         }
         Insert: {
-          created_at?: string | null
           id?: string
           name: string
-          updated_at?: string | null
         }
         Update: {
-          created_at?: string | null
           id?: string
           name?: string
-          updated_at?: string | null
         }
         Relationships: []
       }
       users: {
         Row: {
+          auth_id: string | null
           created_at: string | null
           email: string
           id: string
@@ -170,6 +150,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          auth_id?: string | null
           created_at?: string | null
           email: string
           id?: string
@@ -178,6 +159,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          auth_id?: string | null
           created_at?: string | null
           email?: string
           id?: string
@@ -192,7 +174,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_roles: {
+        Args: {
+          auth_id: string
+        }
+        Returns: Json
+      }
+      get_user_roles_and_permissions: {
+        Args: {
+          auth_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

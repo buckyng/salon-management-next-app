@@ -11,6 +11,7 @@ import { menuOptions } from '@/lib/constant';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { UserProfileMenu } from '../global/user-profile-menu';
 
 const InfoBar = () => {
   const pathName = usePathname();
@@ -55,7 +56,7 @@ const InfoBar = () => {
       </div>
       <div className="flex flex-row justify-end gap-6 items-center px-4 py-4 w-full dark:bg-black ">
         <ModeToggle />
-        {/* TODO: User Profile*/}
+        <UserProfileMenu />
       </div>
     </div>
   );

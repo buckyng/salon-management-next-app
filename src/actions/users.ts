@@ -14,10 +14,17 @@ export async function login(formData: FormData) {
 
     const { error } = await auth.signInWithPassword(data);
 
-    if (error) throw error;
+    // Handle errors during authentication
+    if (error) {
+      console.error('Login error:', error.message);
+      return { errorMessage: getErrorMessage(error) };
+    }
 
+    // Successful login
     return { errorMessage: null };
   } catch (error) {
+    console.error('Unexpected error during login:', error);
     return { errorMessage: getErrorMessage(error) };
   }
 }
+ 

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { createSupabaseClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 
 const Navbar = () => {
@@ -16,7 +16,7 @@ const Navbar = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const supabase = createClient();
+        const supabase = createSupabaseClient();
         const { data, error } = await supabase.auth.getUser();
 
         if (error) {
@@ -38,7 +38,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      const supabase = createClient();
+      const supabase = createSupabaseClient();
       await supabase.auth.signOut();
       router.push('/login'); // Redirect to the homepage after logout
     } catch (error) {

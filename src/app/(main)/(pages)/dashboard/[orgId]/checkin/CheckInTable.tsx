@@ -11,8 +11,8 @@ import {
 } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
 import { FormattedCheckInResponse } from '@/lib/types';
+import { useOrganizationContext } from '@/context/OrganizationContext';
 
 interface CheckInTableProps {
   checkIns: FormattedCheckInResponse[];
@@ -23,7 +23,7 @@ export const CheckInTable: React.FC<CheckInTableProps> = ({
   checkIns,
   onToggle,
 }) => {
-  const { orgId } = useAuth();
+  const { activeOrgId } = useOrganizationContext();
   const router = useRouter();
 
   return (
@@ -47,7 +47,9 @@ export const CheckInTable: React.FC<CheckInTableProps> = ({
             </TableCell>
             <TableCell
               onClick={() =>
-                router.push(`/dashboard/${orgId}/client/${checkIn.clientId}`)
+                router.push(
+                  `/dashboard/${activeOrgId}/client/${checkIn.clientId}`
+                )
               }
             >
               {checkIn.clientName}

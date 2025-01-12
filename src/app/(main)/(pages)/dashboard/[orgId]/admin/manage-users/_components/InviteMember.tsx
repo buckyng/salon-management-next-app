@@ -26,6 +26,7 @@ import { useRoles } from '@/hooks/useRoles';
 const inviteSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   role: z.string().nonempty('Please select a role'),
+  orgId: z.string().uuid('Invalid organization ID'),
 });
 
 type InviteFormValues = z.infer<typeof inviteSchema>;
@@ -38,6 +39,7 @@ export const InviteMember = ({ orgId }: { orgId: string }) => {
     defaultValues: {
       email: '',
       role: '',
+      orgId,
     },
   });
 
@@ -46,6 +48,7 @@ export const InviteMember = ({ orgId }: { orgId: string }) => {
   }
 
   const handleSubmit = async (data: InviteFormValues) => {
+    console.log('Inviting member:', data);
     try {
       const res = await fetch('/api/invite', {
         method: 'POST',

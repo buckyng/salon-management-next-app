@@ -21,8 +21,6 @@ export async function GET() {
       return NextResponse.json({ error: 'No roles found' }, { status: 404 });
     }
 
-    console.log('Roles Data:', data);
-
     const roles = data.map((role) => role.name);
     return NextResponse.json(roles);
   } catch (error) {

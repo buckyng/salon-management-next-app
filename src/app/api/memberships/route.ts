@@ -1,91 +1,108 @@
 'use server';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase/server';
+import { fetchUserData } from '@/lib/supabase/userUtils';
 
 export async function GET(req: NextRequest) {
   const supabase = await createSupabaseClient();
 
   try {
     const { searchParams } = new URL(req.url);
-    const orgId = searchParams.get('orgId'); // Get orgId from query params
+    const orgId = searchParams.get('orgId');
+
+    const { dbUser } = await fetchUserData(supabase);
+
+    console.log('dbUser', dbUser);
 
     if (!orgId) {
-      return NextResponse.json(
-        { error: 'Organization ID is required' },
-        { status: 400 }
-      );
+      // Fetch all memberships for the current user
+      const { data: memberships, error: membershipsError } = await supabase
+        .from('organization_memberships')
+        .select(
+          `
+          id,
+          role_id,
+          created_at,
+          organizations (id, name),
+          roles (name)
+        `
+        )
+        .eq('user_id', dbUser.id);
+
+      console.log('membership', memberships);
+
+      if (membershipsError) {
+        return NextResponse.json(
+          { error: 'Failed to fetch memberships' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json(memberships);
     }
 
-    // Get the authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'User not authenticated' },
-        { status: 401 }
-      );
-    }
-
-    // Fetch user details from the users table
-    const { data: dbUser, error: dbUserError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', user.id)
-      .single();
-
-    if (dbUserError || !dbUser) {
-      return NextResponse.json(
-        { error: 'Failed to fetch user from the database' },
-        { status: 500 }
-      );
-    }
-
-    // Verify the user has admin access to the organization
+    // Check the user's role for the organization
     const { data: membership, error: membershipError } = await supabase
-      .from('organizationmemberships')
-      .select('role')
+      .from('organization_memberships')
+      .select(
+        `
+        role_id,
+        roles (name) -- Include role name
+      `
+      )
       .eq('user_id', dbUser.id)
       .eq('organization_id', orgId)
-      .eq('role', 'admin') // Ensure the user has the admin role
       .single();
+
+    console.log('membership', membership);
 
     if (membershipError || !membership) {
       return NextResponse.json(
-        { error: 'You do not have admin access to this organization' },
+        { error: 'Membership not found for the user' },
         { status: 403 }
       );
     }
 
-    // Fetch all users for the organization
-    const { data: users, error: usersError } = await supabase
-      .from('organizationmemberships')
+    const isAdmin = membership.roles.name === 'admin';
+
+    if (!isAdmin) {
+      return NextResponse.json(
+        { error: 'You do not have access to view this organization' },
+        { status: 403 }
+      );
+    }
+
+    // Admin users can fetch all memberships for the organization
+    const { data: orgMemberships, error: orgMembershipsError } = await supabase
+      .from('organization_memberships')
       .select(
         `
         id,
-        role,
+        role_id,
         created_at,
         users (id, email, name),
-        organizations (id, name)
+        organizations (id, name),
+        roles (name)
       `
       )
       .eq('organization_id', orgId);
 
-    if (usersError) {
+    if (orgMembershipsError) {
       return NextResponse.json(
-        { error: 'Failed to fetch users for the organization' },
+        { error: 'Failed to fetch memberships for the organization' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(users);
+    return NextResponse.json(orgMemberships);
   } catch (error) {
-    console.error('Error fetching organization users:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error fetching memberships:', error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : 'An unexpected error occurred';
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -93,20 +110,27 @@ export async function PUT(req: NextRequest) {
   const supabase = await createSupabaseClient();
 
   try {
-    const { id, role } = await req.json();
+    const { id, roleId } = await req.json();
 
-    if (!id || !role) {
+    if (!id || !roleId) {
       return NextResponse.json(
-        { error: 'Missing membership ID or role' },
+        { error: 'Missing membership ID or role ID' },
         { status: 400 }
       );
     }
 
     const { data: updatedMembership, error } = await supabase
-      .from('organizationmemberships')
-      .update({ role })
+      .from('organization_memberships')
+      .update({ role_id: roleId })
       .eq('id', id)
-      .select('*')
+      .select(
+        `
+        id,
+        role_id,
+        created_at,
+        roles (name) -- Include role name
+      `
+      )
       .single();
 
     if (error) {
@@ -140,7 +164,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     const { error } = await supabase
-      .from('organizationmemberships')
+      .from('organization_memberships')
       .delete()
       .eq('id', id);
 

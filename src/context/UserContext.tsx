@@ -1,11 +1,12 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { createSupabaseClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { createSupabaseClient } from '@/lib/supabase/client';
 
 interface UserContextType {
   user: User | null;
+  dbUserId: string | null;
   loading: boolean;
 }
 
@@ -15,20 +16,33 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [dbUserId, setDbUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createSupabaseClient();
-
     const fetchUser = async () => {
       setLoading(true);
-      const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error('Error fetching user:', error.message);
-      } else {
-        setUser(data?.user || null);
+
+      try {
+        const response = await fetch('/api/auth/user');
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+
+        const { authUser, dbUser } = await response.json();
+        setUser(authUser || null);
+        setDbUserId(dbUser?.id || null);
+      } catch (error) {
+        console.error(
+          'Error fetching user data:',
+          error instanceof Error ? error.message : error
+        );
+        setUser(null);
+        setDbUserId(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchUser();
@@ -44,7 +58,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading }}>
+    <UserContext.Provider value={{ user, dbUserId, loading }}>
       {children}
     </UserContext.Provider>
   );

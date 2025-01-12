@@ -1,9 +1,9 @@
 import Navbar from '@/components/global/navbar';
-import { createClient } from '@/lib/supabase/server';
+import { createSupabaseClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 const RootPage = async () => {
-  const supabase = await createClient();
+  const supabase = await createSupabaseClient();
 
   const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) {
