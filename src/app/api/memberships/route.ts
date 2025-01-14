@@ -13,8 +13,6 @@ export async function GET(req: NextRequest) {
 
     const { dbUser } = await fetchUserData(supabase);
 
-    console.log('dbUser', dbUser);
-
     if (!orgId) {
       // Fetch all memberships for the current user
       const { data: memberships, error: membershipsError } = await supabase
@@ -29,8 +27,6 @@ export async function GET(req: NextRequest) {
         `
         )
         .eq('user_id', dbUser.id);
-
-      console.log('membership', memberships);
 
       if (membershipsError) {
         return NextResponse.json(
@@ -54,8 +50,6 @@ export async function GET(req: NextRequest) {
       .eq('user_id', dbUser.id)
       .eq('organization_id', orgId)
       .single();
-
-    console.log('membership', membership);
 
     if (membershipError || !membership) {
       return NextResponse.json(

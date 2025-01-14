@@ -29,7 +29,7 @@ export async function fetchUserData(
   // Fetch user details from public.users
   const { data: dbUser, error: dbUserError } = await supabase
     .from('users')
-    .select('id, auth_id, email, name, created_at') // Define fields explicitly
+    .select('*')
     .eq('auth_id', authUser.id)
     .single();
 

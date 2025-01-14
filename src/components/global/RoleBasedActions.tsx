@@ -1,32 +1,55 @@
 'use client';
 
 import { Button } from '../ui/button';
-import { rolePermissions } from '@/constants/permission';
 import { FC } from 'react';
 import { useRouter } from 'next/navigation';
+import { Role } from '@/lib/constant';
+import { RouteRolePermission } from '@/lib/types';
+
+const rolePermissions: Record<Role, RouteRolePermission[]> = {
+  admin: [
+    { name: 'Admin Dashboard', route: '/dashboard/[orgId]/admin' },
+    { name: 'Manage Users', route: '/dashboard/[orgId]/admin/manage-users' },
+  ],
+  employee: [
+    { name: 'Employee Dashboard', route: '/dashboard/[orgId]/employee' },
+    { name: 'Sales Report', route: '/dashboard/[orgId]/employee/report' },
+  ],
+  cashier: [
+    { name: 'Cashier Dashboard', route: '/dashboard/[orgId]/cashier' },
+    { name: 'Check-In Dashboard', route: '/dashboard/[orgId]/checkin' },
+    { name: 'End of Day Report', route: '/dashboard/[orgId]/cashier/eod' },
+  ],
+  client: [{ name: 'Client Dashboard', route: '/dashboard/[orgId]/client' }],
+};
 
 interface RoleBasedActionsProps {
-  orgId: string;
-  orgRole: string | null;
+  activeOrgId: string;
+  activeRole: string | null;
 }
 
-const RoleBasedActions: FC<RoleBasedActionsProps> = ({ orgId, orgRole }) => {
+const RoleBasedActions: FC<RoleBasedActionsProps> = ({
+  activeOrgId,
+  activeRole,
+}) => {
   const router = useRouter();
 
-  if (!orgRole)
+  if (!activeRole)
     return <p>No role assigned. Please contact your administrator.</p>;
+
+  if (!activeOrgId)
+    return <p>No organization selected. Please select an organization.</p>;
 
   // Get permissions for the mapped role
   const accessibleRoutes =
-    rolePermissions[orgRole as keyof typeof rolePermissions]?.map(
-      (permission) => ({
-        ...permission,
-        route: permission.route.replace('[orgId]', orgId),
-      })
-    ) || [];
+    rolePermissions[activeRole as Role]?.map((permission) => ({
+      ...permission,
+      route: permission.route.replace('[orgId]', activeOrgId),
+    })) || [];
 
-  if (!accessibleRoutes.length) {
-    console.warn(`No accessible routes found for role: ${orgRole}`);
+  if (!accessibleRoutes || accessibleRoutes.length === 0) {
+    console.warn(`No accessible routes found for role: ${activeRole}`);
+    return <p>No accessible actions available for this role.</p>;
   }
 
   return (

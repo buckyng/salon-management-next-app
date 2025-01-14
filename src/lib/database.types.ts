@@ -13,26 +13,26 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          organization_id: string | null
-          role_id: string | null
+          organization_id: string
+          role_id: string
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
-          organization_id?: string | null
-          role_id?: string | null
+          organization_id: string
+          role_id: string
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
-          organization_id?: string | null
-          role_id?: string | null
+          organization_id?: string
+          role_id?: string
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -96,16 +96,25 @@ export type Database = {
       }
       role_permissions: {
         Row: {
+          created_at: string | null
+          id: string
           permission_id: string
           role_id: string
+          updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
+          id?: string
           permission_id: string
           role_id: string
+          updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
+          id?: string
           permission_id?: string
           role_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -142,6 +151,7 @@ export type Database = {
       users: {
         Row: {
           auth_id: string | null
+          avatar_url: string | null
           created_at: string | null
           email: string
           id: string
@@ -151,6 +161,7 @@ export type Database = {
         }
         Insert: {
           auth_id?: string | null
+          avatar_url?: string | null
           created_at?: string | null
           email: string
           id?: string
@@ -160,6 +171,7 @@ export type Database = {
         }
         Update: {
           auth_id?: string | null
+          avatar_url?: string | null
           created_at?: string | null
           email?: string
           id?: string
@@ -174,15 +186,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_roles: {
+      custom_access_token_hook: {
         Args: {
-          auth_id: string
-        }
-        Returns: Json
-      }
-      get_user_roles_and_permissions: {
-        Args: {
-          auth_id: string
+          event: Json
         }
         Returns: Json
       }

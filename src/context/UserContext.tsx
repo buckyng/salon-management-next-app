@@ -3,10 +3,11 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { createSupabaseClient } from '@/lib/supabase/client';
+import { Tables } from '@/lib/database.types';
 
 interface UserContextType {
-  user: User | null;
-  dbUserId: string | null;
+  authUser: User | null; // Authenticated user details from Supabase Auth
+  dbUser: Tables<'users'> | null; // User details from `public.users`
   loading: boolean;
 }
 
@@ -15,8 +16,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [dbUserId, setDbUserId] = useState<string | null>(null);
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [dbUser, setDbUser] = useState<Tables<'users'> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,15 +32,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         const { authUser, dbUser } = await response.json();
-        setUser(authUser || null);
-        setDbUserId(dbUser?.id || null);
+        setAuthUser(authUser || null);
+        setDbUser(dbUser || null);
       } catch (error) {
         console.error(
           'Error fetching user data:',
           error instanceof Error ? error.message : error
         );
-        setUser(null);
-        setDbUserId(null);
+        setAuthUser(null);
+        setDbUser(null);
       } finally {
         setLoading(false);
       }
@@ -58,7 +59,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, dbUserId, loading }}>
+    <UserContext.Provider value={{ authUser, dbUser, loading }}>
       {children}
     </UserContext.Provider>
   );

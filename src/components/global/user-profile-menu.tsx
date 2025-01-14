@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -26,14 +26,19 @@ import { handleLogout } from '@/lib/supabase/helpers/auth';
 
 export const UserProfileMenu: React.FC = () => {
   const router = useRouter();
-  const { user, dbUserId, loading } = useUserContext(); // Access user and dbUserId from context
+  const { dbUser, loading } = useUserContext(); // Access user and dbUserId from context
 
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(user?.user_metadata?.name || '');
-  const [avatarUrl, setAvatarUrl] = useState(
-    user?.user_metadata?.avatar_url || ''
-  );
+  const [name, setName] = useState<string>('');
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (dbUser) {
+      setName(dbUser.name || '');
+      setAvatarUrl(dbUser.avatar_url || '');
+    }
+  }, [dbUser]);
 
   if (loading) {
     return null; // Optionally, show a loading spinner
@@ -51,7 +56,7 @@ export const UserProfileMenu: React.FC = () => {
   const handleSave = async () => {
     try {
       let uploadedUrl = avatarUrl;
-      if (!dbUserId) {
+      if (!dbUser) {
         console.error('userId is required');
         return;
       }
@@ -62,7 +67,7 @@ export const UserProfileMenu: React.FC = () => {
           file,
           bucket: 'avatars',
           folder: 'profile',
-          userId: dbUserId,
+          userId: dbUser.id,
         });
 
         if (error) {
@@ -74,10 +79,10 @@ export const UserProfileMenu: React.FC = () => {
       }
 
       // Update user profile using helper function
-      if (!dbUserId) throw new Error('User ID not found');
+      if (!dbUser.id) throw new Error('User ID not found');
 
       const updateError = await updateUserDetails({
-        dbUserId,
+        dbUserId: dbUser.id,
         name,
         avatarUrl: uploadedUrl,
       });

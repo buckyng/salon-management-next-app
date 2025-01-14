@@ -2,28 +2,23 @@
 
 import React, { useEffect, useState } from 'react';
 import { CheckInTable } from './CheckInTable';
-import {
-  fetchCheckIns,
-  updateCheckInService,
-} from '@/lib/client/checkInService';
+import { updateCheckInService } from '@/lib/client/checkInService';
 import { useOrganizationContext } from '@/context/OrganizationContext';
-import { getPusherClient } from '@/lib/pusher-client';
 import { FormattedCheckInResponse } from '@/lib/types';
 
 const CheckInPage = () => {
-  const { dbOrganizationId } = useOrganizationContext();
+  const { activeOrgId } = useOrganizationContext();
   const [checkIns, setCheckIns] = useState<FormattedCheckInResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const pusher = getPusherClient();
 
   useEffect(() => {
-    if (!dbOrganizationId) return;
+    if (!activeOrgId) return;
 
     // Fetch initial check-ins
     const fetchData = async () => {
       try {
-        const data = await fetchCheckIns(dbOrganizationId);
-        setCheckIns(data);
+        // const data = [];//todo: call getCheckInsService
+        // setCheckIns(data);
       } catch (error) {
         console.error('Error fetching check-ins:', error);
       } finally {
@@ -32,36 +27,12 @@ const CheckInPage = () => {
     };
 
     fetchData();
-
-    // Subscribe to Pusher for real-time updates
-    const channel = pusher.subscribe(`organization-${dbOrganizationId}`);
-
-    channel.bind('check-in-added', (newCheckIn: FormattedCheckInResponse) => {
-      setCheckIns((prevCheckIns) => {
-        const updatedCheckIns = prevCheckIns.filter(
-          (checkIn) => checkIn.id !== newCheckIn.id
-        );
-        return [...updatedCheckIns, newCheckIn];
-      });
-    });
-
-    channel.bind('check-in-updated', (data: FormattedCheckInResponse) => {
-      setCheckIns((prevCheckIns) =>
-        prevCheckIns.map((checkIn) => (checkIn.id === data.id ? data : checkIn))
-      );
-    });
-
-    // Cleanup
-    // return () => {
-    //   pusher.unsubscribe(`organization-${dbOrganizationId}`);
-    //   pusher.disconnect();
-    // };
-  }, [dbOrganizationId, pusher]);
+  }, [activeOrgId]);
 
   const handleToggle = async (checkInId: string, isInService: boolean) => {
     try {
       const updatedCheckIn = await updateCheckInService(
-        dbOrganizationId!,
+        activeOrgId!,
         checkInId,
         isInService
       );

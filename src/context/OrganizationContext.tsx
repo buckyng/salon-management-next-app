@@ -1,74 +1,89 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { getOrganizationDetails } from '@/actions/organizations';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 
-interface OrganizationContextProps {
-  activeOrgId: string | null;
-  organizationName: string | null;
-  loading: boolean;
+interface MembershipWithOrganization {
+  organizations: {
+    id: string;
+    name: string;
+  };
+  role_id: string;
+  roles: {name: string};
 }
 
-const OrganizationContext = createContext<OrganizationContextProps>({
-  activeOrgId: null,
-  organizationName: null,
-  loading: true,
-});
+interface OrganizationContextType {
+  memberships: MembershipWithOrganization[] | null;
+  activeOrgId: string | null;  
+  setActiveOrgId: (orgId: string | null) => void;
+  activeOrgName: string | null;
+  setActiveOrgName: (name: string | null) => void;
+  activeRole: string | null;
+  setActiveRole: (roleId: string | null) => void;
+  loading: boolean;
+  fetchMemberships: () => Promise<void>;
+}
+
+const OrganizationContext = createContext<OrganizationContextType | undefined>(
+  undefined
+);
 
 export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [memberships, setMemberships] = useState<
+    MembershipWithOrganization[] | null
+  >(null);
   const [activeOrgId, setActiveOrgId] = useState<string | null>(null);
-  const [organizationName, setOrganizationName] = useState<string | null>(null);
+  const [activeOrgName, setActiveOrgName] = useState<string | null>(null);
+  const [activeRole, setActiveRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchOrganization = async () => {
+  const fetchMemberships = useCallback(async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    try {
       setLoading(true);
+      const res = await fetch('/api/memberships', { signal });
 
-      try {
-        // Get activeOrgId from URL params or localStorage
-        const paramOrgId = searchParams.get('orgId');
-        const storedOrgId = localStorage.getItem('activeOrg');
-        const currentOrgId = paramOrgId || storedOrgId;
-
-        if (!currentOrgId) {
-          setActiveOrgId(null);
-          setOrganizationName(null);
-          setLoading(false);
-          return;
-        }
-
-        setActiveOrgId(currentOrgId);
-
-        // Fetch organization details via server action
-        const orgData = await getOrganizationDetails(currentOrgId);
-        console.log('orgData:', orgData);
-        setOrganizationName(orgData.name);
-
-        // Save the activeOrgId to localStorage
-        localStorage.setItem('activeOrg', currentOrgId);
-      } catch (error) {
-        console.error('Error fetching organization details:', error);
-        setActiveOrgId(null);
-        setOrganizationName(null);
-      } finally {
-        setLoading(false);
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Failed to fetch memberships:', errorData.error);
+        return;
       }
-    };
 
-    fetchOrganization();
-  }, [searchParams, pathname]);
+      const data = await res.json();
+      setMemberships(data);
+
+      // Automatically set the first membership as active
+      if (data.length > 0) {
+        setActiveOrgId(data[0].organizations.id);
+        setActiveOrgName(data[0].organizations.name);
+        setActiveRole(data[0].roles.name);
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.log('Fetch aborted');
+      } else {
+        console.error('Error fetching memberships:', error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return (
     <OrganizationContext.Provider
       value={{
+        memberships,
         activeOrgId,
-        organizationName,
+        setActiveOrgId,
+        activeOrgName,
+        setActiveOrgName,
+        activeRole,
+        setActiveRole,
         loading,
+        fetchMemberships,
       }}
     >
       {children}
@@ -76,7 +91,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export const useOrganizationContext = (): OrganizationContextProps => {
+export const useOrganizationContext = (): OrganizationContextType => {
   const context = useContext(OrganizationContext);
 
   if (!context) {

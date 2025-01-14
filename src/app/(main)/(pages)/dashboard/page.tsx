@@ -1,75 +1,35 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { CustomOrganizationPicker } from '@/components/global/CustomOrganizationPicker';
 import RoleBasedActions from '@/components/global/RoleBasedActions';
 import { Tables } from '@/lib/database.types';
+import { useOrganizationContext } from '@/context/OrganizationContext';
 
 export type MembershipRow = Tables<'organization_memberships'>;
 
-type MembershipWithOrganization = {
-  organizations: {
-    id: string;
-    name: string;
-  };
-} & MembershipRow;
-
 const DashboardPage = () => {
-  const [memberships, setMemberships] = useState<
-    MembershipWithOrganization[] | null
-  >(null);
-  const [activeOrg, setActiveOrg] = useState<string | null>(null);
-  const [activeRole, setActiveRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchMemberships = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch('/api/memberships');
-        const data = await res.json();
-
-        if (res.ok) {
-          setMemberships(data);
-          // Set the active organization if not already selected
-          const storedActiveOrg = localStorage.getItem('activeOrg');
-          const storedActiveRole = localStorage.getItem('activeRole');
-          if (storedActiveOrg && storedActiveRole) {
-            setActiveOrg(storedActiveOrg);
-            setActiveRole(storedActiveRole);
-          } else if (data.length > 0) {
-            const defaultOrg = data[0].organizations.id;
-            const defaultRole = data[0].role;
-            setActiveOrg(defaultOrg);
-            setActiveRole(defaultRole);
-
-            localStorage.setItem('activeOrg', defaultOrg);
-            localStorage.setItem('activeRole', defaultRole);
-          }
-        } else {
-          console.error('Failed to fetch memberships:', data.error);
-        }
-      } catch (error) {
-        console.error('Error fetching memberships:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMemberships();
-  }, []);
+  const {
+    memberships,
+    activeOrgId,
+    setActiveOrgId,
+    activeRole,
+    setActiveRole,
+    loading,
+    fetchMemberships,
+  } = useOrganizationContext();
 
   const handleOrgChange = (orgId: string) => {
-    setActiveOrg(orgId);
-    localStorage.setItem('activeOrg', orgId);
-
+    setActiveOrgId(orgId);
+    localStorage.setItem('activeOrgId', orgId);
     // Find and update the role for the selected organization
     const selectedMembership = memberships?.find(
       (membership) => membership.organizations.id === orgId
     );
+
     if (selectedMembership && selectedMembership.role_id) {
-      setActiveRole(selectedMembership.role_id);
-      localStorage.setItem('activeRole', selectedMembership.role_id);
+      setActiveRole(selectedMembership.roles.name);
+      localStorage.setItem('activeRole', selectedMembership.roles.name);
     } else {
       console.error(`No role found for organization ID: ${orgId}`);
       setActiveRole(null);
@@ -77,11 +37,17 @@ const DashboardPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (!memberships) {
+      fetchMemberships();
+    }
+  }, [fetchMemberships, memberships]);
+
   if (loading) {
     return <p>Loading...</p>;
   }
 
-  if (!memberships) {
+  if (!memberships || memberships.length === 0) {
     return (
       <p>You don’t belong to any organizations. Please contact support.</p>
     );
@@ -98,10 +64,12 @@ const DashboardPage = () => {
           id: m.organizations.id,
           name: m.organizations.name,
         }))}
-        activeOrg={activeOrg}
+        activeOrg={activeOrgId}
         handleOrgChange={handleOrgChange}
       />
-      {activeOrg && <RoleBasedActions orgId={activeOrg} orgRole={activeRole} />}
+      {activeOrgId && (
+        <RoleBasedActions activeOrgId={activeOrgId} activeRole={activeRole} />
+      )}
     </div>
   );
 };
