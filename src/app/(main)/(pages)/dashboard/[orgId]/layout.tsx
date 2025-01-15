@@ -15,9 +15,12 @@ const Layout = ({ children, params }: Props) => {
     memberships,
     setActiveRole,
     activeOrgName,
+    isInitialized,
   } = useOrganizationContext();
 
   useEffect(() => {
+    if (!isInitialized) return;
+
     if (!params.orgId) {
       console.error('Organization ID is missing in the route.');
       router.push('/dashboard');
@@ -46,7 +49,12 @@ const Layout = ({ children, params }: Props) => {
     setActiveOrgId,
     setActiveRole,
     router,
+    isInitialized,
   ]);
+
+  if (!isInitialized) {
+    return <p>Loading...</p>;
+  }
 
   if (!activeOrgId || !activeRole) {
     return (

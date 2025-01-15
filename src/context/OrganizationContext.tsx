@@ -26,6 +26,7 @@ interface OrganizationContextType {
   activeRole: string | null;
   setActiveRole: (roleId: string | null) => void;
   loading: boolean;
+  isInitialized: boolean;
   fetchMemberships: () => Promise<void>;
 }
 
@@ -42,17 +43,22 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [activeOrgId, setActiveOrgId] = useState<string | null>(null);
   const [activeOrgName, setActiveOrgName] = useState<string | null>(null);
   const [activeRole, setActiveRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Load localStorage values on client-side mount
   useEffect(() => {
     const storedOrgId = localStorage.getItem('activeOrgId');
     const storedOrgName = localStorage.getItem('activeOrgName');
     const storedRole = localStorage.getItem('activeRole');
+    const storedMemberships = localStorage.getItem('memberships');
 
     if (storedOrgId) setActiveOrgId(storedOrgId);
     if (storedOrgName) setActiveOrgName(storedOrgName);
     if (storedRole) setActiveRole(storedRole);
+    if (storedMemberships) setMemberships(JSON.parse(storedMemberships));
+
+    setIsInitialized(true); // Mark initialization as complete
   }, []);
 
   const fetchMemberships = useCallback(async () => {
@@ -71,6 +77,9 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const data = await res.json();
       setMemberships(data);
+
+      // Persist memberships in localStorage
+      localStorage.setItem('memberships', JSON.stringify(data));
 
       // Automatically set the first membership as active
       if (!activeOrgId && data.length > 0) {
@@ -100,24 +109,26 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Sync changes to activeOrgId, activeOrgName, and activeRole to localStorage
   useEffect(() => {
-    if (activeOrgId) {
-      localStorage.setItem('activeOrgId', activeOrgId);
-    } else {
-      localStorage.removeItem('activeOrgId');
-    }
+    if (isInitialized) {
+      if (activeOrgId) {
+        localStorage.setItem('activeOrgId', activeOrgId);
+      } else {
+        localStorage.removeItem('activeOrgId');
+      }
 
-    if (activeOrgName) {
-      localStorage.setItem('activeOrgName', activeOrgName);
-    } else {
-      localStorage.removeItem('activeOrgName');
-    }
+      if (activeOrgName) {
+        localStorage.setItem('activeOrgName', activeOrgName);
+      } else {
+        localStorage.removeItem('activeOrgName');
+      }
 
-    if (activeRole) {
-      localStorage.setItem('activeRole', activeRole);
-    } else {
-      localStorage.removeItem('activeRole');
+      if (activeRole) {
+        localStorage.setItem('activeRole', activeRole);
+      } else {
+        localStorage.removeItem('activeRole');
+      }
     }
-  }, [activeOrgId, activeOrgName, activeRole]);
+  }, [activeOrgId, activeOrgName, activeRole, isInitialized]);
 
   return (
     <OrganizationContext.Provider
@@ -130,6 +141,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
         activeRole,
         setActiveRole,
         loading,
+        isInitialized,
         fetchMemberships,
       }}
     >

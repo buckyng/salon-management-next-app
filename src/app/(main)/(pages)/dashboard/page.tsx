@@ -18,11 +18,12 @@ const DashboardPage = () => {
     setActiveOrgName,
     loading,
     fetchMemberships,
+    isInitialized,
   } = useOrganizationContext();
 
   const handleOrgChange = (orgId: string) => {
     setActiveOrgId(orgId);
-    localStorage.setItem('activeOrgId', orgId);
+
     // Find and update the role for the selected organization
     const selectedMembership = memberships?.find(
       (membership) => membership.organizations.id === orgId
@@ -30,12 +31,15 @@ const DashboardPage = () => {
 
     if (selectedMembership && selectedMembership.role_id) {
       setActiveRole(selectedMembership.roles.name);
-      localStorage.setItem('activeRole', selectedMembership.roles.name);
       setActiveOrgName(selectedMembership.organizations.name);
+
+      // Save to localStorage (already handled by context, but can be explicitly updated if needed)
+      localStorage.setItem('activeOrgId', selectedMembership.organizations.id);
       localStorage.setItem(
         'activeOrgName',
         selectedMembership.organizations.name
       );
+      localStorage.setItem('activeRole', selectedMembership.roles.name);
     } else {
       console.error(`No role found for organization ID: ${orgId}`);
       setActiveRole(null);
@@ -43,15 +47,15 @@ const DashboardPage = () => {
     }
   };
 
+  // Fetch memberships on mount
   useEffect(() => {
-    try {
-      if (!memberships) {
-        fetchMemberships();
-      }
-    } catch (error) {
-      console.error('Error fetching memberships:', error);
+    if (!isInitialized) return;
+    if (!memberships) {
+      fetchMemberships().catch((error) =>
+        console.error('Error fetching memberships:', error)
+      );
     }
-  }, [fetchMemberships, memberships]);
+  }, [fetchMemberships, isInitialized, memberships]);
 
   if (loading) {
     return <p>Loading...</p>;
