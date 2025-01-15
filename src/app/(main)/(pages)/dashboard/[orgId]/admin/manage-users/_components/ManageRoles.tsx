@@ -36,7 +36,7 @@ export const ManageRoles = () => {
     const fetchMemberships = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/memberships?orgId=${activeOrgId}`);
+        const res = await fetch(`/api/memberships/admin?orgId=${activeOrgId}`);
         const data = await res.json();
 
         if (res.ok) {

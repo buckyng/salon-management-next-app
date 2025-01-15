@@ -1,16 +1,9 @@
 import { SupabaseClient, User } from '@supabase/supabase-js';
-
-interface DbUser {
-  id: string; // Primary key from the `public.users` table
-  auth_id: string; // Auth ID linked to the Supabase `auth.users` table
-  email?: string; // Additional fields if needed
-  name?: string;
-  created_at?: string; // Adjust according to your schema
-}
+import { Tables } from '../database.types';
 
 interface FetchedUser {
   authUser: User; // Authenticated user from Supabase
-  dbUser: DbUser; // User details from the `public.users` table
+  dbUser: Tables<'users'>; // User details from the `public.users` table
 }
 
 export async function fetchUserData(
@@ -26,6 +19,8 @@ export async function fetchUserData(
     throw new Error('User not authenticated');
   }
 
+  console.log('authUser:', authUser);
+
   // Fetch user details from public.users
   const { data: dbUser, error: dbUserError } = await supabase
     .from('users')
@@ -36,6 +31,8 @@ export async function fetchUserData(
   if (dbUserError || !dbUser) {
     throw new Error('Failed to fetch user from the database');
   }
+
+  console.log('dbUser:', dbUser);
 
   return { authUser, dbUser };
 }

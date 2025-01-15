@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { Tables } from '@/lib/database.types';
+import { jwtDecode } from 'jwt-decode';
 
 interface UserContextType {
   authUser: User | null; // Authenticated user details from Supabase Auth
@@ -20,10 +21,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [dbUser, setDbUser] = useState<Tables<'users'> | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const supabase = createSupabaseClient();
+
   useEffect(() => {
-    const supabase = createSupabaseClient();
     const fetchUser = async () => {
       setLoading(true);
+
+      const { data, error } = await supabase.auth.getUser();
+
+      if (!data || error) return;
 
       try {
         const response = await fetch('/api/auth/user');
@@ -49,9 +55,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchUser();
 
     // Real-time user session handling
-    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
-      fetchUser();
-    });
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
+          const jwt = jwtDecode(session.access_token);
+          console.log('jwt', jwt);
+        }
+        fetchUser();
+      }
+    );
 
     return () => {
       authListener?.subscription.unsubscribe();

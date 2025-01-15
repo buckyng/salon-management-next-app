@@ -15,6 +15,7 @@ const DashboardPage = () => {
     setActiveOrgId,
     activeRole,
     setActiveRole,
+    setActiveOrgName,
     loading,
     fetchMemberships,
   } = useOrganizationContext();
@@ -30,6 +31,11 @@ const DashboardPage = () => {
     if (selectedMembership && selectedMembership.role_id) {
       setActiveRole(selectedMembership.roles.name);
       localStorage.setItem('activeRole', selectedMembership.roles.name);
+      setActiveOrgName(selectedMembership.organizations.name);
+      localStorage.setItem(
+        'activeOrgName',
+        selectedMembership.organizations.name
+      );
     } else {
       console.error(`No role found for organization ID: ${orgId}`);
       setActiveRole(null);
@@ -38,8 +44,12 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    if (!memberships) {
-      fetchMemberships();
+    try {
+      if (!memberships) {
+        fetchMemberships();
+      }
+    } catch (error) {
+      console.error('Error fetching memberships:', error);
     }
   }, [fetchMemberships, memberships]);
 

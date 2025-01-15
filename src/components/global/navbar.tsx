@@ -17,6 +17,7 @@ const Navbar = () => {
     const fetchUser = async () => {
       try {
         const supabase = createSupabaseClient();
+
         const { data, error } = await supabase.auth.getUser();
 
         if (error) {
