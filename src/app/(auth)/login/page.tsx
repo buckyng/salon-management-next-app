@@ -1,6 +1,6 @@
 'use client';
 
-import { login } from '@/actions/users';
+import { login } from '@/lib/supabase/servers/auth';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';

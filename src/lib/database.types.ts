@@ -9,175 +9,130 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      organization_memberships: {
+      group_invites: {
         Row: {
-          created_at: string | null
+          accepted_at: string | null
+          created_at: string
+          group_id: string
           id: string
-          organization_id: string
-          role_id: string
-          updated_at: string | null
+          invited_by: string
+          roles: string[]
+          user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          group_id: string
+          id?: string
+          invited_by: string
+          roles?: string[]
+          user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          group_id?: string
+          id?: string
+          invited_by?: string
+          roles?: string[]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_invites_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_users: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          metadata: Json
+          role: string
+          updated_at: string
           user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
+          group_id: string
           id?: string
-          organization_id: string
-          role_id: string
-          updated_at?: string | null
+          metadata?: Json
+          role?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
+          group_id?: string
           id?: string
-          organization_id?: string
-          role_id?: string
-          updated_at?: string | null
+          metadata?: Json
+          role?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "organization_memberships_organization_id_fkey"
-            columns: ["organization_id"]
+            foreignKeyName: "group_users_group_id_fkey"
+            columns: ["group_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_memberships_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_memberships_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
         ]
       }
-      organizations: {
+      groups: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
-          name: string
-          updated_at: string | null
+          metadata: Json
+          name: string | null
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
-          name: string
-          updated_at?: string | null
+          metadata?: Json
+          name?: string | null
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
-          name?: string
-          updated_at?: string | null
+          metadata?: Json
+          name?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
-      permissions: {
+      profiles: {
         Row: {
-          id: string
-          name: string
-        }
-        Insert: {
-          id?: string
-          name: string
-        }
-        Update: {
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      role_permissions: {
-        Row: {
-          created_at: string | null
-          id: string
-          permission_id: string
-          role_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          permission_id: string
-          role_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          permission_id?: string
-          role_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "role_permissions_permission_id_fkey"
-            columns: ["permission_id"]
-            isOneToOne: false
-            referencedRelation: "permissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "role_permissions_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      roles: {
-        Row: {
-          id: string
-          name: string
-        }
-        Insert: {
-          id?: string
-          name: string
-        }
-        Update: {
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      users: {
-        Row: {
-          auth_id: string | null
           avatar_url: string | null
-          created_at: string | null
+          created_at: string
           email: string
           id: string
           name: string | null
           phone: string | null
-          updated_at: string | null
         }
         Insert: {
-          auth_id?: string | null
           avatar_url?: string | null
-          created_at?: string | null
+          created_at?: string
           email: string
           id?: string
           name?: string | null
           phone?: string | null
-          updated_at?: string | null
         }
         Update: {
-          auth_id?: string | null
           avatar_url?: string | null
-          created_at?: string | null
+          created_at?: string
           email?: string
           id?: string
           name?: string | null
           phone?: string | null
-          updated_at?: string | null
         }
         Relationships: []
       }
@@ -186,11 +141,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      custom_access_token_hook: {
-        Args: {
-          event: Json
-        }
+      db_pre_request: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      get_user_claims: {
+        Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      jwt_is_expired: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      user_has_group_role: {
+        Args: {
+          group_id: string
+          group_role: string
+        }
+        Returns: boolean
+      }
+      user_is_group_member: {
+        Args: {
+          group_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {

@@ -19,14 +19,14 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
-import { useUserContext } from '@/context/UserContext';
 import { uploadImage } from '@/lib/supabase/storage/client';
 import { updateUserDetails } from '@/lib/supabase/helpers/user';
 import { handleLogout } from '@/lib/supabase/helpers/auth';
+import { useUser } from '@/context/UserContext';
 
 export const UserProfileMenu: React.FC = () => {
   const router = useRouter();
-  const { dbUser, loading } = useUserContext(); // Access user and dbUserId from context
+  const { user, loading } = useUser(); // Access user and dbUserId from context
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState<string>('');
@@ -34,11 +34,11 @@ export const UserProfileMenu: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (dbUser) {
-      setName(dbUser.name || '');
-      setAvatarUrl(dbUser.avatar_url || '');
+    if (user) {
+      setName(user.name || '');
+      setAvatarUrl(user.avatar_url || '');
     }
-  }, [dbUser]);
+  }, [user]);
 
   if (loading) {
     return null; // Optionally, show a loading spinner
@@ -56,7 +56,7 @@ export const UserProfileMenu: React.FC = () => {
   const handleSave = async () => {
     try {
       let uploadedUrl = avatarUrl;
-      if (!dbUser) {
+      if (!user) {
         console.error('userId is required');
         return;
       }
@@ -67,7 +67,7 @@ export const UserProfileMenu: React.FC = () => {
           file,
           bucket: 'avatars',
           folder: 'profile',
-          userId: dbUser.id,
+          userId: user.id,
         });
 
         if (error) {
@@ -79,10 +79,10 @@ export const UserProfileMenu: React.FC = () => {
       }
 
       // Update user profile using helper function
-      if (!dbUser.id) throw new Error('User ID not found');
+      if (!user.id) throw new Error('User ID not found');
 
       const updateError = await updateUserDetails({
-        dbUserId: dbUser.id,
+        dbUserId: user.id,
         name,
         avatarUrl: uploadedUrl,
       });

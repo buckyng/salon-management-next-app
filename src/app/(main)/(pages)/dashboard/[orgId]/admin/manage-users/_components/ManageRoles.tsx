@@ -40,9 +40,10 @@ export const ManageRoles = () => {
         const data = await res.json();
 
         if (res.ok) {
-          setMemberships(
-            data.filter((mem: Membership) => mem.users.id !== dbUser.id) // dont show the current user in the list
-          );
+          // setMemberships(
+          //   data.filter((mem: Membership) => mem.users.id !== dbUser.id) // dont show the current user in the list
+          // );
+          setMemberships(data);
         } else {
           console.error('Failed to fetch memberships:', data.error);
         }

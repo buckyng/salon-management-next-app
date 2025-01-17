@@ -21,23 +21,32 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch memberships for the organization
+    // const { data: memberships, error: membershipsError } = await supabase
+    //   .from('organization_memberships')
+    //   .select(
+    //     `
+    //     id,
+    //     role_id,
+    //     created_at,
+    //     users (id, email, name),
+    //     organizations (id, name),
+    //     roles (name)
+    //   `
+    //   )
+    //   .eq('organization_id', orgId);
 
-    console.log('Fetching memberships for organization:', orgId);
     const { data: memberships, error: membershipsError } = await supabase
       .from('organization_memberships')
       .select(
         `
-        id,
-        role_id,
+        id,        
         created_at,
-        users (id, email, name),
-        organizations (id, name),
-        roles (name)
       `
       )
       .eq('organization_id', orgId);
 
     if (membershipsError) {
+      console.error('Failed to fetch memberships:', membershipsError.message);
       return NextResponse.json(
         { error: 'Failed to fetch memberships for the organization' },
         { status: 500 }
