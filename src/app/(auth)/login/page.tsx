@@ -18,7 +18,7 @@ function LoginPage() {
       if (errorMessage) {
         toast.error(errorMessage);
       } else {
-        router.push('/');
+        router.push('/group-picker');
         toast.success('Log in successfully');
       }
     });
