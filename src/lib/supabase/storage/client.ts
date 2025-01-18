@@ -19,9 +19,10 @@ export async function uploadImage({
   folder,
   userId,
 }: UploadProps) {
-  const fileName = userId;
-  const fileExtension = fileName.slice(fileName.lastIndexOf('.') + 1);
-  const path = `${folder ? folder + '/' : ''}${fileName}.${fileExtension}`;
+  // Get the file extension (e.g., png, jpg) from the uploaded file
+  const fileExtension = file.name.split('.').pop(); // Extract the actual extension from the file name
+  const fileName = `${userId}.${fileExtension}`; // Ensure file name includes the correct extension
+  const path = `${folder ? folder + '/' : ''}${fileName}`; // Construct the file path
 
   try {
     file = await imageCompression(file, { maxSizeMB: 1 });

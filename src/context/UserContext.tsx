@@ -15,6 +15,7 @@ interface UserContextValue {
   user: UserMetadata | null;
   loading: boolean;
   error: string | null;
+  updateUser: (updates: Partial<UserMetadata>) => void;
 }
 
 const UserContext = createContext<UserContextValue | undefined>(undefined);
@@ -93,8 +94,12 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     fetchUserMetadata();
   }, []);
 
+  const updateUser = (updates: Partial<UserMetadata>) => {
+    setUser((prev) => (prev ? { ...prev, ...updates } : prev));
+  };
+
   return (
-    <UserContext.Provider value={{ user, loading, error }}>
+    <UserContext.Provider value={{ user, loading, error, updateUser }}>
       {children}
     </UserContext.Provider>
   );

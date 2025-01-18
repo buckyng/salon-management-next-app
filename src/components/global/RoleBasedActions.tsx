@@ -4,23 +4,24 @@ import { Button } from '../ui/button';
 import { FC } from 'react';
 import { useRouter } from 'next/navigation';
 import { Role } from '@/lib/constant';
-import { RouteRolePermission } from '@/lib/types';
+
+type RouteRolePermission = {
+  name: string;
+  route: string;
+};
 
 const rolePermissions: Record<Role, RouteRolePermission[]> = {
-  admin: [
-    { name: 'Admin Dashboard', route: '/dashboard/[orgId]/admin' },
-    { name: 'Manage Users', route: '/dashboard/[orgId]/admin/manage-users' },
-  ],
+  admin: [{ name: 'Manage Users', route: '/[groupId]/admin/manage-users' }],
   employee: [
-    { name: 'Employee Dashboard', route: '/dashboard/[orgId]/employee' },
-    { name: 'Sales Report', route: '/dashboard/[orgId]/employee/report' },
+    { name: 'Employee Dashboard', route: '/[groupId]/employee' },
+    { name: 'Sales Report', route: '/[groupId]/employee/report' },
   ],
   cashier: [
-    { name: 'Cashier Dashboard', route: '/dashboard/[orgId]/cashier' },
-    { name: 'Check-In Dashboard', route: '/dashboard/[orgId]/checkin' },
-    { name: 'End of Day Report', route: '/dashboard/[orgId]/cashier/eod' },
+    { name: 'Cashier Dashboard', route: '/[groupId]/cashier' },
+    { name: 'Check-In Dashboard', route: '/[groupId]/checkin' },
+    { name: 'End of Day Report', route: '/[groupId]/cashier/eod' },
   ],
-  client: [{ name: 'Client Dashboard', route: '/dashboard/[orgId]/client' }],
+  client: [{ name: 'Client Dashboard', route: '/[groupId]/client' }],
 };
 
 interface RoleBasedActionsProps {
@@ -44,7 +45,7 @@ const RoleBasedActions: FC<RoleBasedActionsProps> = ({
   const accessibleRoutes =
     rolePermissions[activeRole as Role]?.map((permission) => ({
       ...permission,
-      route: permission.route.replace('[orgId]', activeOrgId),
+      route: permission.route.replace('[groupId]', activeOrgId),
     })) || [];
 
   if (!accessibleRoutes || accessibleRoutes.length === 0) {

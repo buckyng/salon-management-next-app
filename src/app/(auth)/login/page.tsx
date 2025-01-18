@@ -18,7 +18,7 @@ function LoginPage() {
       if (errorMessage) {
         toast.error(errorMessage);
       } else {
-        router.push('/dashboard');
+        router.push('/');
         toast.success('Log in successfully');
       }
     });

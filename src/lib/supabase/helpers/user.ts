@@ -1,25 +1,25 @@
 import { createSupabaseClient } from '../client';
 
 type UpdateUserDetailsProps = {
-  dbUserId: string;
+  userId: string;
   name: string;
   avatarUrl: string;
 };
 
 export async function updateUserDetails({
-  dbUserId,
+  userId,
   name,
   avatarUrl,
 }: UpdateUserDetailsProps) {
   const supabase = createSupabaseClient();
 
   const { error } = await supabase
-    .from('users')
+    .from('profiles')
     .update({
       name,
       avatar_url: avatarUrl,
     })
-    .eq('id', dbUserId);
+    .eq('id', userId);
 
   return error;
 }

@@ -20,21 +20,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Fetch memberships for the organization
-    // const { data: memberships, error: membershipsError } = await supabase
-    //   .from('organization_memberships')
-    //   .select(
-    //     `
-    //     id,
-    //     role_id,
-    //     created_at,
-    //     users (id, email, name),
-    //     organizations (id, name),
-    //     roles (name)
-    //   `
-    //   )
-    //   .eq('organization_id', orgId);
-
     const { data: memberships, error: membershipsError } = await supabase
       .from('organization_memberships')
       .select(
@@ -53,7 +38,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    console.log('Fetched memberships:', memberships);
 
     return NextResponse.json(memberships);
   } catch (error) {

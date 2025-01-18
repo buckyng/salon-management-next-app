@@ -26,7 +26,7 @@ import { useUser } from '@/context/UserContext';
 
 export const UserProfileMenu: React.FC = () => {
   const router = useRouter();
-  const { user, loading } = useUser(); // Access user and dbUserId from context
+  const { user, loading , updateUser} = useUser();
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState<string>('');
@@ -82,11 +82,17 @@ export const UserProfileMenu: React.FC = () => {
       if (!user.id) throw new Error('User ID not found');
 
       const updateError = await updateUserDetails({
-        dbUserId: user.id,
+        userId: user.id,
         name,
         avatarUrl: uploadedUrl,
       });
       if (updateError) throw updateError;
+
+      // Dynamically update the UserContext
+      updateUser({
+        name,
+        avatar_url: uploadedUrl,
+      });
 
       setIsEditing(false);
       router.refresh();

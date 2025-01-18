@@ -5,11 +5,12 @@ import { createSupabaseClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 // Schema for validating the request body
 const inviteSchema = z.object({
   email: z.string().email(),
-  role: z.string(),
-  orgId: z.string().uuid(), // Ensure valid UUID for the organization ID
+  groupId: z.string().uuid(), // Ensure valid UUID for the organization ID
 });
 
 export async function POST(request: Request) {
@@ -26,12 +27,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const { email, role, orgId } = parsed.data;
+  const { groupId, email } = parsed.data;
 
   try {
     // Check if the user already exists
     const { data: existingUser, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id')
       .eq('email', email)
       .single();
@@ -46,9 +47,10 @@ export async function POST(request: Request) {
     // If user doesn't exist, create a new user
     if (!userId) {
       const { data: newUser, error: newUserError } =
-        await supabase.auth.admin.createUser({
+        await supabaseAdmin.auth.admin.createUser({
           email,
-          password: 'temporary-password', // Use a temporary password
+          password: '912190Oli', // Use a temporary password
+          email_confirm: isDevelopment,
         });
 
       if (newUserError) {
@@ -63,12 +65,14 @@ export async function POST(request: Request) {
     }
 
     // Add the user to the organization
-    const { error: membershipError } = await supabaseAdmin
-      .from('organizationmemberships')
+    const role = 'employee'; // Default role for new members
+
+    const { error: membershipError } = await supabase
+      .from('group_users')
       .insert({
         user_id: userId,
         role,
-        organization_id: orgId,
+        group_id: groupId,
       });
 
     if (membershipError) {
