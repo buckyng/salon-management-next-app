@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
-import { ClerkProvider } from '@clerk/nextjs';
 import { ToastContainer } from 'react-toastify';
 
 const geistSans = localFont({
@@ -67,23 +66,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider afterSignOutUrl="/">
-      <html lang="en" suppressHydrationWarning={true}>
-        <body
-          suppressHydrationWarning={true}
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    <html lang="en" suppressHydrationWarning={true}>
+      <body
+        suppressHydrationWarning={true}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <ToastContainer position="top-right" autoClose={3000} />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
         >
-          <ToastContainer position="top-right" autoClose={3000} />
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

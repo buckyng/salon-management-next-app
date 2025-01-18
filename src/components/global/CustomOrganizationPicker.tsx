@@ -8,36 +8,32 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { OrganizationMembershipResource } from '@clerk/types';
 
 interface CustomOrganizationPickerProps {
-  organizations: OrganizationMembershipResource[];
+  organizations: { id: string; name: string }[];
   activeOrg: string | null;
-  setActiveOrg: (orgId: string) => void;
-  setActive: (params: { organization: string }) => Promise<void>;
+  handleOrgChange: (orgId: string) => void;
 }
 
 export const CustomOrganizationPicker: FC<CustomOrganizationPickerProps> = ({
   organizations,
   activeOrg,
-  setActiveOrg,
-  setActive,
+  handleOrgChange,
 }) => {
   const handleSelect = useCallback(
     async (orgId: string) => {
-      setActiveOrg(orgId);
       try {
-        await setActive({ organization: orgId });
+        handleOrgChange(orgId);
       } catch (error) {
         console.error('Failed to set active organization:', error);
       }
     },
-    [setActiveOrg, setActive]
+    [handleOrgChange]
   );
 
   useEffect(() => {
     if (!activeOrg && organizations.length > 0) {
-      handleSelect(organizations[0].organization.id);
+      handleSelect(organizations[0].id);
     }
   }, [activeOrg, handleSelect, organizations]);
 
@@ -45,17 +41,17 @@ export const CustomOrganizationPicker: FC<CustomOrganizationPickerProps> = ({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
-          {organizations.find((org) => org.organization.id === activeOrg)
-            ?.organization.name || 'Select Organization'}
+          {organizations.find((org) => org.id === activeOrg)
+            ?.name || 'Select Organization'}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {organizations.map((org) => (
           <DropdownMenuItem
-            key={org.organization.id}
-            onClick={() => handleSelect(org.organization.id)}
+            key={org.id}
+            onClick={() => handleSelect(org.id)}
           >
-            {org.organization.name}
+            {org.name}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

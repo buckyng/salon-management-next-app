@@ -1,50 +1,56 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
 import { Button } from '../ui/button';
-import { rolePermissions } from '@/constants/permission';
 import { FC } from 'react';
 import { useRouter } from 'next/navigation';
+import { Role } from '@/lib/constant';
+
+type RouteRolePermission = {
+  name: string;
+  route: string;
+};
+
+const rolePermissions: Record<Role, RouteRolePermission[]> = {
+  admin: [{ name: 'Manage Users', route: '/[groupId]/admin/manage-users' }],
+  employee: [
+    { name: 'Employee Dashboard', route: '/[groupId]/employee' },
+    { name: 'Sales Report', route: '/[groupId]/employee/report' },
+  ],
+  cashier: [
+    { name: 'Cashier Dashboard', route: '/[groupId]/cashier' },
+    { name: 'Check-In Dashboard', route: '/[groupId]/checkin' },
+    { name: 'End of Day Report', route: '/[groupId]/cashier/eod' },
+  ],
+  client: [{ name: 'Client Dashboard', route: '/[groupId]/client' }],
+};
 
 interface RoleBasedActionsProps {
-  orgId: string;
+  activeOrgId: string;
+  activeRole: string | null;
 }
 
-const RoleBasedActions: FC<RoleBasedActionsProps> = ({ orgId }) => {
-  const { orgRole } = useAuth();
+const RoleBasedActions: FC<RoleBasedActionsProps> = ({
+  activeOrgId,
+  activeRole,
+}) => {
   const router = useRouter();
 
-  if (!orgRole)
+  if (!activeRole)
     return <p>No role assigned. Please contact your administrator.</p>;
 
-  // Map full `orgRole` to simplified keys
-  const roleKeyMap: Record<string, keyof typeof rolePermissions> = {
-    'org:admin': 'admin',
-    'org:employee': 'employee',
-    'org:cashier': 'cashier',
-    'org:client': 'client',
-  };
-
-  const simplifiedRole = roleKeyMap[orgRole || ''] || null;
-
-  if (!simplifiedRole) {
-    return (
-      <p>
-        No role assigned or role not recognized. Please contact your
-        administrator.
-      </p>
-    );
-  }
+  if (!activeOrgId)
+    return <p>No organization selected. Please select an organization.</p>;
 
   // Get permissions for the mapped role
   const accessibleRoutes =
-    rolePermissions[simplifiedRole]?.map((permission) => ({
+    rolePermissions[activeRole as Role]?.map((permission) => ({
       ...permission,
-      route: permission.route.replace('[orgId]', orgId),
+      route: permission.route.replace('[groupId]', activeOrgId),
     })) || [];
 
-  if (!accessibleRoutes.length) {
-    console.warn(`No accessible routes found for role: ${orgRole}`);
+  if (!accessibleRoutes || accessibleRoutes.length === 0) {
+    console.warn(`No accessible routes found for role: ${activeRole}`);
+    return <p>No accessible actions available for this role.</p>;
   }
 
   return (

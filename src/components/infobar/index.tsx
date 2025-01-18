@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-import { SignedIn, UserButton } from '@clerk/nextjs';
 import { ModeToggle } from '../global/mode-toggle';
 import {
   Tooltip,
@@ -8,10 +7,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { menuOptions } from '@/lib/constant';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { UserProfileMenu } from '../global/user-profile-menu';
+import Home from '../icons/home';
+
+export const menuOptions = [
+  { name: 'Dashboard', Component: Home, href: '/group-picker' },
+];
 
 const InfoBar = () => {
   const pathName = usePathname();
@@ -56,9 +60,7 @@ const InfoBar = () => {
       </div>
       <div className="flex flex-row justify-end gap-6 items-center px-4 py-4 w-full dark:bg-black ">
         <ModeToggle />
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
+        <UserProfileMenu />
       </div>
     </div>
   );

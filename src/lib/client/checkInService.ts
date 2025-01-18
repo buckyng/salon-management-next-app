@@ -28,27 +28,6 @@ export async function saveCheckIn({
   }
 }
 
-export const fetchCheckIns = async (organizationId: string) => {
-  try {
-    const response = await fetch(`/api/prisma/checkin`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'fetchCheckIns', organizationId }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch check-ins');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching check-ins:', error);
-    return [];
-  }
-};
-
 export const updateCheckInService = async (
   organizationId: string,
   checkInId: string,
