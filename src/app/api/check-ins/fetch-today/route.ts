@@ -21,12 +21,9 @@ export async function GET(req: NextRequest) {
       .from('check_ins')
       .select(
         `
-      id,
-      created_at,
-      is_in_service,
-      client_id,
-      clients (first_name, last_name)
-    `
+      *,
+      clients(first_name, last_name, client_group_details(number_of_visits, last_visit_rating))
+      `
       )
       .eq('group_id', groupId)
       .eq('created_date', today)

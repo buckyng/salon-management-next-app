@@ -17,6 +17,14 @@ type EnrichedCheckIn = CheckIn & {
   clientName: string;
   visitsBeforeToday: number;
   lastVisitRating: number | null;
+  clients: {
+    first_name: string;
+    last_name: string;
+    client_group_details: {
+      number_of_visits: number;
+      last_visit_rating: number | null;
+    }[];
+  };
 };
 
 const fetchCheckInsToday = async (
@@ -92,40 +100,22 @@ const CheckInManagementPage = () => {
         setLoading(true);
         const checkInsData = await fetchCheckInsToday(activeGroup.id);
 
-        // Add visitsBeforeToday and lastVisitRating from client data
-        const enrichedCheckIns = await Promise.all(
-          checkInsData.map(async (checkIn: CheckIn) => {
-            try {
-              const clientData = await fetchClientById(
-                activeGroup.id,
-                checkIn.client_id
-              );
-              return {
-                ...checkIn,
-                visitsBeforeToday:
-                  clientData.client_group_details[0].number_of_visits || 0,
-                lastVisitRating:
-                  clientData.client_group_details[0].last_visit_rating || null,
-                clientName: clientData.first_name
-                  ? `${clientData.first_name} ${clientData.last_name}`.trim()
-                  : 'Unknown Client',
-              };
-            } catch (error) {
-              console.error(
-                `Error fetching client data for ${checkIn.client_id}:`,
-                error
-              );
-              return {
-                ...checkIn,
-                visitsBeforeToday: 0,
-                lastVisitRating: null,
-                clientName: 'Unknown Client',
-              };
-            }
-          })
-        );
+        // Map and enrich check-ins with client data
+        const enrichedCheckIns = checkInsData.map((checkIn) => {
+          const clientData = checkIn.clients || {};
+          const clientGroupDetails = clientData.client_group_details?.[0] || {};
 
-        // Sort the enriched data
+          return {
+            ...checkIn,
+            clientName: `${clientData.first_name || 'Unknown'} ${
+              clientData.last_name || 'Client'
+            }`.trim(),
+            visitsBeforeToday: clientGroupDetails.number_of_visits || 0,
+            lastVisitRating: clientGroupDetails.last_visit_rating || null,
+          };
+        });
+
+        // Sort enriched data
         const sortedCheckIns = enrichedCheckIns.sort((a, b) => {
           if (a.is_in_service === b.is_in_service) {
             return (
@@ -133,7 +123,7 @@ const CheckInManagementPage = () => {
               new Date(b.created_at ?? '1970-01-01').getTime()
             );
           }
-          return a.is_in_service ? 1 : -1; // Move isInService === true to the end
+          return a.is_in_service ? 1 : -1;
         });
 
         setCheckIns(sortedCheckIns);
@@ -157,6 +147,16 @@ const CheckInManagementPage = () => {
             clientName: `${clientData.first_name} ${clientData.last_name}`,
             visitsBeforeToday: clientData.number_of_visits || 0,
             lastVisitRating: clientData.last_visit_rating || null,
+            clients: {
+              first_name: clientData.first_name,
+              last_name: clientData.last_name,
+              client_group_details: [
+                {
+                  number_of_visits: clientData.number_of_visits || 0,
+                  last_visit_rating: clientData.last_visit_rating || null,
+                },
+              ],
+            },
           };
 
           setCheckIns((prevCheckIns) => {
@@ -231,7 +231,7 @@ const CheckInManagementPage = () => {
         data={checkIns}
         getRowProps={(row) => ({
           className: row.is_in_service
-            ? 'line-through' // Styling for in-service rows
+            ? 'line-through text-red-800' // Styling for in-service rows
             : '', // Styling for not-in-service rows
         })}
       />
