@@ -6,6 +6,7 @@ export const fetchMemberships = async (
   groupId: string
 ): Promise<Membership[]> => {
   const supabase = await createSupabaseClient();
+
   const { data, error } = await supabase
     .from('group_users')
     .select('id, user_id, role, created_at, profiles(name, email)')
@@ -16,7 +17,13 @@ export const fetchMemberships = async (
     throw new Error('Failed to fetch memberships.');
   }
 
-  return data as Membership[];
+  // Transform the data to ensure `profiles` is a single object
+  const transformedData = data.map((item) => ({
+    ...item,
+    profiles: Array.isArray(item.profiles) ? item.profiles[0] : item.profiles,
+  }));
+
+  return transformedData as Membership[];
 };
 
 // Fetch available roles

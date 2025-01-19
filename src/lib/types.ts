@@ -2,7 +2,7 @@ export interface Membership {
   id: string;
   user_id: string;
   role: string;
-  created_at: string;
+  created_at: string | null;
   profiles: {
     name: string | null;
     email: string | null;
@@ -12,4 +12,3 @@ export interface Membership {
 export interface Role {
   name: string;
 }
-

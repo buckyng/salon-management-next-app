@@ -9,6 +9,171 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      check_ins: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          group_id: string
+          id: string
+          is_in_service: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          group_id: string
+          id?: string
+          is_in_service?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          group_id?: string
+          id?: string
+          is_in_service?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "check_ins_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_group_details: {
+        Row: {
+          agree_to_terms: boolean
+          client_id: string
+          created_at: string | null
+          group_id: string
+          id: string
+          last_visit_rating: number | null
+          number_of_visits: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          agree_to_terms: boolean
+          client_id: string
+          created_at?: string | null
+          group_id: string
+          id?: string
+          last_visit_rating?: number | null
+          number_of_visits?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          agree_to_terms?: boolean
+          client_id?: string
+          created_at?: string | null
+          group_id?: string
+          id?: string
+          last_visit_rating?: number | null
+          number_of_visits?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_group_details_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_group_details_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          phone: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      feedbacks: {
+        Row: {
+          client_id: string
+          comment: string | null
+          created_at: string | null
+          group_id: string
+          id: string
+          rating: number
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          comment?: string | null
+          created_at?: string | null
+          group_id: string
+          id?: string
+          rating: number
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          comment?: string | null
+          created_at?: string | null
+          group_id?: string
+          id?: string
+          rating?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedbacks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_invites: {
         Row: {
           accepted_at: string | null
@@ -83,12 +248,20 @@ export type Database = {
             referencedRelation: "groups"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "group_users_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       groups: {
         Row: {
           created_at: string
           id: string
+          logo_url: string | null
           metadata: Json
           name: string | null
           updated_at: string
@@ -96,6 +269,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          logo_url?: string | null
           metadata?: Json
           name?: string | null
           updated_at?: string
@@ -103,6 +277,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          logo_url?: string | null
           metadata?: Json
           name?: string | null
           updated_at?: string
@@ -133,6 +308,27 @@ export type Database = {
           id?: string
           name?: string | null
           phone?: string | null
+        }
+        Relationships: []
+      }
+      roles: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }
