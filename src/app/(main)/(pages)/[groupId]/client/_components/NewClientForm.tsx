@@ -4,13 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Tables } from '@/lib/database.types';
+import { Loader2 } from 'lucide-react';
 
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 
 interface NewClientFormProps {
   phoneNumber: string; // Pre-filled phone number
-  onSave: (clientData: Partial<Tables<'clients'>>, groupDetails: { agree_to_terms: boolean }) => void;
+  onSave: (
+    clientData: Partial<Tables<'clients'>>,
+    groupDetails: { agree_to_terms: boolean }
+  ) => void;
 }
 
 const NewClientForm: React.FC<NewClientFormProps> = ({
@@ -21,12 +25,21 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
   const [lastName, setLastName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false); // Loading state
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     e.preventDefault();
 
     if (!firstName || !lastName) {
       toast.error('First and last names are required!');
+      return;
+    }
+
+    // Validate phone number length
+    if (phoneNumber.length !== 10 || !/^\d{10}$/.test(phoneNumber)) {
+      toast.error('Phone number must be exactly 10 digits.');
       return;
     }
 
@@ -35,27 +48,38 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
       return;
     }
 
-    // Prepare client data
-    const clientData: Partial<Tables<'clients'>> = {
-      first_name: firstName,
-      last_name: lastName,
-      email,
-      phone: phoneNumber,
-    };
+    // Start loading state
+    setLoading(true);
 
-    // Prepare group-specific details
-    const groupDetails = {
-      agree_to_terms: agreeToTerms,
-    };
+    try {
+      // Prepare client data
+      const clientData: Partial<Tables<'clients'>> = {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        phone: phoneNumber,
+      };
 
-    // Pass data to the onSave handler
-    onSave(clientData, groupDetails);
+      // Prepare group-specific details
+      const groupDetails = {
+        agree_to_terms: agreeToTerms,
+      };
 
-    // Reset form state
-    setFirstName('');
-    setLastName('');
-    setEmail('');
-    setAgreeToTerms(false);
+      // Pass data to the onSave handler
+      await onSave(clientData, groupDetails);
+
+      // Reset form state
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      setAgreeToTerms(false);
+    } catch (error) {
+      console.error('Error saving client:', error);
+      toast.error('Failed to save client. Please try again.');
+    } finally {
+      // End loading state
+      setLoading(false);
+    }
   };
 
   return (
@@ -70,6 +94,7 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
           onChange={(e) => setFirstName(e.target.value)}
           placeholder="Enter first name"
           required
+          disabled={loading} // Disable input when loading
         />
       </div>
       <div>
@@ -82,6 +107,7 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
           onChange={(e) => setLastName(e.target.value)}
           placeholder="Enter last name"
           required
+          disabled={loading} // Disable input when loading
         />
       </div>
       <div>
@@ -91,6 +117,7 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter client email"
+          disabled={loading} // Disable input when loading
         />
       </div>
       <div>
@@ -99,7 +126,7 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
           type="tel"
           value={phoneNumber}
           disabled
-          className="bg-gray-100 cursor-not-allowed"
+          className="cursor-not-allowed"
         />
       </div>
       <div className="flex items-center space-x-2">
@@ -107,6 +134,7 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
           id="agreeToPolicy"
           checked={agreeToTerms}
           onCheckedChange={(checked) => setAgreeToTerms(!!checked)}
+          disabled={loading} // Disable checkbox when loading
         />
         <div className="grid gap-1.5 leading-none">
           <label
@@ -120,8 +148,8 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
           </p>
         </div>
       </div>
-      <Button type="submit" className="w-full">
-        Check In
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? <Loader2 /> : 'Check In'}
       </Button>
     </form>
   );

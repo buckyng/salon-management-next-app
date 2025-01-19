@@ -3,12 +3,13 @@
 import { Button } from '../ui/button';
 import { FC } from 'react';
 import { useRouter } from 'next/navigation';
-import { Role } from '@/lib/constant';
 
 type RouteRolePermission = {
   name: string;
   route: string;
 };
+
+type Role = 'admin' | 'employee' | 'cashier' | 'client';
 
 const rolePermissions: Record<Role, RouteRolePermission[]> = {
   admin: [{ name: 'Manage Users', route: '/[groupId]/admin/manage-users' }],
@@ -18,7 +19,7 @@ const rolePermissions: Record<Role, RouteRolePermission[]> = {
   ],
   cashier: [
     { name: 'Cashier Dashboard', route: '/[groupId]/cashier' },
-    { name: 'Check-In Dashboard', route: '/[groupId]/checkin' },
+    { name: 'Check-In Dashboard', route: '/[groupId]/check-in' },
     { name: 'End of Day Report', route: '/[groupId]/cashier/eod' },
   ],
   client: [{ name: 'Client Dashboard', route: '/[groupId]/client' }],

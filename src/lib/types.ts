@@ -9,7 +9,4 @@ export interface Membership {
   };
 }
 
-export interface Role {
-  name: string;
-}
 

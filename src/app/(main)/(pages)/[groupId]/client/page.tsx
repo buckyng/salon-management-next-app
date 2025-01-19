@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import OrganizationLogo from '@/components/global/OrganizationLogo';
 import { useGroup } from '@/context/GroupContext';
 import { Tables } from '@/lib/database.types';
+import { toast } from 'react-toastify';
+import { Loader2 } from 'lucide-react';
 
 type Client = Tables<'clients'>;
 
@@ -19,6 +21,7 @@ const CheckInPage = () => {
   const [client, setClient] = useState<Client | null>(null);
   const [step, setStep] = useState(1);
   const [message, setMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
     setPhoneNumber('');
@@ -29,6 +32,13 @@ const CheckInPage = () => {
   const handlePhoneSubmit = async () => {
     if (!phoneNumber || !activeGroup?.id) return;
 
+    // Validate phone number length
+    if (phoneNumber.length !== 10 || !/^\d{10}$/.test(phoneNumber)) {
+      toast.error('Phone number must be exactly 10 digits.');
+      return;
+    }
+
+    setLoading(true); // Start loading state
     try {
       const response = await fetch(
         `/api/clients/query-by-phone?groupId=${activeGroup.id}&phone=${phoneNumber}`
@@ -43,6 +53,8 @@ const CheckInPage = () => {
       setStep(2);
     } catch (error) {
       console.error('Error querying client:', error);
+    } finally {
+      setLoading(false); // End loading state
     }
   };
 
@@ -50,6 +62,7 @@ const CheckInPage = () => {
     clientData: Partial<Client>,
     groupDetails: { agree_to_terms: boolean }
   ) => {
+    setLoading(true); // Start loading state
     try {
       if (!activeGroup?.id) {
         throw new Error('Missing organizationId');
@@ -68,31 +81,32 @@ const CheckInPage = () => {
       await handleCheckIn(clientId);
     } catch (error) {
       console.error('Error saving client:', error);
+    } finally {
+      setLoading(false); // End loading state
     }
   };
 
   const handleCheckInExistingClient = async (updatedClient: Client) => {
+    setLoading(true); // Start loading state
     try {
       if (!activeGroup?.id || !client) {
         throw new Error('Missing groupId or client');
       }
 
-      // Construct the payload
       const payload = {
         groupId: activeGroup.id,
         clientData: {
-          id: client.id, // Existing client ID
+          id: client.id,
           first_name: updatedClient.first_name,
           last_name: updatedClient.last_name,
           phone: updatedClient.phone,
           email: updatedClient.email,
         },
         groupDetails: {
-          agree_to_terms: true, // Default to true if not provided
+          agree_to_terms: true,
         },
       };
 
-      // Send the payload to save-client API
       const saveResponse = await fetch('/api/clients/save-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -108,6 +122,8 @@ const CheckInPage = () => {
       await handleCheckIn(clientId);
     } catch (error) {
       console.error('Error during check-in:', error);
+    } finally {
+      setLoading(false); // End loading state
     }
   };
 
@@ -117,6 +133,7 @@ const CheckInPage = () => {
       return;
     }
 
+    setLoading(true); // Start loading state
     try {
       const response = await fetch('/api/clients/save-check-in', {
         method: 'POST',
@@ -136,6 +153,8 @@ const CheckInPage = () => {
       }
     } catch (error) {
       console.error('Error during check-in:', error);
+    } finally {
+      setLoading(false); // End loading state
     }
   };
 
@@ -174,9 +193,14 @@ const CheckInPage = () => {
                   className="w-full"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
+                  disabled={loading} // Disable input when loading
                 />
-                <Button onClick={handlePhoneSubmit} className="w-full mt-4">
-                  Check In
+                <Button
+                  onClick={handlePhoneSubmit}
+                  className="w-full mt-4"
+                  disabled={loading} // Disable button when loading
+                >
+                  {loading ? <Loader2 /> : 'Check In'}
                 </Button>
               </Card>
             )}
