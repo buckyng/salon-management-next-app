@@ -1,8 +1,16 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Home, DollarSign, BarChart, CheckCircle, User } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import {
+  Home,
+  DollarSign,
+  BarChart,
+  CheckCircle,
+  User,
+  Notebook,
+  Receipt,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -16,8 +24,39 @@ interface BottomNavBarProps {
 }
 
 const pageNavItems: Record<string, NavItem[]> = {
-  dashboard: [
-    { name: 'Home', icon: <Home size={20} />, route: '/[groupId]/dashboard' },
+  checkin: [
+    {
+      name: 'Cashier',
+      icon: <DollarSign size={20} />,
+      route: '/[groupId]/cashier',
+    },
+    {
+      name: 'Check-Ins',
+      icon: <CheckCircle size={20} />,
+      route: '/[groupId]/checkin',
+    },
+  ],
+  cashier: [
+    {
+      name: 'Check-Ins',
+      icon: <CheckCircle size={20} />,
+      route: '/[groupId]/checkin',
+    },
+    {
+      name: 'Cashier',
+      icon: <DollarSign size={20} />,
+      route: '/[groupId]/cashier',
+    },
+    {
+      name: 'History',
+      icon: <Receipt size={20} />,
+      route: '/[groupId]/cashier/history-cashier',
+    },
+    {
+      name: 'End Of Day',
+      icon: <Notebook size={20} />,
+      route: '/[groupId]/cashier/eod',
+    },
   ],
   employee: [
     {
@@ -36,18 +75,6 @@ const pageNavItems: Record<string, NavItem[]> = {
       route: '/[groupId]/employee/report',
     },
   ],
-  cashier: [
-    {
-      name: 'Cashier',
-      icon: <DollarSign size={20} />,
-      route: '/[groupId]/cashier',
-    },
-    {
-      name: 'Check-Ins',
-      icon: <CheckCircle size={20} />,
-      route: '/[groupId]/check-in',
-    },
-  ],
   admin: [
     {
       name: 'Manage Users',
@@ -55,35 +82,27 @@ const pageNavItems: Record<string, NavItem[]> = {
       route: '/[groupId]/admin/manage-users',
     },
   ],
-  client: [
-    { name: 'Client', icon: <Home size={20} />, route: '/[groupId]/client' },
-  ],
 };
 
 const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeGroupId }) => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState<string | null>(null);
+  const pathname = usePathname(); // Current path
   const [navItems, setNavItems] = useState<NavItem[]>([]);
 
   useEffect(() => {
-    // Safely access `window` and set the current page
-    if (typeof window !== 'undefined') {
-      const pathSegments = window.location.pathname.split('/');
-      const page = pathSegments[pathSegments.length - 1];
-      setCurrentPage(page);
+    // Extract the base route from pathname
+    const pathSegments = pathname.split('/');
+    const basePage = pathSegments[2]; // "cashier", "employee", etc.
 
-      // Set the navigation items dynamically
-      const items = pageNavItems[page] || [];
-      setNavItems(
-        items.map((item) => ({
-          ...item,
-          route: item.route.replace('[groupId]', activeGroupId),
-        }))
-      );
-    }
-  }, [activeGroupId]);
+    const items = pageNavItems[basePage] || [];
+    setNavItems(
+      items.map((item) => ({
+        ...item,
+        route: item.route.replace('[groupId]', activeGroupId),
+      }))
+    );
+  }, [pathname, activeGroupId]);
 
-  // Don't render if navItems are not available
   if (!navItems || navItems.length === 0) {
     return null;
   }
@@ -97,7 +116,9 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeGroupId }) => {
             onClick={() => router.push(item.route)}
             className={cn(
               'flex flex-col items-center px-3 py-1 text-sm',
-              'text-gray-600 dark:text-gray-300 hover:text-blue-500'
+              pathname.includes(item.route.split('/').at(-1)!)
+                ? 'text-blue-500'
+                : 'text-gray-600 dark:text-gray-300 hover:text-blue-500'
             )}
           >
             {item.icon}

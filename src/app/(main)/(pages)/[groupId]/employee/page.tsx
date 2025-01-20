@@ -91,7 +91,12 @@ const EmployeeHomePage = () => {
         {loading ? (
           <Loader2 />
         ) : (
-          <DataTable columns={columns} data={sales} pageSize={5} />
+          <DataTable
+            columns={columns}
+            data={sales}
+            enablePagination={true}
+            pageSize={5}
+          />
         )}
       </div>
     </div>
