@@ -22,24 +22,31 @@ interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
   data: TData[];
   getRowProps?: (row: TData) => React.HTMLAttributes<HTMLTableRowElement>; // Optional row props function
+  pageSize?: number; // Dynamic page size
 }
 
 export function DataTable<TData>({
   columns,
   data,
   getRowProps,
+  pageSize = 10, // Default to 10 rows per page
 }: DataTableProps<TData>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize, // Set the page size dynamically
+      },
+    },
   });
 
   return (
     <div>
-      <div className="border rounded-md">
-        <Table>
+      <div className="border rounded-md overflow-x-auto">
+        <Table className="min-w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

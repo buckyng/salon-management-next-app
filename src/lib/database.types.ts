@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string | null
+          created_date: string | null
           group_id: string
           id: string
           is_in_service: boolean | null
@@ -21,6 +22,7 @@ export type Database = {
         Insert: {
           client_id: string
           created_at?: string | null
+          created_date?: string | null
           group_id: string
           id?: string
           is_in_service?: boolean | null
@@ -29,6 +31,7 @@ export type Database = {
         Update: {
           client_id?: string
           created_at?: string | null
+          created_date?: string | null
           group_id?: string
           id?: string
           is_in_service?: boolean | null
@@ -332,6 +335,57 @@ export type Database = {
         }
         Relationships: []
       }
+      sales: {
+        Row: {
+          amount: number
+          combo_num: number | null
+          created_at: string | null
+          created_date: string | null
+          group_id: string
+          id: string
+          note: string | null
+          paid: boolean | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          combo_num?: number | null
+          created_at?: string | null
+          created_date?: string | null
+          group_id: string
+          id?: string
+          note?: string | null
+          paid?: boolean | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          combo_num?: number | null
+          created_at?: string | null
+          created_date?: string | null
+          group_id?: string
+          id?: string
+          note?: string | null
+          paid?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -344,6 +398,13 @@ export type Database = {
       get_user_claims: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      increment_visits: {
+        Args: {
+          arg_client_id: string
+          arg_group_id: string
+        }
+        Returns: undefined
       }
       jwt_is_expired: {
         Args: Record<PropertyKey, never>

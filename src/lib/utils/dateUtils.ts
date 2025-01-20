@@ -12,3 +12,6 @@ export const formatToLocalTime = (utcDate: string | null): string => {
   }); // Adjusts to local timezone and formats as HH:MM
   return localTime;
 };
+
+
+export const getCurrentLocalDate = () => new Date().toLocaleDateString('en-CA');

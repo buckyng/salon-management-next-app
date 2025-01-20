@@ -4,36 +4,28 @@ import { CustomOrganizationPicker } from '@/components/global/CustomOrganization
 import { useUser } from '@/context/UserContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 export default function GroupPickerPage() {
   const { user, loading, error } = useUser();
   const router = useRouter();
-  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && user) {
-      const groups = user.groups;
-
-      if (groups.length === 1) {
-        // Automatically redirect to the single group's dashboard
-        const singleGroup = groups[0];
-        setActiveGroup(singleGroup.id);
-        localStorage.setItem('activeGroup', JSON.stringify(singleGroup)); // Persist active group
-        router.push(`/${singleGroup.id}/dashboard`);
-      }
+    if (!loading && user?.groups.length === 1) {
+      // Automatically set and redirect to the only group
+      const singleGroup = user.groups[0];
+      setSelectedOrg(singleGroup.id);
+      localStorage.setItem('activeGroup', JSON.stringify(singleGroup));
+      router.push(`/${singleGroup.id}/dashboard`);
     }
   }, [loading, user, router]);
 
-  if (loading) return <p>Loading groups...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-
-  const handleGroupChange = (groupId: string) => {
-    const selectedGroup = user?.groups.find((g) => g.id === groupId);
-
+  const handleConfirm = () => {
+    const selectedGroup = user?.groups.find((g) => g.id === selectedOrg);
     if (selectedGroup) {
-      setActiveGroup(groupId);
-      localStorage.setItem('activeGroup', JSON.stringify(selectedGroup)); // Persist active group
-      router.push(`/${groupId}/dashboard`); // Redirect to the group's dashboard
+      localStorage.setItem('activeGroup', JSON.stringify(selectedGroup));
+      router.push(`/${selectedOrg}/dashboard`);
     }
   };
 
@@ -47,16 +39,23 @@ export default function GroupPickerPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-2xl font-bold mb-6">Select a Group</h1>
+    <div className="flex flex-col items-center h-screen space-y-6">
+      <h1 className="text-2xl font-bold">Select a Group</h1>
       <CustomOrganizationPicker
         organizations={user.groups.map((group) => ({
           id: group.id,
           name: group.name || `Group ${group.id}`,
         }))}
-        activeOrg={activeGroup}
-        handleOrgChange={handleGroupChange}
+        selectedOrg={selectedOrg}
+        setSelectedOrg={setSelectedOrg}
       />
+      <Button
+        onClick={handleConfirm}
+        disabled={!selectedOrg} // Disable button if no selection
+        variant="default"
+      >
+        Confirm Selection
+      </Button>
     </div>
   );
 }

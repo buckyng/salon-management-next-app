@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase/server';
+import { getCurrentLocalDate } from '@/lib/utils/dateUtils';
 
 export async function GET(req: NextRequest) {
   const supabase = await createSupabaseClient();
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const today = new Date().toLocaleDateString('en-CA');
+    const today = getCurrentLocalDate();
 
     const { data: checkIns, error } = await supabase
       .from('check_ins')

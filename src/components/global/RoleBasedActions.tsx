@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '../ui/button';
-import { FC } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from '../ui/button';
+import { useEffect, useMemo } from 'react';
 
 type RouteRolePermission = {
   name: string;
@@ -13,14 +13,10 @@ type Role = 'admin' | 'employee' | 'cashier' | 'client';
 
 const rolePermissions: Record<Role, RouteRolePermission[]> = {
   admin: [{ name: 'Manage Users', route: '/[groupId]/admin/manage-users' }],
-  employee: [
-    { name: 'Employee Dashboard', route: '/[groupId]/employee' },
-    { name: 'Sales Report', route: '/[groupId]/employee/report' },
-  ],
+  employee: [{ name: 'Employee Dashboard', route: '/[groupId]/employee' }],
   cashier: [
     { name: 'Cashier Dashboard', route: '/[groupId]/cashier' },
     { name: 'Check-In Dashboard', route: '/[groupId]/check-in' },
-    { name: 'End of Day Report', route: '/[groupId]/cashier/eod' },
   ],
   client: [{ name: 'Client Dashboard', route: '/[groupId]/client' }],
 };
@@ -30,24 +26,33 @@ interface RoleBasedActionsProps {
   activeRole: string | null;
 }
 
-const RoleBasedActions: FC<RoleBasedActionsProps> = ({
+const RoleBasedActions: React.FC<RoleBasedActionsProps> = ({
   activeOrgId,
   activeRole,
 }) => {
   const router = useRouter();
+
+  // Wrap accessibleRoutes in useMemo
+  const accessibleRoutes = useMemo(() => {
+    return (
+      rolePermissions[activeRole as Role]?.map((permission) => ({
+        ...permission,
+        route: permission.route.replace('[groupId]', activeOrgId),
+      })) || []
+    );
+  }, [activeRole, activeOrgId]);
+
+  useEffect(() => {
+    if (accessibleRoutes.length === 1) {
+      router.push(accessibleRoutes[0].route);
+    }
+  }, [accessibleRoutes, router]);
 
   if (!activeRole)
     return <p>No role assigned. Please contact your administrator.</p>;
 
   if (!activeOrgId)
     return <p>No organization selected. Please select an organization.</p>;
-
-  // Get permissions for the mapped role
-  const accessibleRoutes =
-    rolePermissions[activeRole as Role]?.map((permission) => ({
-      ...permission,
-      route: permission.route.replace('[groupId]', activeOrgId),
-    })) || [];
 
   if (!accessibleRoutes || accessibleRoutes.length === 0) {
     console.warn(`No accessible routes found for role: ${activeRole}`);
