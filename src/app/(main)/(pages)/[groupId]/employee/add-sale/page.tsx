@@ -69,8 +69,10 @@ const AddSalePage = () => {
   }
 
   return (
-    <div className="container mx-auto mt-4">
-      <h1 className="mb-4 text-xl font-bold">Add Sale</h1>
+    <div className="container mx-auto mt-4 px-4 sm:px-6 lg:px-8">
+      <h1 className="text-xl font-bold text-center sm:text-2xl mb-4">
+        Add Sale
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Amount */}
         <div>

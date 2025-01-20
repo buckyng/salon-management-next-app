@@ -1,20 +1,17 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { DataTable } from '@/components/ui/data-table';
-import { Button } from '@/components/ui/button';
 import { ColumnDef } from '@tanstack/react-table';
 import { useUser } from '@/context/UserContext';
 import { useGroup } from '@/context/GroupContext';
 import { formatToLocalTime, getCurrentLocalDate } from '@/lib/utils/dateUtils';
 import { SaleData } from '@/lib/types';
-
+import { Loader2 } from 'lucide-react';
 
 const EmployeeHomePage = () => {
   const { user } = useUser();
   const { activeGroup } = useGroup();
-  const router = useRouter();
 
   const [sales, setSales] = useState<SaleData[]>([]);
   const [totalSales, setTotalSales] = useState<number>(0);
@@ -37,16 +34,6 @@ const EmployeeHomePage = () => {
       header: 'Amount',
       accessorKey: 'amount',
       cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
-    },
-    {
-      header: 'Combo',
-      accessorKey: 'combo_num',
-      cell: ({ getValue }) => getValue() || '',
-    },
-    {
-      header: 'Note',
-      accessorKey: 'note',
-      cell: ({ getValue }) => getValue() || '',
     },
   ];
 
@@ -86,43 +73,25 @@ const EmployeeHomePage = () => {
   }, [user, activeGroup?.id, currentDate]);
 
   return (
-    <div className="container mx-auto mt-4">
-      <h1 className="text-2xl font-bold">
+    <div className="container mx-auto mt-4 px-4 sm:px-6 lg:px-8">
+      <h1 className="text-xl font-bold text-center sm:text-2xl mb-4">
         {activeGroup?.name
           ? `${activeGroup.name} - Today's Sales`
           : "Today's Sales"}
       </h1>
-      <p className="text-gray-600">Date: {currentDate}</p>
+      <p className="text-center mb-4">Date: {currentDate}</p>
 
-      <div className="my-4 flex gap-4">
-        <Button
-          onClick={() => router.push(`/${activeGroup?.id}/employee/add-sale`)}
-          disabled={loading} // Disable button when loading
-        >
-          Add Sale
-        </Button>
-
-        <Button
-          onClick={() => router.push(`/${activeGroup?.id}/employee/report`)}
-          className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600"
-          disabled={loading} // Disable button when loading
-        >
-          View Reports
-        </Button>
-      </div>
-
-      <div className="my-4">
+      <div className="my-4 text-center">
         <h2 className="text-lg font-bold">
           Total Sales: ${totalSales.toFixed(2)}
         </h2>
       </div>
 
-      <div className="mt-4">
-        <h3 className="mb-2 text-lg font-bold">Today&apos;s Sales</h3>
+      <div className="mt-4 overflow-x-auto">
         {loading ? (
-          <p>Loading sales data...</p>
+          <Loader2 />
         ) : (
-          <DataTable columns={columns} data={sales} />
+          <DataTable columns={columns} data={sales} pageSize={5} />
         )}
       </div>
     </div>

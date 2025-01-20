@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase/server';
-import { startOfDay, endOfDay, parseISO } from 'date-fns';
 
 export async function GET(req: NextRequest) {
   const supabase = await createSupabaseClient();
@@ -19,16 +18,14 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const startTimestamp = startOfDay(parseISO(startDate)).toISOString();
-    const endTimestamp = endOfDay(parseISO(endDate)).toISOString();
-
+    // Use created_date directly for filtering
     const { data: sales, error } = await supabase
       .from('sales')
-      .select('created_at, amount')
+      .select('created_date, amount')
       .eq('group_id', groupId)
       .eq('user_id', employeeId)
-      .gte('created_at', startTimestamp)
-      .lte('created_at', endTimestamp);
+      .gte('created_date', startDate)
+      .lte('created_date', endDate);
 
     if (error) {
       console.error('Error fetching sales data:', error);
@@ -38,10 +35,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Process the data to group by date and calculate total sales
+    // Process the data to group by created_date and calculate total sales
     const salesByDate: Record<string, number> = {};
     sales.forEach((sale) => {
-      const date = new Date(sale.created_at).toISOString().split('T')[0]; // Extract date in YYYY-MM-DD
+      const date = sale.created_date; // Use created_date directly
       if (!salesByDate[date]) salesByDate[date] = 0;
       salesByDate[date] += sale.amount;
     });
