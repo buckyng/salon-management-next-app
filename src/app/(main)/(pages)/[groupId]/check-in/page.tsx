@@ -144,6 +144,7 @@ const CheckInManagementPage = () => {
           );
           const enrichedCheckIn: EnrichedCheckIn = {
             ...newCheckIn,
+            created_date: newCheckIn.created_at, // Add the 'created_date' property
             clientName: `${clientData.first_name} ${clientData.last_name}`,
             visitsBeforeToday: clientData.number_of_visits || 0,
             lastVisitRating: clientData.last_visit_rating || null,

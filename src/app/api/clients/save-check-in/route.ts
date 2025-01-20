@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase/server';
+import { getCurrentLocalDate } from '@/lib/utils/dateUtils';
 
 export async function POST(req: NextRequest) {
   const supabase = await createSupabaseClient();
@@ -15,9 +16,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const now = new Date();
-    // Get local date in YYYY-MM-DD format
-    const localDate = now.toLocaleDateString('en-CA'); // en-CA ensures ISO format YYYY-MM-DD
+    const today = getCurrentLocalDate();
 
     const { error: checkInError } = await supabase
       .from('check_ins')
@@ -25,7 +24,7 @@ export async function POST(req: NextRequest) {
         client_id: clientId,
         group_id: groupId,
         is_in_service: false,
-        created_date: localDate,
+        created_date: today,
       })
       .select('id')
       .single();

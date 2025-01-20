@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useCallback, useEffect } from 'react';
+import { FC } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,45 +11,28 @@ import { Button } from '../ui/button';
 
 interface CustomOrganizationPickerProps {
   organizations: { id: string; name: string }[];
-  activeOrg: string | null;
-  handleOrgChange: (orgId: string) => void;
+  selectedOrg: string | null;
+  setSelectedOrg: (orgId: string) => void;
 }
 
 export const CustomOrganizationPicker: FC<CustomOrganizationPickerProps> = ({
   organizations,
-  activeOrg,
-  handleOrgChange,
+  selectedOrg,
+  setSelectedOrg,
 }) => {
-  const handleSelect = useCallback(
-    async (orgId: string) => {
-      try {
-        handleOrgChange(orgId);
-      } catch (error) {
-        console.error('Failed to set active organization:', error);
-      }
-    },
-    [handleOrgChange]
-  );
-
-  useEffect(() => {
-    if (!activeOrg && organizations.length > 0) {
-      handleSelect(organizations[0].id);
-    }
-  }, [activeOrg, handleSelect, organizations]);
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
-          {organizations.find((org) => org.id === activeOrg)
-            ?.name || 'Select Organization'}
+          {organizations.find((org) => org.id === selectedOrg)?.name ||
+            'Select Organization'}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {organizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
-            onClick={() => handleSelect(org.id)}
+            onClick={() => setSelectedOrg(org.id)} // Only update the selected organization
           >
             {org.name}
           </DropdownMenuItem>
