@@ -76,6 +76,7 @@ export const fetchReportDetails = async (
 
     if (!employeeMap[sale.user_id]) {
       employeeMap[sale.user_id] = {
+        employeeId: sale.user_id,
         employeeName,
         totalSale: 0,
         sales: [],
