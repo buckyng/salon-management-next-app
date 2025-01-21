@@ -1,3 +1,6 @@
+import { endOfDay, parse, startOfDay } from 'date-fns';
+import { format, toZonedTime } from 'date-fns-tz';
+
 export const formatToLocalDateTime = (utcDate: string | null): string => {
   if (!utcDate) return 'N/A';
   const localDate = new Date(utcDate).toLocaleString(); // Adjusts to local timezone
@@ -13,5 +16,20 @@ export const formatToLocalTime = (utcDate: string | null): string => {
   return localTime;
 };
 
+export const getCurrentLocalDate = () => {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const now = new Date();
+  const zonedDate = toZonedTime(now, timeZone);
+  return format(zonedDate, 'yyyy-MM-dd', { timeZone });
+};
 
-export const getCurrentLocalDate = () => new Date().toLocaleDateString('en-CA');
+// Parse the date as a local date
+export const getStartOfDay = (date: string): Date => {
+  const parsedDate = parse(date, 'yyyy-MM-dd', new Date()); // Parse as local date
+  return startOfDay(parsedDate); // Start of day in local time
+};
+
+export const getEndOfDay = (date: string): Date => {
+  const parsedDate = parse(date, 'yyyy-MM-dd', new Date()); // Parse as local date
+  return endOfDay(parsedDate); // End of day in local time
+};

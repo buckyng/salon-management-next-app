@@ -7,6 +7,7 @@ import { useUser } from '@/context/UserContext';
 import { useGroup } from '@/context/GroupContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { addSale } from '@/services/saleService';
 
 const AddSalePage = () => {
   const { user } = useUser();
@@ -16,7 +17,7 @@ const AddSalePage = () => {
   const [amount, setAmount] = useState('');
   const [comboNum, setComboNum] = useState('');
   const [note, setNote] = useState('');
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,18 +37,14 @@ const AddSalePage = () => {
       return;
     }
 
-    setLoading(true); // Start loading state
+    setLoading(true);
     try {
-      await fetch('/api/sales/add-sale', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          groupId: activeGroup.id,
-          userId: user.id,
-          amount: parseFloat(amount),
-          comboNum: comboNum ? parseInt(comboNum, 10) : null,
-          note: note || null,
-        }),
+      await addSale({
+        groupId: activeGroup.id,
+        userId: user.id,
+        amount: parseFloat(amount),
+        comboNum: comboNum ? parseInt(comboNum, 10) : null,
+        note: note || null,
       });
 
       toast.success('Sale added successfully!');
@@ -56,7 +53,7 @@ const AddSalePage = () => {
       console.error('Error adding sale:', error);
       toast.error('Failed to add sale. Please try again.');
     } finally {
-      setLoading(false); // End loading state
+      setLoading(false);
     }
   };
 

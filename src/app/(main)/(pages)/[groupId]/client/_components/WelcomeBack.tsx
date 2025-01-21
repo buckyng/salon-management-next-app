@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { Tables } from '@/lib/database.types';
 import { Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
@@ -42,44 +43,74 @@ const WelcomeBack: React.FC<WelcomeBackProps> = ({ client, onUpdate }) => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-lg font-bold">Welcome Back, {client.first_name}!</h2>
-      <div className="space-y-4">
-        <input
-          type="text"
-          value={formData.first_name || ''}
-          onChange={(e) => handleInputChange('first_name', e.target.value)}
-          placeholder="First Name"
-          className="w-full p-2 mt-2 border rounded"
-          disabled={loading} // Disable input while loading
-        />
-        <input
-          type="text"
-          value={formData.last_name || ''}
-          onChange={(e) => handleInputChange('last_name', e.target.value)}
-          placeholder="Last Name"
-          className="w-full p-2 mt-2 border rounded"
-          disabled={loading} // Disable input while loading
-        />
-        <input
-          type="email"
-          value={formData.email || ''}
-          onChange={(e) => handleInputChange('email', e.target.value)}
-          placeholder="Email"
-          className="w-full p-2 mt-2 border rounded"
-          disabled={loading} // Disable input while loading
-        />
-        <button
+    <div className="container mx-auto px-6 py-10 sm:px-8 lg:px-10">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6">
+        Welcome Back, {client.first_name}!
+      </h2>
+      <div className="max-w-md mx-auto space-y-6 bg-white p-6 shadow-md rounded-lg">
+        {/* First Name Input */}
+        <div>
+          <label
+            htmlFor="first_name"
+            className="block text-sm font-medium mb-2"
+          >
+            First Name
+          </label>
+          <input
+            id="first_name"
+            type="text"
+            value={formData.first_name || ''}
+            onChange={(e) => handleInputChange('first_name', e.target.value)}
+            placeholder="First Name"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading} // Disable input while loading
+          />
+        </div>
+
+        {/* Last Name Input */}
+        <div>
+          <label htmlFor="last_name" className="block text-sm font-medium mb-2">
+            Last Name
+          </label>
+          <input
+            id="last_name"
+            type="text"
+            value={formData.last_name || ''}
+            onChange={(e) => handleInputChange('last_name', e.target.value)}
+            placeholder="Last Name"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading} // Disable input while loading
+          />
+        </div>
+
+        {/* Email Input */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium mb-2">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={formData.email || ''}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            placeholder="Email"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading} // Disable input while loading
+          />
+        </div>
+
+        {/* Submit Button */}
+        <Button
           onClick={handleSubmit}
-          className={`px-4 py-2 mt-4 text-white rounded ${
+          className={`w-full py-3 text-white font-semibold rounded-lg ${
             loading
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-green-500 hover:bg-green-600'
+              : 'bg-green-500 hover:bg-green-600 focus:ring-2 focus:ring-green-500'
           }`}
           disabled={loading} // Disable button while loading
         >
-          {loading ? <Loader2 /> : 'Check In'}
-        </button>
+          {loading ? <Loader2 className="animate-spin" /> : 'Check In'}
+        </Button>
       </div>
     </div>
   );

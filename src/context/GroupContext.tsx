@@ -13,6 +13,7 @@ interface Group {
 interface GroupContextValue {
   activeGroup: Group | null;
   setActiveGroup: (group: Group) => void;
+  updateGroup: (updates: Partial<Group>) => void; // Add the updateGroup method
 }
 
 const GroupContext = createContext<GroupContextValue | undefined>(undefined);
@@ -65,6 +66,8 @@ export const GroupProvider = ({
           return;
         }
 
+        console.log('Fetched group details:', data);
+
         const activeGroupDetails: Group = {
           id: data.id,
           name: data.name,
@@ -87,8 +90,19 @@ export const GroupProvider = ({
     localStorage.setItem('activeGroup', JSON.stringify(group)); // Persist active group
   };
 
+  const updateGroup = (updates: Partial<Group>) => {
+    if (!activeGroup) {
+      console.error('No active group to update.');
+      return;
+    }
+
+    const updatedGroup = { ...activeGroup, ...updates };
+    setActiveGroupState(updatedGroup);
+    localStorage.setItem('activeGroup', JSON.stringify(updatedGroup)); // Persist updated group
+  };
+
   return (
-    <GroupContext.Provider value={{ activeGroup, setActiveGroup }}>
+    <GroupContext.Provider value={{ activeGroup, setActiveGroup, updateGroup }}>
       {children}
     </GroupContext.Provider>
   );

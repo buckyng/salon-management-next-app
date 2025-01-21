@@ -159,45 +159,47 @@ const CheckInPage = () => {
   };
 
   return (
-    <div className="container px-4 mx-auto mt-10 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-6 py-10">
       {message ? (
         <div className="text-center">
           <h1 className="text-2xl font-bold text-green-500">{message}</h1>
         </div>
       ) : (
-        <div>
-          <div className="flex flex-col items-center">
-            <div className="flex items-center justify-center h-16">
-              <OrganizationLogo
-                logoSrc={activeGroup?.logo_url || ''}
-                altText={`${activeGroup?.name} Logo`}
-              />
-            </div>
-            <h1 className="mt-4 text-3xl font-bold text-center">
-              Welcome to {activeGroup?.name}
-            </h1>
-            <p className="mt-2 text-center text-gray-500">
-              Please check in by entering your phone number below.
-            </p>
+        <div className="flex flex-col items-center">
+          {/* Organization Logo */}
+          <div className="flex items-center justify-center mb-8 w-40 h-40 sm:w-48 sm:h-48 lg:w-56 lg:h-56">
+            <OrganizationLogo
+              logoSrc={activeGroup?.logo_url ?? ''}
+              altText={`${activeGroup?.name || 'Organization'} Logo`}
+            />
           </div>
 
-          <div className="max-w-md mx-auto mt-8">
+          {/* Welcome Text */}
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4">
+            Welcome to {activeGroup?.name}
+          </h1>
+          <p className="text-center text-gray-500 text-base sm:text-lg max-w-xl">
+            Please check in by entering your phone number below.
+          </p>
+
+          {/* Form Section */}
+          <div className="max-w-md w-full mt-8">
             {step === 1 && (
               <Card className="p-6 shadow-lg">
-                <h2 className="mb-4 text-xl font-semibold">
+                <h2 className="mb-4 text-xl sm:text-2xl font-semibold text-center">
                   Enter Phone Number
                 </h2>
                 <Input
                   type="tel"
                   placeholder="Phone Number"
-                  className="w-full"
+                  className="w-full text-base sm:text-lg"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   disabled={loading} // Disable input when loading
                 />
                 <Button
                   onClick={handlePhoneSubmit}
-                  className="w-full mt-4"
+                  className="w-full mt-4 py-2 sm:py-3"
                   disabled={loading} // Disable button when loading
                 >
                   {loading ? <Loader2 /> : 'Check In'}
