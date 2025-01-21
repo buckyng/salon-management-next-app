@@ -81,6 +81,11 @@ const pageNavItems: Record<string, NavItem[]> = {
       icon: <User size={20} />,
       route: '/[groupId]/admin/manage-users',
     },
+    {
+      name: 'Reports',
+      icon: <DollarSign size={20} />,
+      route: '/[groupId]/admin/reports',
+    },
   ],
 };
 
