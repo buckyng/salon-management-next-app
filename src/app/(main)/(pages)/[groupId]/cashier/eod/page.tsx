@@ -14,6 +14,7 @@ import {
 import { SaleData } from '@/lib/types';
 import { getCurrentLocalDate } from '@/lib/utils/dateUtils';
 import { Loader2 } from 'lucide-react';
+import { useCheckEodReport } from '@/lib/hooks/useCheckEodReport';
 
 const ReportCashierPage = () => {
   const router = useRouter();
@@ -32,6 +33,11 @@ const ReportCashierPage = () => {
   const [resultCheck, setResultCheck] = useState<number>(0);
   const [resultMessage, setResultMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Loading state
+
+  const { eodExists, isEodLoading } = useCheckEodReport({
+    groupId: activeGroup?.id || null,
+    date: currentDate,
+  });
 
   const fetchTotalSale = async (): Promise<number> => {
     try {
@@ -129,6 +135,20 @@ const ReportCashierPage = () => {
       setIsLoading(false); // End loading
     }
   };
+
+  if (isEodLoading) {
+    return <p className="text-center mt-4">Loading...</p>;
+  }
+
+  if (eodExists) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+        <p className="text-2xl font-bold text-red-500 text-center">
+          An End-of-Day Report for {currentDate} has already been submitted.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto mt-6">

@@ -56,7 +56,6 @@ const EmployeeReportPage = () => {
         endDate: formattedEndDate,
       });
 
-      console.log('Employee report:', data);
 
       setReports(data);
     } catch (error) {

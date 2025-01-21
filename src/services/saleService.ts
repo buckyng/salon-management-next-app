@@ -112,8 +112,6 @@ export const saveEndOfDayReport = async (
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to save the EOD report.');
     }
-
-    console.log('EOD report saved successfully');
   } catch (error) {
     console.error('Error saving EOD report:', error);
     throw new Error('Failed to save the EOD report.');
@@ -142,7 +140,6 @@ export const fetchSalesByUser = async ({
   return data;
 };
 
-
 export const addSale = async ({
   groupId,
   userId,
@@ -167,7 +164,7 @@ export const addSale = async ({
   }
 
   return res.json();
-}
+};
 
 export const fetchEmployeeReport = async ({
   groupId,
@@ -191,4 +188,4 @@ export const fetchEmployeeReport = async ({
   }
 
   return data;
-}
+};
