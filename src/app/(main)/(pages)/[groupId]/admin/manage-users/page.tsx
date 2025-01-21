@@ -4,30 +4,31 @@ import React, { useEffect, useState } from 'react';
 import { ManageRoles } from './_components/ManageRoles';
 import { InviteMember } from './_components/InviteMember';
 import { Membership } from '@/lib/types';
+import { useGroup } from '@/context/GroupContext';
+import { fetchMemberships, fetchRoles } from '@/services/userService';
 
-interface ManageUsersPageProps {
-  params: { groupId: string };
-}
-
-const ManageUsersPage: React.FC<ManageUsersPageProps> = ({ params }) => {
-  const { groupId } = params;
+const ManageUsersPage = () => {
+  const { activeGroup } = useGroup();
   const [memberships, setMemberships] = useState<Membership[]>([]);
+  const [roles, setRoles] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchMemberships = async () => {
+    const fetchAllData = async () => {
       try {
-        const response = await fetch(`/api/groupUsers/memberships?groupId=${groupId}`);
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch memberships.');
-        }
-        const data = await response.json();
-        setMemberships(data);
+        if (!activeGroup) return;
+
+        const [membershipsData, rolesData] = await Promise.all([
+          fetchMemberships(activeGroup.id),
+          fetchRoles(),
+        ]);
+
+        setMemberships(membershipsData);
+        setRoles(rolesData);
       } catch (err: unknown) {
         if (err instanceof Error) {
-          console.error('Error fetching memberships:', err.message);
+          console.error('Error fetching data:', err.message);
           setError(err.message);
         } else {
           console.error('Unexpected error:', err);
@@ -38,8 +39,8 @@ const ManageUsersPage: React.FC<ManageUsersPageProps> = ({ params }) => {
       }
     };
 
-    fetchMemberships();
-  }, [groupId]);
+    fetchAllData();
+  }, [activeGroup]);
 
   if (loading) {
     return <p>Loading memberships...</p>;
@@ -49,13 +50,21 @@ const ManageUsersPage: React.FC<ManageUsersPageProps> = ({ params }) => {
     return <p className="text-red-500">{error}</p>;
   }
 
+  if (!activeGroup) {
+    return <p>No active group found.</p>;
+  }
+
   return (
     <div className="container px-4 mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
-      <InviteMember groupId={groupId} />
+      <InviteMember groupId={activeGroup.id} />
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Members</h2>
-        <ManageRoles memberships={memberships} setMemberships={setMemberships} />
+        <ManageRoles
+          memberships={memberships}
+          setMemberships={setMemberships}
+          roles={roles} // Pass roles as a prop
+        />
       </div>
     </div>
   );

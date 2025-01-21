@@ -48,3 +48,10 @@ export interface GroupedSale {
   sales: EnrichedSales[];
   totalAmount: number;
 }
+
+export interface OwnerReport {
+  date: string; // The date for the report in 'YYYY-MM-DD' format
+  totalSales: number; // Total sales for the organization on that date
+}
+
+export type EodReport = Tables<'eod_reports'>;

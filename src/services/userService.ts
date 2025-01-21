@@ -1,24 +1,54 @@
-export const fetchEmployeeNames = async (
-  employeeIds: string[]
+export const fetchUserNames = async (
+  userIds: string[]
 ): Promise<Record<string, string>> => {
-  if (!employeeIds.length) return {};
+  if (!userIds.length) return {};
 
-  try {
-    const response = await fetch('/api/employees/names', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ employeeIds }),
-    });
+  const queryParams = new URLSearchParams({
+    userIds: userIds.join(','),
+  });
 
-    if (!response.ok) {
-      console.error('Failed to fetch employee names');
-      return {};
-    }
+  const res = await fetch(
+    `/api/users/fetch-user-names?${queryParams.toString()}`
+  );
+  const data = await res.json();
 
-    const data = await response.json();
-    return data || {};
-  } catch (error) {
-    console.error('Error fetching employee names:', error);
-    return {};
+  if (!res.ok) {
+    throw new Error('Failed to fetch user names.');
   }
+
+  // Return a map of userId to userName
+  return data.reduce(
+    (acc: Record<string, string>, user: { id: string; name: string }) => {
+      acc[user.id] = user.name;
+      return acc;
+    },
+    {}
+  );
+};
+
+export const fetchMemberships = async (groupId: string) => {
+  if (!groupId) return {};
+
+  const res = await fetch(`/api/groupUsers/memberships?groupId=${groupId}`);
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch memberships.');
+  }
+
+  return data;
+};
+
+export const fetchRoles = async (): Promise<Record<string, string>> => {
+  const res = await fetch('/api/groupUsers/roles');
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch roles.');
+  }
+
+  return data.reduce((acc: Record<string, string>, role: { id: string; name: string }) => {
+    acc[role.id] = role.name;
+    return acc;
+  }, {});
 };

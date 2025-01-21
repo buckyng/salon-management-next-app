@@ -12,7 +12,10 @@ type RouteRolePermission = {
 type Role = 'admin' | 'employee' | 'cashier' | 'client';
 
 const rolePermissions: Record<Role, RouteRolePermission[]> = {
-  admin: [{ name: 'Manage Users', route: '/[groupId]/admin/manage-users' }],
+  admin: [
+    { name: 'Manage Users', route: '/[groupId]/admin/manage-users' },
+    { name: 'Reports', route: '/[groupId]/admin/reports' },
+  ],
   employee: [{ name: 'Employee Dashboard', route: '/[groupId]/employee' }],
   cashier: [
     { name: 'Cashier Dashboard', route: '/[groupId]/cashier' },
