@@ -74,7 +74,7 @@ export default function RootLayout({
         <ToastContainer position="top-right" autoClose={3000} />
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

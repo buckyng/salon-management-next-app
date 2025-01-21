@@ -22,9 +22,9 @@ const InfoBar = () => {
   return (
     <div className="flex flex-row justify-between gap-6 items-center px-4 py-4 w-full dark:bg-black ">
       <div className="flex flex-row justify-start gap-6 items-center px-4 py-4 w-full dark:bg-black ">
-        <Link className="flex font-bold flex-row " href="/">
+        {/* <Link className="flex font-bold flex-row " href="/">
           sm
-        </Link>
+        </Link> */}
         <TooltipProvider>
           {menuOptions.map((menuItem) => (
             <ul key={menuItem.name}>

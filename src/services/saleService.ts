@@ -119,3 +119,76 @@ export const saveEndOfDayReport = async (
     throw new Error('Failed to save the EOD report.');
   }
 };
+
+export const fetchSalesByUser = async ({
+  activeGroupId,
+  userId,
+  date,
+}: {
+  activeGroupId: string;
+  userId: string;
+  date: string;
+}) => {
+  const response = await fetch(
+    `/api/sales/fetch-today?groupId=${activeGroupId}&userId=${userId}&date=${date}`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch sales data.');
+  }
+
+  return data;
+};
+
+
+export const addSale = async ({
+  groupId,
+  userId,
+  amount,
+  comboNum,
+  note,
+}: {
+  groupId: string;
+  userId: string;
+  amount: number;
+  comboNum: number | null;
+  note: string | null;
+}) => {
+  const res = await fetch('/api/sales/add-sale', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ groupId, userId, amount, comboNum, note }),
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to add sale.');
+  }
+
+  return res.json();
+}
+
+export const fetchEmployeeReport = async ({
+  groupId,
+  employeeId,
+  startDate,
+  endDate,
+}: {
+  groupId: string;
+  employeeId: string;
+  startDate: string;
+  endDate: string;
+}) => {
+  const response = await fetch(
+    `/api/reports/employee?groupId=${groupId}&employeeId=${employeeId}&startDate=${startDate}&endDate=${endDate}`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch employee report.');
+  }
+
+  return data;
+}

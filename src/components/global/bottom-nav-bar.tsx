@@ -121,7 +121,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeGroupId }) => {
             onClick={() => router.push(item.route)}
             className={cn(
               'flex flex-col items-center px-3 py-1 text-sm',
-              pathname.includes(item.route.split('/').at(-1)!)
+              pathname === item.route
                 ? 'text-blue-500'
                 : 'text-gray-600 dark:text-gray-300 hover:text-blue-500'
             )}

@@ -4,14 +4,13 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '../ui/button';
-import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { handleLogout } from '@/lib/supabase/helpers/auth';
 
 const Navbar = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -37,14 +36,8 @@ const Navbar = () => {
     fetchUser();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const supabase = createSupabaseClient();
-      await supabase.auth.signOut();
-      router.push('/login'); // Redirect to the homepage after logout
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
+  const handleLogoutClick = async () => {
+    await handleLogout();
   };
 
   if (loading) return null;
@@ -74,7 +67,7 @@ const Navbar = () => {
             </Link>
             <Button
               variant="destructive"
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="h-10"
             >
               Logout

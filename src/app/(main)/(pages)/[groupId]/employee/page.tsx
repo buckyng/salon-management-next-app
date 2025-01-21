@@ -8,6 +8,8 @@ import { useGroup } from '@/context/GroupContext';
 import { formatToLocalTime, getCurrentLocalDate } from '@/lib/utils/dateUtils';
 import { SaleData } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
+import { fetchSalesByUser } from '@/services/saleService';
+import { sortByKey } from '@/lib/utils/funcUtils';
 
 const EmployeeHomePage = () => {
   const { user } = useUser();
@@ -15,6 +17,7 @@ const EmployeeHomePage = () => {
 
   const [sales, setSales] = useState<SaleData[]>([]);
   const [totalSales, setTotalSales] = useState<number>(0);
+  const [numOfSales, setNumOfSales] = useState<number>(0);
   const [loading, setLoading] = useState(false); // Loading state
 
   const currentDate = getCurrentLocalDate();
@@ -44,18 +47,20 @@ const EmployeeHomePage = () => {
     const fetchSales = async () => {
       setLoading(true); // Start loading state
       try {
-        const response = await fetch(
-          `/api/sales/fetch-today?groupId=${activeGroup.id}&userId=${user.id}&date=${currentDate}`
-        );
+        const salesData = await fetchSalesByUser({
+          activeGroupId: activeGroup.id,
+          userId: user.id,
+          date: currentDate,
+        });
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to fetch sales data.');
-        }
+        const sortedByCreatedAt = sortByKey(
+          salesData,
+          'created_at',
+          'desc'
+        ) as SaleData[];
 
-        const salesData = await response.json();
-
-        setSales(salesData);
+        setSales(sortedByCreatedAt);
+        setNumOfSales(sortedByCreatedAt.length);
 
         const total = salesData.reduce(
           (sum: number, sale: SaleData) => sum + sale.amount,
@@ -85,6 +90,7 @@ const EmployeeHomePage = () => {
         <h2 className="text-lg font-bold">
           Total Sales: ${totalSales.toFixed(2)}
         </h2>
+        <p className="text-center mb-4">Number of sales: {numOfSales}</p>
       </div>
 
       <div className="mt-4 overflow-x-auto">
@@ -95,7 +101,7 @@ const EmployeeHomePage = () => {
             columns={columns}
             data={sales}
             enablePagination={true}
-            pageSize={5}
+            pageSize={8}
           />
         )}
       </div>

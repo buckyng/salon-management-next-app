@@ -83,75 +83,123 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          First Name
-        </label>
-        <Input
-          type="text"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          placeholder="Enter first name"
-          required
-          disabled={loading} // Disable input when loading
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Last Name
-        </label>
-        <Input
-          type="text"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          placeholder="Enter last name"
-          required
-          disabled={loading} // Disable input when loading
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Email</label>
-        <Input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter client email"
-          disabled={loading} // Disable input when loading
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Phone</label>
-        <Input
-          type="tel"
-          value={phoneNumber}
-          disabled
-          className="cursor-not-allowed"
-        />
-      </div>
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="agreeToPolicy"
-          checked={agreeToTerms}
-          onCheckedChange={(checked) => setAgreeToTerms(!!checked)}
-          disabled={loading} // Disable checkbox when loading
-        />
-        <div className="grid gap-1.5 leading-none">
+    <div className="container mx-auto px-6 py-10 sm:px-8 lg:px-10">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-md mx-auto space-y-6 bg-white p-6 shadow-md rounded-lg"
+      >
+        {/* First Name Input */}
+        <div>
           <label
-            htmlFor="terms1"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            htmlFor="first_name"
+            className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Accept terms and conditions
+            First Name
           </label>
-          <p className="text-sm text-muted-foreground">
-            You agree to our Terms of Service and Privacy Policy.
-          </p>
+          <Input
+            id="first_name"
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Enter first name"
+            required
+            disabled={loading} // Disable input when loading
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
-      </div>
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? <Loader2 /> : 'Check In'}
-      </Button>
-    </form>
+
+        {/* Last Name Input */}
+        <div>
+          <label
+            htmlFor="last_name"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Last Name
+          </label>
+          <Input
+            id="last_name"
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Enter last name"
+            required
+            disabled={loading} // Disable input when loading
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Email Input */}
+        <div>
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Email
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter client email"
+            disabled={loading} // Disable input when loading
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Phone Input */}
+        <div>
+          <label
+            htmlFor="phone"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Phone
+          </label>
+          <Input
+            id="phone"
+            type="tel"
+            value={phoneNumber}
+            disabled
+            className="w-full p-3 border border-gray-300 rounded-lg cursor-not-allowed bg-gray-100 text-gray-500"
+          />
+        </div>
+
+        {/* Terms and Conditions */}
+        <div className="flex items-start space-x-3">
+          <Checkbox
+            id="agreeToPolicy"
+            checked={agreeToTerms}
+            onCheckedChange={(checked) => setAgreeToTerms(!!checked)}
+            disabled={loading} // Disable checkbox when loading
+            className="h-5 w-5 text-blue-500 focus:ring-2 focus:ring-blue-500 rounded-md"
+          />
+          <div>
+            <label
+              htmlFor="agreeToPolicy"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Accept terms and conditions
+            </label>
+            <p className="text-sm text-gray-500">
+              You agree to our Terms of Service and Privacy Policy.
+            </p>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          className={`w-full py-3 font-semibold text-white rounded-lg ${
+            loading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-500'
+          }`}
+          disabled={loading}
+        >
+          {loading ? <Loader2 /> : 'Check In'}
+        </Button>
+      </form>
+    </div>
   );
 };
 

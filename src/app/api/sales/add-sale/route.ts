@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     const localDate = getCurrentLocalDate();
+    console.log('Adding sale:', localDate);
 
     const { error } = await supabase.from('sales').insert({
       group_id: groupId,

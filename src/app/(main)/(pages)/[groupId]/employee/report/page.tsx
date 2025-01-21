@@ -9,6 +9,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import { formatToLocalTime } from '@/lib/utils/dateUtils';
 import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
+import { fetchEmployeeReport, fetchSalesByUser } from '@/services/saleService';
+import { Loader2 } from 'lucide-react';
 
 type EmployeeReport = {
   date: string;
@@ -47,10 +49,14 @@ const EmployeeReportPage = () => {
         return;
       }
 
-      const response = await fetch(
-        `/api/reports/employee?groupId=${activeGroup.id}&employeeId=${user.id}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
-      );
-      const data = await response.json();
+      const data = await fetchEmployeeReport({
+        groupId: activeGroup.id,
+        employeeId: user.id,
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      });
+
+      console.log('Employee report:', data);
 
       setReports(data);
     } catch (error) {
@@ -66,10 +72,12 @@ const EmployeeReportPage = () => {
     setSelectedDate(date); // Set the selected date for display
 
     try {
-      const response = await fetch(
-        `/api/reports/employee/sales?groupId=${activeGroup.id}&employeeId=${user.id}&date=${date}`
-      );
-      const sales = await response.json();
+      const sales = await fetchSalesByUser({
+        activeGroupId: activeGroup.id,
+        userId: user.id,
+        date,
+      });
+
       setDetailedSales(sales);
     } catch (error) {
       console.error('Error fetching sales by date:', error);
@@ -122,7 +130,7 @@ const EmployeeReportPage = () => {
         </div>
         <div className="mt-6">
           <Button onClick={fetchReport} disabled={loading}>
-            {loading ? 'Loading...' : 'Fetch Report'}
+            {loading ? <Loader2 /> : 'Fetch Report'}
           </Button>
         </div>
       </div>

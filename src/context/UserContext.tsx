@@ -6,7 +6,12 @@ import { createContext, useContext, useEffect, useState } from 'react';
 interface UserMetadata {
   id: string;
   email: string | undefined;
-  groups: { id: string; name: string | null; roles: string[] }[]; // Group ID mapped to roles
+  groups: {
+    id: string;
+    name: string | null;
+    roles: string[];
+    logo_url: string | null;
+  }[]; // Group ID mapped to roles
   name: string | null; // From profiles table
   avatar_url: string | null; // From profiles table
 }
@@ -56,7 +61,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         // Fetch group names from the groups table
         const { data: groupData, error: groupError } = await supabase
           .from('groups')
-          .select('id, name')
+          .select('id, name, logo_url')
           .in('id', groupIds);
 
         if (groupError) throw groupError;
@@ -68,6 +73,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
             groupData?.find((group) => group.id === groupId)?.name ||
             'Unknown Group',
           roles: groupRoles[groupId], // Extract roles for this group
+          logo_url:
+            groupData?.find((group) => group.id === groupId)?.logo_url || null,
         }));
 
         // Combine auth user metadata, profile data, and group info
