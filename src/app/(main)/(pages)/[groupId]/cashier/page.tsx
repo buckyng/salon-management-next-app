@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { useCheckEodReport } from '@/lib/hooks/useCheckEodReport';
 
 const CashierPage: React.FC = () => {
   const { activeGroup } = useGroup();
@@ -34,6 +35,11 @@ const CashierPage: React.FC = () => {
   const [sales, setSales] = useState<GroupedSale[]>([]); // Properly typed state
   const [loading, setLoading] = useState<boolean>(false); // Properly typed state
   const currentDate = getCurrentLocalDate();
+
+  const { eodExists, isEodLoading } = useCheckEodReport({
+    groupId: activeGroup?.id || null,
+    date: currentDate,
+  });
 
   useEffect(() => {
     if (!activeGroup) return;
@@ -248,6 +254,20 @@ const CashierPage: React.FC = () => {
 
   if (loading) {
     return <p className="text-center">Loading sales...</p>;
+  }
+
+  if (isEodLoading) {
+    return <p className="text-center mt-4">Loading...</p>;
+  }
+
+  if (eodExists) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+        <p className="text-2xl font-bold text-red-500 text-center">
+          An End-of-Day Report for {currentDate} has already been submitted.
+        </p>
+      </div>
+    );
   }
 
   return (

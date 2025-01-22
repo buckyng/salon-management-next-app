@@ -6,6 +6,7 @@ import {
 } from '@/lib/types';
 import { fetchUserNames } from './userService';
 import { fetchWithParams } from '@/lib/utils/serverUtils';
+import { API_ROUTES } from '@/lib/constants/routes';
 
 export const checkEodReportExists = async ({
   groupId,
@@ -109,3 +110,49 @@ export const fetchSalesForEmployee = async ({
 
   return res.json();
 };
+
+export async function updateEndOfDayReport(data: {
+  group_id: string;
+  date: string;
+  [key: string]: string | number | null;
+}): Promise<void> {
+  const res = await fetch(API_ROUTES.UPDATE_EOD_REPORT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || 'Failed to update the EOD report');
+  }
+}
+
+export async function removeEndOfDayReport(
+  groupId: string,
+  date: string
+): Promise<void> {
+  const res = await fetch(API_ROUTES.DELETE_EOD_REPORT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ group_id: groupId, date }),
+  });
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || 'Failed to delete the EOD report');
+  }
+}
+
+export async function fetchEodReport(groupId: string, date: string) {
+  try {
+    const response = await fetch(`/api/reports/eod/${groupId}/${date}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch EOD report data');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching EOD report:', error);
+    throw error;
+  }
+}

@@ -8,6 +8,8 @@ import { useGroup } from '@/context/GroupContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { addSale } from '@/services/saleService';
+import { useCheckEodReport } from '@/lib/hooks/useCheckEodReport';
+import { getCurrentLocalDate } from '@/lib/utils/dateUtils';
 
 const AddSalePage = () => {
   const { user } = useUser();
@@ -18,6 +20,12 @@ const AddSalePage = () => {
   const [comboNum, setComboNum] = useState('');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const currentDate = getCurrentLocalDate();
+
+  const { eodExists, isEodLoading } = useCheckEodReport({
+    groupId: activeGroup?.id || null,
+    date: currentDate,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +42,13 @@ const AddSalePage = () => {
 
     if (!amount || parseFloat(amount) <= 0) {
       toast.error('Amount must be greater than 0.');
+      return;
+    }
+
+    //check if eodExists
+
+    if (eodExists) {
+      toast.error('End of Day report is submitted. Nomore sale can be added');
       return;
     }
 
@@ -58,6 +73,14 @@ const AddSalePage = () => {
   };
 
   if (!activeGroup?.id) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (isEodLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>

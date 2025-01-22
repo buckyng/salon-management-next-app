@@ -19,6 +19,7 @@ const OwnerReportPage = () => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [reportData, setReportData] = useState<EodReport[]>([]);
+  const [totalSales, setTotalSales] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
   const { setSelectedReport } = useReport();
@@ -56,6 +57,13 @@ const OwnerReportPage = () => {
         formattedStartDate,
         formattedEndDate
       );
+
+      const total = report.reduce(
+        (sum: number, sale: EodReport) => sum + sale.total_sale,
+        0
+      );
+
+      setTotalSales(total);
 
       setReportData(report);
     } catch (error) {
@@ -102,6 +110,10 @@ const OwnerReportPage = () => {
           </Button>
         </div>
       </div>
+
+      <h2 className="mt-6 text-lg font-bold">
+        Total Sales for selected periods: ${totalSales.toFixed(2)}
+      </h2>
 
       {loading ? (
         <p className="text-center">Loading report...</p>

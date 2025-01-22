@@ -5,7 +5,8 @@ import { createSupabaseClient } from './lib/supabase/server';
 const isPublicRoute = (url: string) => {
   const publicRoutes = [
     '/sign-in',
-    '/sign-up',
+    '/forgot-password',
+    '/reset-password',
     '/',
     '/manifest.json',
     '/favicon.ico',

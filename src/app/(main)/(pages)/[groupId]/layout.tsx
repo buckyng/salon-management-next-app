@@ -13,11 +13,14 @@ const Layout = ({
 }) => {
   return (
     <div className="flex flex-col h-screen">
-      <main className="flex-1 pb-16 overflow-y-auto">
+      {/* Scrollable container for main content */}
+      <main className="flex-1 overflow-y-auto pb-16">
         <GroupProvider groupId={params.groupId}>{children}</GroupProvider>
       </main>
-      {/* Add BottomNavBar */}
-      <BottomNavBar activeGroupId={params.groupId} />
+      {/* Fixed BottomNavBar */}
+      <div className="fixed bottom-0 left-0 right-0 z-10">
+        <BottomNavBar activeGroupId={params.groupId} />
+      </div>
     </div>
   );
 };

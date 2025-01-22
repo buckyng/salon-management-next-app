@@ -1,14 +1,18 @@
 'use client';
 
-import { login } from '@/lib/supabase/servers/auth';
-import { Loader2 } from 'lucide-react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { toast } from 'react-toastify';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
+import { login } from '@/lib/supabase/servers/auth';
 
 function LoginPage() {
   const router = useRouter();
-
   const [isPending, startTransition] = useTransition();
 
   const handleClickLoginButton = (formData: FormData) => {
@@ -25,31 +29,71 @@ function LoginPage() {
   };
 
   return (
-    <div className="bg-emerald-700 w-96 rounded-lg p-8">
-      <h1 className="text-2xl text-center mb-8">Login</h1>
-      <form
-        className="flex flex-col bg-emerald-700 gap-4"
-        action={handleClickLoginButton}
-      >
-        <input
-          type="email"
-          name="email"
-          className="rounded-lg p-2"
-          placeholder="Email"
-          disabled={isPending}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          className="rounded-lg p-2"
-          disabled={isPending}
-        />
+    <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
+      <Card className="w-full max-w-md">
+        {/* Header */}
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold">
+            Welcome to{' '}
+            <span className="text-blue-500">Salon Management App</span>
+          </CardTitle>
+        </CardHeader>
 
-        <button className="rounded-lg p-2 mt-4 bg-black text-white flex justify-center">
-          {isPending ? <Loader2 /> : 'Log in'}
-        </button>
-      </form>
+        {/* Login Form */}
+        <CardContent>
+          <form className="space-y-4" action={handleClickLoginButton}>
+            {/* Email Input */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                disabled={isPending}
+                required
+              />
+            </div>
+            {/* Password Input */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                disabled={isPending}
+                required
+              />
+            </div>
+
+            {/* Forgot Password */}
+            <div className="flex justify-end">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-blue-500 hover:underline dark:text-blue-400"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
+            {/* Submit Button */}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? <Loader2 className="animate-spin mr-2" /> : 'Log in'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -66,7 +66,6 @@ export const GroupProvider = ({
           return;
         }
 
-        console.log('Fetched group details:', data);
 
         const activeGroupDetails: Group = {
           id: data.id,

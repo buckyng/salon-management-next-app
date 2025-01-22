@@ -27,3 +27,35 @@ export async function login(formData: FormData) {
     return { errorMessage: getErrorMessage(error) };
   }
 }
+
+export async function sendPasswordResetEmail(
+  email: string
+): Promise<{ errorMessage?: string }> {
+  const supabase = await createSupabaseClient();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password`,
+  });
+
+  if (error) {
+    return { errorMessage: error.message };
+  }
+
+  return {};
+}
+
+export async function updatePassword(
+  newPassword: string
+): Promise<{ errorMessage?: string }> {
+  const supabase = await createSupabaseClient();
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) {
+    return { errorMessage: error.message };
+  }
+
+  return {};
+}

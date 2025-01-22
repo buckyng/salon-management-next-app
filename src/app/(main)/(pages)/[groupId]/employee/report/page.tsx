@@ -30,6 +30,7 @@ const EmployeeReportPage = () => {
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [reports, setReports] = useState<EmployeeReport[]>([]);
+  const [totalSales, setTotalSales] = useState<number>(0);
   const [detailedSales, setDetailedSales] = useState<SaleData[] | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -56,7 +57,12 @@ const EmployeeReportPage = () => {
         endDate: formattedEndDate,
       });
 
-      console.log('Employee report:', data);
+
+      const total = data.reduce(
+        (sum: number, sale: EmployeeReport) => sum + sale.totalSales,
+        0
+      );
+      setTotalSales(total);
 
       setReports(data);
     } catch (error) {
@@ -134,6 +140,10 @@ const EmployeeReportPage = () => {
           </Button>
         </div>
       </div>
+
+      <h2 className="mt-6 text-lg font-bold">
+        Total Sales for selected periods: ${totalSales.toFixed(2)}
+      </h2>
 
       <div className="mt-6 overflow-x-auto">
         <DataTable columns={columns} data={reports} />
