@@ -67,10 +67,13 @@ const ReportByDatePage = () => {
         <p>Cash: ${selectedReport?.cash}</p>
         <p>Debit: ${selectedReport?.debit}</p>
         <p>Other Income: ${selectedReport?.other_income}</p>
+        <p>Income Note: ${selectedReport?.income_note}</p>
         <p>Expense: ${selectedReport?.expense}</p>
+        <p>Expense Note: ${selectedReport?.expense_note}</p>
         <p>Service Discount: ${selectedReport?.service_discount}</p>
         <p>Giftcard Buy: ${selectedReport?.giftcard_buy}</p>
         <p>Giftcard Redeem: ${selectedReport?.giftcard_redeem}</p>
+        <p>Result: ${selectedReport?.result}</p>
       </div>
       <DataTable columns={columns} data={employeeSummaries} />
     </div>

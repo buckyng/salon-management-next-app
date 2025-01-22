@@ -14,13 +14,15 @@ type Role = 'admin' | 'employee' | 'cashier' | 'client';
 const rolePermissions: Record<Role, RouteRolePermission[]> = {
   admin: [
     { name: 'Manage Users', route: '/[groupId]/admin/manage-users' },
+    { name: 'Today Report', route: '/[groupId]/admin/today-report' },
     { name: 'Reports', route: '/[groupId]/admin/reports' },
     { name: 'Update Logo', route: '/[groupId]/admin/update-logo' },
+    { name: 'Update Eod', route: '/[groupId]/admin/update-eod' },
   ],
   employee: [{ name: 'Employee Dashboard', route: '/[groupId]/employee' }],
   cashier: [
     { name: 'Cashier Dashboard', route: '/[groupId]/cashier' },
-    { name: 'Check-In Dashboard', route: '/[groupId]/check-in' },
+    { name: 'Check-In Dashboard', route: '/[groupId]/checkin' },
   ],
   client: [{ name: 'Client Dashboard', route: '/[groupId]/client' }],
 };

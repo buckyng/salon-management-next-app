@@ -7,6 +7,6 @@ const withPWA = withPWAInit({
 export default withPWA({
     reactStrictMode: true,
     images: {
-      domains: ['yuydlfabcomardopckat.supabase.co'], // Add your Supabase storage domain here
+      domains: [process.env.NEXT_PUBLIC_SUPABASE_STORAGE_DOMAIN], // Add your Supabase storage domain here
     },
 });
