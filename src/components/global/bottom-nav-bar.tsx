@@ -13,7 +13,6 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { match } from 'path-to-regexp';
 
 interface NavItem {
   name: string;
