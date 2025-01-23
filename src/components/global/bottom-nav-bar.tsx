@@ -10,8 +10,10 @@ import {
   User,
   Notebook,
   Receipt,
+  LayoutDashboard,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { match } from 'path-to-regexp';
 
 interface NavItem {
   name: string;
@@ -24,23 +26,18 @@ interface BottomNavBarProps {
 }
 
 const pageNavItems: Record<string, NavItem[]> = {
-  checkin: [
+  '/cashier-combined': [
     {
-      name: 'Cashier',
-      icon: <DollarSign size={20} />,
-      route: '/[groupId]/cashier',
-    },
-    {
-      name: 'Check-Ins',
-      icon: <CheckCircle size={20} />,
-      route: '/[groupId]/checkin',
+      name: 'Back to Dashboard',
+      icon: <LayoutDashboard size={20} />,
+      route: '/[groupId]/dashboard',
     },
   ],
-  cashier: [
+  '/cashier': [
     {
-      name: 'Check-Ins',
-      icon: <CheckCircle size={20} />,
-      route: '/[groupId]/checkin',
+      name: 'Back to Dashboard',
+      icon: <DollarSign size={20} />,
+      route: '/[groupId]/dashboard',
     },
     {
       name: 'Cashier',
@@ -58,7 +55,14 @@ const pageNavItems: Record<string, NavItem[]> = {
       route: '/[groupId]/cashier/eod',
     },
   ],
-  employee: [
+  '/cashier/history-cashier': [
+    {
+      name: 'Back to Cashier',
+      icon: <DollarSign size={20} />,
+      route: '/[groupId]/cashier',
+    },
+  ],
+  '/employee': [
     {
       name: 'Dashboard',
       icon: <Home size={20} />,
@@ -75,7 +79,7 @@ const pageNavItems: Record<string, NavItem[]> = {
       route: '/[groupId]/employee/report',
     },
   ],
-  admin: [
+  '/admin': [
     {
       name: 'Manage Users',
       icon: <User size={20} />,
@@ -87,6 +91,18 @@ const pageNavItems: Record<string, NavItem[]> = {
       route: '/[groupId]/admin/reports',
     },
   ],
+  '/checkin': [
+    {
+      name: 'Cashier',
+      icon: <DollarSign size={20} />,
+      route: '/[groupId]/cashier',
+    },
+    {
+      name: 'Check-Ins',
+      icon: <CheckCircle size={20} />,
+      route: '/[groupId]/checkin',
+    },
+  ],
 };
 
 const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeGroupId }) => {
@@ -95,11 +111,12 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeGroupId }) => {
   const [navItems, setNavItems] = useState<NavItem[]>([]);
 
   useEffect(() => {
-    // Extract the base route from pathname
-    const pathSegments = pathname.split('/');
-    const basePage = pathSegments[2]; // "cashier", "employee", etc.
+    const pathWithoutGroupId = pathname.split('/').slice(2).join('/');
+    const basePage = `/${pathWithoutGroupId.split('/')[0]}`; // Extract the first segment after groupId
 
     const items = pageNavItems[basePage] || [];
+
+    // Replace placeholder with actual groupId
     setNavItems(
       items.map((item) => ({
         ...item,
