@@ -21,6 +21,7 @@ const RootPage = async () => {
           <p className="mt-2 text-gray-600">
             Manage your salon effortlessly with our user-friendly platform.
           </p>
+          {}
         </div>
       </main>
     </div>
