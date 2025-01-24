@@ -45,3 +45,4 @@ export const fetchUserName = async (userId: string): Promise<string> => {
 
   return data?.name || 'Unknown User';
 };
+

@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
       .select(
         `
       *,
-      clients(first_name, last_name, client_group_details(number_of_visits, last_visit_rating))
+      clients(first_name, last_name, phone, client_group_details(number_of_visits, last_visit_rating))
       `
       )
       .eq('group_id', groupId)
