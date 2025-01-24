@@ -46,9 +46,23 @@ const WelcomeBack: React.FC<WelcomeBackProps> = ({ client, onUpdate }) => {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-gray-100">
-        Welcome Back, {client.first_name}!
-      </h2>
+      <div className="text-center space-y-4">
+        {/* Greeting */}
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          Welcome Back, {client.first_name}!
+        </h2>
+
+        {/* Instruction */}
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-lg mx-auto">
+          If your information below is not up-to-date, please update it.
+          Otherwise, click the
+          <span className="font-semibold text-blue-500 dark:text-blue-400">
+            {' '}
+            Check In{' '}
+          </span>
+          button to complete your check-in.
+        </p>
+      </div>
       <div className="space-y-4">
         <Label>First Name</Label>
         <Input

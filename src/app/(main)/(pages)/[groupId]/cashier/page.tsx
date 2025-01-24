@@ -314,25 +314,31 @@ const CashierPage: React.FC = () => {
 
       {isEditing && (
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <DialogContent className="fixed inset-x-0 bottom-0 sm:inset-auto sm:relative sm:bottom-auto sm:translate-x-0 sm:translate-y-0 max-h-full overflow-auto rounded-t-lg sm:rounded-lg">
-            <DialogHeader>
-              <DialogTitle>Edit Sale Amount</DialogTitle>
-              <DialogDescription>
+          <DialogContent>
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                Edit Sale Amount
+              </DialogTitle>
+              <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
                 Update the sale amount for the selected item.
               </DialogDescription>
             </DialogHeader>
-            <Input
-              value={newAmount}
-              onChange={(e) => setNewAmount(e.target.value)}
-              type="number"
-              placeholder="Enter new amount"
-              className="w-full"
-            />
-            <DialogFooter>
+            <div className="space-y-4">
+              <Input
+                value={newAmount}
+                onChange={(e) => setNewAmount(e.target.value)}
+                type="number"
+                placeholder="Enter new amount"
+                className="w-full"
+              />
+            </div>
+            <DialogFooter className="mt-6 flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSaveAmount}>Save</Button>
+              <Button onClick={handleSaveAmount} className="px-4 py-2">
+                Save
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

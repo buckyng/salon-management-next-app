@@ -186,6 +186,7 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
             disabled={isLoading}
             placeholder="Enter cash amount"
             className="mt-1"
+            type="number"
           />
         </div>
         <div>
@@ -196,6 +197,7 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
             disabled={isLoading}
             placeholder="Enter debit amount"
             className="mt-1"
+            type="number"
           />
         </div>
         <div>
@@ -206,6 +208,7 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
             disabled={isLoading}
             placeholder="Enter discount amount"
             className="mt-1"
+            type="number"
           />
         </div>
         <div>
@@ -216,6 +219,7 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
             disabled={isLoading}
             placeholder="Enter gift card purchases"
             className="mt-1"
+            type="number"
           />
         </div>
         <div>
@@ -226,6 +230,7 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
             disabled={isLoading}
             placeholder="Enter gift card redemptions"
             className="mt-1"
+            type="number"
           />
         </div>
         <div>
@@ -236,6 +241,7 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
             disabled={isLoading}
             placeholder="Enter other income"
             className="mt-1"
+            type="number"
           />
         </div>
         {otherIncome && (
@@ -258,6 +264,7 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
             disabled={isLoading}
             placeholder="Enter expense amount"
             className="mt-1"
+            type="number"
           />
         </div>
         {expense && (
