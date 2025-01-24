@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
-const tempPassword = '12345678Temp';
 
 // Schema for validating the request body
 const inviteSchema = z.object({
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
       const { data: newUser, error: newUserError } =
         await supabaseAdmin.auth.admin.createUser({
           email,
-          password: tempPassword, // Use a temporary password
+          password: process.env.TEMP_PASSWORD, // Use a temporary password
           email_confirm: !isDevelopment,
         });
 
