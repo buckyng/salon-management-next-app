@@ -33,8 +33,12 @@ export async function sendPasswordResetEmail(
 ): Promise<{ errorMessage?: string }> {
   const supabase = await createSupabaseClient();
 
+  const redirectTo = `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/confirm?token_hash={token}&type=email&redirectUrl=/reset-password`;
+
+  console.log('Redirect URL:', redirectTo);
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password`,
+    redirectTo,
   });
 
   if (error) {
