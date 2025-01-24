@@ -9,32 +9,60 @@ export default function DashboardPage() {
   const { user } = useUser();
 
   if (!activeGroup) {
-    return <p className="text-red-500">Error: Active group not found.</p>;
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <p className="text-lg text-red-500">Error: Active group not found.</p>
+      </div>
+    );
   }
 
   if (!user) {
-    return <p className="text-red-500">Error: User data not available.</p>;
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <p className="text-lg text-red-500">Error: User data not available.</p>
+      </div>
+    );
   }
 
   const activeRole = activeGroup.roles[0] || null;
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">
-        Welcome to {activeGroup.name} Dashboard
-      </h1>
-      <p>
-        <strong>Your Role:</strong> {activeRole || 'No role assigned'}
-      </p>
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header Section */}
+      <header className="sticky top-0 z-10 p-4 shadow-md">
+        <div className="container mx-auto flex flex-col items-center text-center">
+          <h1 className="text-2xl md:text-3xl font-bold">
+            Welcome to {activeGroup.name} Dashboard
+          </h1>
+          <p className="mt-2 text-sm md:text-lg">
+            <strong>Your Role:</strong> {activeRole || 'No role assigned'}
+          </p>
+        </div>
+      </header>
 
-      {/* Role-Based Actions */}
-      <div className="mt-6">
-        <h2 className="text-xl font-bold mb-4">Available Actions</h2>
-        <RoleBasedActions
-          activeOrgId={activeGroup.id}
-          activeRole={activeRole}
-        />
-      </div>
+      {/* Content Section */}
+      <main className="flex-grow p-4">
+        <div className="container mx-auto max-w-3xl space-y-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+              Available Actions
+            </h2>
+            <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
+              <RoleBasedActions
+                activeOrgId={activeGroup.id}
+                activeRole={activeRole}
+              />
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer Section */}
+      <footer className="bg-gray-100 dark:bg-gray-800 text-center py-4 border-t border-gray-200 dark:border-gray-700">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          &copy; 2024 Salon Manager. All rights reserved.
+        </p>
+      </footer>
     </div>
   );
 }

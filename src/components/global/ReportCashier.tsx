@@ -175,82 +175,123 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="mt-4 space-y-4">
-        {/* Input Fields */}
-        <Label>Cash</Label>
-        <Input
-          value={cash}
-          onChange={(e) => setCash(e.target.value)}
-          disabled={isLoading}
-        />
-        <Label>Debit</Label>
-        <Input
-          value={debit}
-          onChange={(e) => setDebit(e.target.value)}
-          disabled={isLoading}
-        />
-        <Label>Service Discount</Label>
-        <Input
-          value={serviceDiscount}
-          onChange={(e) => setServiceDiscount(e.target.value)}
-          disabled={isLoading}
-        />
-        <Label>Giftcard Buy</Label>
-        <Input
-          value={giftcardBuy}
-          onChange={(e) => setGiftcardBuy(e.target.value)}
-          disabled={isLoading}
-        />
-        <Label>Giftcard Redeem</Label>
-        <Input
-          value={giftcardRedeem}
-          onChange={(e) => setGiftcardRedeem(e.target.value)}
-          disabled={isLoading}
-        />
-        <Label>Other Income</Label>
-        <Input
-          value={otherIncome}
-          onChange={(e) => setOtherIncome(e.target.value)}
-          disabled={isLoading}
-        />
+    <div className="space-y-6">
+      {/* Input Fields Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>Cash</Label>
+          <Input
+            value={cash}
+            onChange={(e) => setCash(e.target.value)}
+            disabled={isLoading}
+            placeholder="Enter cash amount"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Debit</Label>
+          <Input
+            value={debit}
+            onChange={(e) => setDebit(e.target.value)}
+            disabled={isLoading}
+            placeholder="Enter debit amount"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Service Discount</Label>
+          <Input
+            value={serviceDiscount}
+            onChange={(e) => setServiceDiscount(e.target.value)}
+            disabled={isLoading}
+            placeholder="Enter discount amount"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Giftcard Buy</Label>
+          <Input
+            value={giftcardBuy}
+            onChange={(e) => setGiftcardBuy(e.target.value)}
+            disabled={isLoading}
+            placeholder="Enter gift card purchases"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Giftcard Redeem</Label>
+          <Input
+            value={giftcardRedeem}
+            onChange={(e) => setGiftcardRedeem(e.target.value)}
+            disabled={isLoading}
+            placeholder="Enter gift card redemptions"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Other Income</Label>
+          <Input
+            value={otherIncome}
+            onChange={(e) => setOtherIncome(e.target.value)}
+            disabled={isLoading}
+            placeholder="Enter other income"
+            className="mt-1"
+          />
+        </div>
         {otherIncome && (
-          <>
+          <div className="md:col-span-2">
             <Label>Income Note</Label>
             <Input
               value={incomeNote}
               onChange={(e) => setIncomeNote(e.target.value)}
               disabled={isLoading}
+              placeholder="Enter note for other income"
+              className="mt-1"
             />
-          </>
+          </div>
         )}
-        <Label>Expense</Label>
-        <Input
-          value={expense}
-          onChange={(e) => setExpense(e.target.value)}
-          disabled={isLoading}
-        />
+        <div>
+          <Label>Expense</Label>
+          <Input
+            value={expense}
+            onChange={(e) => setExpense(e.target.value)}
+            disabled={isLoading}
+            placeholder="Enter expense amount"
+            className="mt-1"
+          />
+        </div>
         {expense && (
-          <>
+          <div className="md:col-span-2">
             <Label>Expense Note</Label>
             <Input
               value={expenseNote}
               onChange={(e) => setExpenseNote(e.target.value)}
               disabled={isLoading}
+              placeholder="Enter note for expenses"
+              className="mt-1"
             />
-          </>
+          </div>
         )}
       </div>
 
-      <div className="mt-4">
-        <Button onClick={handlePreCheck} disabled={isLoading}>
+      {/* Action Buttons */}
+      <div className="flex flex-col items-center space-y-4">
+        <Button
+          onClick={handlePreCheck}
+          disabled={isLoading}
+          className="w-full md:w-auto"
+        >
           {isLoading ? <Loader2 /> : 'Pre-Check'}
         </Button>
-        <p className="mt-2 text-lg font-semibold">{resultMessage}</p>
-      </div>
-
-      <div className="mt-6">
-        <Button onClick={handleSubmit} disabled={isLoading}>
+        <p className="text-center text-lg font-semibold text-gray-700 dark:text-gray-300">
+          {resultMessage}
+        </p>
+        <Button
+          onClick={handleSubmit}
+          disabled={isLoading}
+          className="w-full md:w-auto"
+          variant="destructive"
+        >
           {isLoading ? <Loader2 /> : 'Submit Report'}
         </Button>
       </div>
