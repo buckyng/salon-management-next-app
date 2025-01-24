@@ -55,3 +55,20 @@ export interface OwnerReport {
 }
 
 export type EodReport = Tables<'eod_reports'>;
+
+export type CheckIn = Tables<'check_ins'>;
+
+export type EnrichedCheckIn = CheckIn & {
+  clientName: string;
+  visitsBeforeToday: number;
+  lastVisitRating: number | null;
+  clients: {
+    first_name: string;
+    last_name: string;
+    phone: string;
+    client_group_details: {
+      number_of_visits: number;
+      last_visit_rating: number | null;
+    }[];
+  };
+};

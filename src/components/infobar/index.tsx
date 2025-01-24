@@ -10,8 +10,8 @@ import {
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserProfileMenu } from '../global/user-profile-menu';
 import Home from '../icons/home';
+import UserProfileMenu from '../global/user-profile-menu';
 
 export const menuOptions = [
   { name: 'Dashboard', Component: Home, href: '/group-picker' },
