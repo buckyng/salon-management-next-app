@@ -217,25 +217,37 @@ const CheckInManagementPage = () => {
 
   if (loading) {
     return (
-      <div className="container px-4 mx-auto mt-10">
-        <h1 className="mb-6 text-3xl font-bold">Check-In Management</h1>
+      <div className="container p-4 space-y-6">
+        <h1 className="text-2xl font-bold text-center">Check-In Management</h1>
+
         <p>Loading check-ins...</p>
       </div>
     );
   }
 
   return (
-    <div className="container px-4 mx-auto mt-10">
-      <h1 className="mb-6 text-3xl font-bold">Check-In Management</h1>
-      <DataTable
-        columns={columns}
-        data={checkIns}
-        getRowProps={(row) => ({
-          className: row.is_in_service
-            ? 'line-through text-red-800' // Styling for in-service rows
-            : '', // Styling for not-in-service rows
-        })}
-      />
+    <div className="container mx-auto p-6 space-y-6 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-md">
+      {/* Header Section */}
+      <header className="text-center">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          Check-In Management
+        </h1>
+      </header>
+
+      {/* Data Table */}
+      <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg">
+        <DataTable
+          columns={columns}
+          data={checkIns}
+          getRowProps={(row) => ({
+            className: `px-4 py-2 ${
+              row.is_in_service
+                ? 'line-through text-red-600 dark:text-red-400'
+                : 'text-gray-800 dark:text-gray-200'
+            }`,
+          })}
+        />
+      </div>
     </div>
   );
 };

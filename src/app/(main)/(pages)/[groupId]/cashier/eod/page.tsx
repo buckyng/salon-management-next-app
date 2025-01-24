@@ -40,12 +40,25 @@ const ReportCashierPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto h-full overflow-y-auto">
-      <ReportCashier
-        date={currentDate}
-        groupId={activeGroup.id}
-        onSubmitSuccess={handleSuccess}
-      />
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="sticky top-0 z-10  p-4 shadow-md">
+        <div className="container mx-auto text-center">
+          <h1 className="text-xl font-bold">End of Day Report</h1>
+          <p className="text-sm mt-1">Date: {currentDate}</p>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="flex-grow container mx-auto p-6 overflow-y-auto">
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+          <ReportCashier
+            date={currentDate}
+            groupId={activeGroup.id}
+            onSubmitSuccess={handleSuccess}
+          />
+        </div>
+      </main>
     </div>
   );
 };

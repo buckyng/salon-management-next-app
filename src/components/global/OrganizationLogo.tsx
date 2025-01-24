@@ -13,14 +13,14 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
   const placeholderSrc = PLACEHOLDER_LOGO_URL; // Fallback to placeholder
 
   return (
-    <div className="flex items-center justify-center h-16">
+    <div className="flex items-center justify-center w-full h-full">
       <Image
-        src={logoSrc || placeholderSrc} // Ensure a valid src is always passed
+        src={logoSrc || placeholderSrc}
         alt={altText}
         width={150}
-        height={64}
+        height={150}
         priority
-        className="object-contain"
+        className="object-contain rounded-md shadow"
       />
     </div>
   );

@@ -159,10 +159,12 @@ const CheckInPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-6 py-10">
+    <div className="container mx-auto px-6 py-10 space-y-10">
       {message ? (
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-green-500">{message}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-green-500">
+            {message}
+          </h1>
         </div>
       ) : (
         <div className="flex flex-col items-center">
@@ -176,17 +178,17 @@ const CheckInPage = () => {
 
           {/* Welcome Text */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4">
-            Welcome to {activeGroup?.name}
+            Welcome to {activeGroup?.name || 'Our Organization'}
           </h1>
-          <p className="text-center text-gray-500 text-base sm:text-lg max-w-xl">
+          <p className="text-center text-gray-500 dark:text-gray-400 text-base sm:text-lg max-w-xl">
             Please check in by entering your phone number below.
           </p>
 
           {/* Form Section */}
           <div className="max-w-md w-full mt-8">
             {step === 1 && (
-              <Card className="p-6 shadow-lg">
-                <h2 className="mb-4 text-xl sm:text-2xl font-semibold text-center">
+              <Card className="p-6 shadow-lg bg-white dark:bg-gray-800 rounded-lg">
+                <h2 className="mb-4 text-xl sm:text-2xl font-semibold text-center text-gray-800 dark:text-gray-100">
                   Enter Phone Number
                 </h2>
                 <Input
@@ -195,14 +197,18 @@ const CheckInPage = () => {
                   className="w-full text-base sm:text-lg"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  disabled={loading} // Disable input when loading
+                  disabled={loading}
                 />
                 <Button
                   onClick={handlePhoneSubmit}
-                  className="w-full mt-4 py-2 sm:py-3"
-                  disabled={loading} // Disable button when loading
+                  className={`w-full mt-4 py-2 sm:py-3 font-semibold rounded-md ${
+                    loading
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  }`}
+                  disabled={loading}
                 >
-                  {loading ? <Loader2 /> : 'Check In'}
+                  {loading ? <Loader2 className="animate-spin" /> : 'Check In'}
                 </Button>
               </Card>
             )}
