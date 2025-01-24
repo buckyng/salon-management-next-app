@@ -34,25 +34,17 @@ export default function DashboardPage() {
           <h1 className="text-2xl md:text-3xl font-bold">
             Welcome to {activeGroup.name} Dashboard
           </h1>
-          <p className="mt-2 text-sm md:text-lg">
-            <strong>Your Role:</strong> {activeRole || 'No role assigned'}
-          </p>
         </div>
       </header>
 
       {/* Content Section */}
       <main className="flex-grow p-4">
         <div className="container mx-auto max-w-3xl space-y-6">
-          <div>
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
-              Available Actions
-            </h2>
-            <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
-              <RoleBasedActions
-                activeOrgId={activeGroup.id}
-                activeRole={activeRole}
-              />
-            </div>
+          <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
+            <RoleBasedActions
+              activeOrgId={activeGroup.id}
+              activeRole={activeRole}
+            />
           </div>
         </div>
       </main>

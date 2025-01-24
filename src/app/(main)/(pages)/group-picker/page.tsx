@@ -12,20 +12,31 @@ export default function GroupPickerPage() {
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && user?.groups.length === 1) {
-      // Automatically set and redirect to the only group
+    if (!loading && user?.groups?.length === 1) {
       const singleGroup = user.groups[0];
-      setSelectedOrg(singleGroup.id);
-      localStorage.setItem('activeGroup', JSON.stringify(singleGroup));
-      router.push(`/${singleGroup.id}/dashboard`);
+      if (singleGroup) {
+        setSelectedOrg(singleGroup.id);
+        setTimeout(() => {
+          try {
+            localStorage.setItem('activeGroup', JSON.stringify(singleGroup));
+            router.push(`/${singleGroup.id}/dashboard`);
+          } catch (err) {
+            console.error('Error storing group in localStorage:', err);
+          }
+        }, 0);
+      }
     }
-  }, [loading, user, router]);
+  }, [loading, user?.groups, router]);
 
   const handleConfirm = () => {
     const selectedGroup = user?.groups.find((g) => g.id === selectedOrg);
     if (selectedGroup) {
-      localStorage.setItem('activeGroup', JSON.stringify(selectedGroup));
-      router.push(`/${selectedOrg}/dashboard`);
+      try {
+        localStorage.setItem('activeGroup', JSON.stringify(selectedGroup));
+        router.push(`/${selectedOrg}/dashboard`);
+      } catch (err) {
+        console.error('Failed to write to localStorage:', err);
+      }
     }
   };
 
@@ -69,7 +80,7 @@ export default function GroupPickerPage() {
       <Button
         onClick={handleConfirm}
         disabled={!selectedOrg} // Disable button if no selection
-        variant="default"
+        className="mt-4"
       >
         Confirm Selection
       </Button>
