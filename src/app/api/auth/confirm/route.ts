@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get('token_hash');
   const type = searchParams.get('type') as EmailOtpType | null;
-  const next = searchParams.get('next') ?? '/';
+  const redirectUrl = searchParams.get('redirectUrl') ?? '/';
 
   if (token_hash && type) {
     const supabase = await createSupabaseClient();
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     });
     if (!error) {
       // redirect user to specified redirect URL or root of app
-      redirect(next);
+      redirect(redirectUrl);
     }
   }
 
