@@ -30,6 +30,11 @@ const pageNavItems: Record<string, NavItem[]> = {
       icon: <LayoutDashboard size={20} />,
       route: '/[groupId]/dashboard',
     },
+    {
+      name: 'History',
+      icon: <Receipt size={20} />,
+      route: '/[groupId]/cashier/history-cashier',
+    },
   ],
   '/cashier': [
     {
@@ -58,6 +63,11 @@ const pageNavItems: Record<string, NavItem[]> = {
       name: 'Back to Cashier',
       icon: <DollarSign size={20} />,
       route: '/[groupId]/cashier',
+    },
+    {
+      name: 'Back to Combined View',
+      icon: <DollarSign size={20} />,
+      route: '/[groupId]/cashier-combined',
     },
   ],
   '/employee': [

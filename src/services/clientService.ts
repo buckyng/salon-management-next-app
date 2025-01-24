@@ -1,4 +1,5 @@
 import { Tables } from '@/lib/database.types';
+import { EnrichedCheckIn } from '@/lib/types';
 
 type Client = Tables<'clients'>;
 
@@ -60,4 +61,20 @@ export const checkInClient = async ({
   if (!response.ok) {
     throw new Error('Failed to check in client.');
   }
+};
+
+export const fetchCheckInsToday = async (
+  groupId: string
+): Promise<EnrichedCheckIn[]> => {
+  const response = await fetch(`/api/check-ins/fetch-today?groupId=${groupId}`);
+  if (!response.ok) throw new Error('Failed to fetch check-ins');
+  return await response.json();
+};
+
+export const fetchClientById = async (groupId: string, clientId: string) => {
+  const response = await fetch(
+    `/api/clients/fetch-by-id?groupId=${groupId}&clientId=${clientId}`
+  );
+  if (!response.ok) throw new Error('Failed to fetch client');
+  return await response.json();
 };
