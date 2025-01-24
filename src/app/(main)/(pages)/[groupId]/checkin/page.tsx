@@ -6,42 +6,11 @@ import { Switch } from '@/components/ui/switch';
 import { ColumnDef } from '@tanstack/react-table';
 
 import { useGroup } from '@/context/GroupContext';
-import { Tables } from '@/lib/database.types';
 import { DataTable } from '@/components/ui/data-table';
 import { formatToLocalTime } from '@/lib/utils/dateUtils';
 import subscribeToCheckIns from '@/lib/supabase/services/realtimeCheckins';
-
-type CheckIn = Tables<'check_ins'>;
-
-type EnrichedCheckIn = CheckIn & {
-  clientName: string;
-  visitsBeforeToday: number;
-  lastVisitRating: number | null;
-  clients: {
-    first_name: string;
-    last_name: string;
-    client_group_details: {
-      number_of_visits: number;
-      last_visit_rating: number | null;
-    }[];
-  };
-};
-
-const fetchCheckInsToday = async (
-  groupId: string
-): Promise<EnrichedCheckIn[]> => {
-  const response = await fetch(`/api/check-ins/fetch-today?groupId=${groupId}`);
-  if (!response.ok) throw new Error('Failed to fetch check-ins');
-  return await response.json();
-};
-
-const fetchClientById = async (groupId: string, clientId: string) => {
-  const response = await fetch(
-    `/api/clients/fetch-by-id?groupId=${groupId}&clientId=${clientId}`
-  );
-  if (!response.ok) throw new Error('Failed to fetch client');
-  return await response.json();
-};
+import { CheckIn, EnrichedCheckIn } from '@/lib/types';
+import { fetchCheckInsToday, fetchClientById } from '@/services/clientService';
 
 const updateCheckInServiceStatus = async (
   groupId: string,
@@ -101,19 +70,23 @@ const CheckInManagementPage = () => {
         const checkInsData = await fetchCheckInsToday(activeGroup.id);
 
         // Map and enrich check-ins with client data
-        const enrichedCheckIns = checkInsData.map((checkIn) => {
-          const clientData = checkIn.clients || {};
-          const clientGroupDetails = clientData.client_group_details?.[0] || {};
+        const enrichedCheckIns = checkInsData.map(
+          (checkIn: EnrichedCheckIn) => {
+            const clientData = checkIn.clients || {};
+            const clientGroupDetails =
+              clientData.client_group_details?.[0] || {};
 
-          return {
-            ...checkIn,
-            clientName: `${clientData.first_name || 'Unknown'} ${
-              clientData.last_name || 'Client'
-            }`.trim(),
-            visitsBeforeToday: clientGroupDetails.number_of_visits || 0,
-            lastVisitRating: clientGroupDetails.last_visit_rating || null,
-          };
-        });
+            return {
+              ...checkIn,
+              clientName: `${clientData.first_name || 'Unknown'} ${
+                clientData.last_name || 'Client'
+              }`.trim(),
+              clientPhone: clientData.phone,
+              visitsBeforeToday: clientGroupDetails.number_of_visits || 0,
+              lastVisitRating: clientGroupDetails.last_visit_rating || null,
+            };
+          }
+        );
 
         // Sort enriched data
         const sortedCheckIns = enrichedCheckIns.sort((a, b) => {
@@ -151,6 +124,7 @@ const CheckInManagementPage = () => {
             clients: {
               first_name: clientData.first_name,
               last_name: clientData.last_name,
+              phone: clientData.phone,
               client_group_details: [
                 {
                   number_of_visits: clientData.number_of_visits || 0,
@@ -194,12 +168,12 @@ const CheckInManagementPage = () => {
     },
     { header: 'Client Name', accessorKey: 'clientName' },
     {
-      header: 'Visits Before Today',
-      accessorKey: 'visitsBeforeToday',
+      header: 'Phone',
+      accessorKey: 'clientPhone',
     },
     {
-      header: 'Last Visit Rating',
-      accessorKey: 'lastVisitRating',
+      header: 'Visits Before Today',
+      accessorKey: 'visitsBeforeToday',
     },
     {
       header: 'In Service?',
