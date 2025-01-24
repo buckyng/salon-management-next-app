@@ -39,7 +39,7 @@ const RoleBasedActions: React.FC<RoleBasedActionsProps> = ({
 }) => {
   const router = useRouter();
 
-  // Wrap accessibleRoutes in useMemo
+  // Memoized accessible routes
   const accessibleRoutes = useMemo(() => {
     return (
       rolePermissions[activeRole as Role]?.map((permission) => ({
@@ -56,24 +56,43 @@ const RoleBasedActions: React.FC<RoleBasedActionsProps> = ({
   }, [accessibleRoutes, router]);
 
   if (!activeRole)
-    return <p>No role assigned. Please contact your administrator.</p>;
+    return (
+      <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
+        <p className="text-lg text-gray-600">
+          No role assigned. Please contact your administrator.
+        </p>
+      </div>
+    );
 
   if (!activeOrgId)
-    return <p>No organization selected. Please select an organization.</p>;
+    return (
+      <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
+        <p className="text-lg text-gray-600">
+          No organization selected. Please select an organization.
+        </p>
+      </div>
+    );
 
   if (!accessibleRoutes || accessibleRoutes.length === 0) {
     console.warn(`No accessible routes found for role: ${activeRole}`);
-    return <p>No accessible actions available for this role.</p>;
+    return (
+      <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
+        <p className="text-lg text-gray-600">
+          No accessible actions available for this role.
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-4 bg-white rounded-lg shadow">
+      <h2 className="text-xl font-semibold text-gray-800">Available Actions</h2>
+      <div className="flex flex-col gap-2">
         {accessibleRoutes.map(({ name, route }) => (
           <Button
             key={route}
             onClick={() => router.push(route)}
-            className="p-2 border rounded hover:bg-gray-100"
+            className="py-3 px-4 text-left font-medium text-white rounded hover:bg-indigo-700 focus:ring focus:ring-indigo-400"
           >
             {name}
           </Button>

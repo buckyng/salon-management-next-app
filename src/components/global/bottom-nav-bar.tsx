@@ -6,7 +6,6 @@ import {
   Home,
   DollarSign,
   BarChart,
-  CheckCircle,
   User,
   Notebook,
   Receipt,
@@ -35,7 +34,7 @@ const pageNavItems: Record<string, NavItem[]> = {
   '/cashier': [
     {
       name: 'Back to Dashboard',
-      icon: <DollarSign size={20} />,
+      icon: <LayoutDashboard size={20} />,
       route: '/[groupId]/dashboard',
     },
     {
@@ -92,14 +91,9 @@ const pageNavItems: Record<string, NavItem[]> = {
   ],
   '/checkin': [
     {
-      name: 'Cashier',
-      icon: <DollarSign size={20} />,
-      route: '/[groupId]/cashier',
-    },
-    {
-      name: 'Check-Ins',
-      icon: <CheckCircle size={20} />,
-      route: '/[groupId]/checkin',
+      name: 'Back to Dashboard',
+      icon: <LayoutDashboard size={20} />,
+      route: '/[groupId]/dashboard',
     },
   ],
 };
@@ -129,20 +123,20 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeGroupId }) => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-black border-t border-gray-200 dark:border-gray-700">
-      <div className="flex justify-around py-2">
+    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+      <div className="flex justify-around items-center py-3">
         {navItems.map((item) => (
           <button
             key={item.name}
             onClick={() => router.push(item.route)}
             className={cn(
-              'flex flex-col items-center px-3 py-1 text-sm',
+              'flex flex-col items-center px-4 py-2 text-sm font-medium transition-all',
               pathname === item.route
-                ? 'text-blue-500'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
                 : 'text-gray-600 dark:text-gray-300 hover:text-blue-500'
             )}
           >
-            {item.icon}
+            <div className="w-6 h-6">{item.icon}</div>
             <span className="mt-1">{item.name}</span>
           </button>
         ))}

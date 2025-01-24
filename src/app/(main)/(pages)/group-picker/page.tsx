@@ -29,18 +29,35 @@ export default function GroupPickerPage() {
     }
   };
 
-  if (loading) return <p>Loading groups...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <p className="text-lg text-gray-500">Loading groups...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <p className="text-lg text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   if (!user || user.groups.length === 0) {
     return (
-      <p className="text-lg text-gray-600">You are not part of any groups.</p>
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <p className="text-lg text-gray-600">You are not part of any groups.</p>
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center h-screen space-y-6">
-      <h1 className="text-2xl font-bold">Select a Group</h1>
+    <div className="flex flex-col items-center justify-center h-screen px-4 bg-gray-50">
+      <h1 className="text-3xl font-extrabold text-gray-800 mb-8 text-center">
+        Select a Group
+      </h1>
       <CustomOrganizationPicker
         organizations={user.groups.map((group) => ({
           id: group.id,

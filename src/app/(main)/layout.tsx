@@ -9,11 +9,16 @@ type Props = { children: React.ReactNode };
 const Layout = (props: Props) => {
   return (
     <UserProvider>
-      <div className="flex overflow-hidden h-screen">
-        <div className="w-full">
+      <div className="flex flex-col h-screen">
+        {/* Fixed InfoBar */}
+        <header className="sticky top-0 z-10 bg-white shadow-md dark:bg-gray-900">
           <InfoBar />
+        </header>
+
+        {/* Scrollable Content */}
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800">
           {props.children}
-        </div>
+        </main>
       </div>
     </UserProvider>
   );

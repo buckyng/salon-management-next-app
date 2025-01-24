@@ -252,18 +252,18 @@ const CashierPage: React.FC = () => {
     },
   ];
 
-  if (loading) {
-    return <p className="text-center">Loading sales...</p>;
-  }
-
-  if (isEodLoading) {
-    return <p className="text-center mt-4">Loading...</p>;
+  if (loading || isEodLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <p className="text-lg text-gray-600">Loading...</p>
+      </div>
+    );
   }
 
   if (eodExists) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-        <p className="text-2xl font-bold text-red-500 text-center">
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <p className="text-lg font-bold text-red-500 text-center">
           An End-of-Day Report for {currentDate} has already been submitted.
         </p>
       </div>
@@ -271,24 +271,25 @@ const CashierPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold text-center">
         Cashier - {activeGroup?.name || 'Loading...'}
       </h1>
-      <p className="text-center text-gray-600">Date: {currentDate}</p>
-
+      <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        Date: {currentDate}
+      </p>
       {sales.length === 0 ? (
-        <div className="p-4 text-center text-gray-500 bg-gray-100 rounded-md">
+        <div className="text-center text-gray-500 bg-gray-100 dark:bg-gray-700 p-4 rounded-md">
           <p>No sales to display for today.</p>
         </div>
       ) : (
         sales.map((group) => (
           <div
             key={group.comboNum || 'no-combo'}
-            className="mb-6 border p-4 rounded-md"
+            className="bg-white dark:bg-gray-700 border rounded-md p-4 shadow"
           >
             <div className="flex flex-wrap items-center justify-between">
-              <h2 className="text-lg font-bold">
+              <h2 className="text-lg font-semibold mb-2">
                 Combo {group.comboNum || 'No Combo'} - Total: $
                 {group.totalAmount.toFixed(2)}
               </h2>
@@ -313,7 +314,7 @@ const CashierPage: React.FC = () => {
 
       {isEditing && (
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <DialogContent>
+          <DialogContent className="fixed inset-x-0 bottom-0 sm:inset-auto sm:relative sm:bottom-auto sm:translate-x-0 sm:translate-y-0 max-h-full overflow-auto rounded-t-lg sm:rounded-lg">
             <DialogHeader>
               <DialogTitle>Edit Sale Amount</DialogTitle>
               <DialogDescription>

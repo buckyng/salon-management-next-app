@@ -5,8 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Tables } from '@/lib/database.types';
 import { Loader2 } from 'lucide-react';
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 
 interface NewClientFormProps {
@@ -25,7 +24,17 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
   const [lastName, setLastName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false); // Loading state
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const formRef = useRef<HTMLDivElement>(null);
+
+  // Scroll input into view on focus
+  const handleFocus = (id: string) => {
+    const element = document.getElementById(id);
+    if (element && formRef.current) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
@@ -37,7 +46,6 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
       return;
     }
 
-    // Validate phone number length
     if (phoneNumber.length !== 10 || !/^\d{10}$/.test(phoneNumber)) {
       toast.error('Phone number must be exactly 10 digits.');
       return;
@@ -48,11 +56,8 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
       return;
     }
 
-    // Start loading state
     setLoading(true);
-
     try {
-      // Prepare client data
       const clientData: Partial<Tables<'clients'>> = {
         first_name: firstName,
         last_name: lastName,
@@ -60,15 +65,11 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
         phone: phoneNumber,
       };
 
-      // Prepare group-specific details
-      const groupDetails = {
-        agree_to_terms: agreeToTerms,
-      };
+      const groupDetails = { agree_to_terms: agreeToTerms };
 
-      // Pass data to the onSave handler
       await onSave(clientData, groupDetails);
 
-      // Reset form state
+      // Reset form
       setFirstName('');
       setLastName('');
       setEmail('');
@@ -77,22 +78,24 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
       console.error('Error saving client:', error);
       toast.error('Failed to save client. Please try again.');
     } finally {
-      // End loading state
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto px-6 py-10 sm:px-8 lg:px-10">
+    <div
+      className="container mx-auto px-6 py-10 sm:px-8 lg:px-10 overflow-y-auto"
+      ref={formRef}
+    >
       <form
         onSubmit={handleSubmit}
-        className="max-w-md mx-auto space-y-6 bg-white p-6 shadow-md rounded-lg"
+        className="max-w-md mx-auto space-y-6 bg-white dark:bg-gray-800 p-6 shadow-md rounded-lg"
       >
         {/* First Name Input */}
         <div>
           <label
             htmlFor="first_name"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             First Name
           </label>
@@ -101,10 +104,11 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
             type="text"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
+            onFocus={() => handleFocus('first_name')}
             placeholder="Enter first name"
             required
-            disabled={loading} // Disable input when loading
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full"
           />
         </div>
 
@@ -112,7 +116,7 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
         <div>
           <label
             htmlFor="last_name"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Last Name
           </label>
@@ -121,10 +125,11 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
             type="text"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
+            onFocus={() => handleFocus('last_name')}
             placeholder="Enter last name"
             required
-            disabled={loading} // Disable input when loading
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full"
           />
         </div>
 
@@ -132,7 +137,7 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Email
           </label>
@@ -141,9 +146,10 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onFocus={() => handleFocus('email')}
             placeholder="Enter client email"
-            disabled={loading} // Disable input when loading
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full"
           />
         </div>
 
@@ -151,7 +157,7 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
         <div>
           <label
             htmlFor="phone"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Phone
           </label>
@@ -160,7 +166,7 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
             type="tel"
             value={phoneNumber}
             disabled
-            className="w-full p-3 border border-gray-300 rounded-lg cursor-not-allowed bg-gray-100 text-gray-500"
+            className="w-full cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-500"
           />
         </div>
 
@@ -170,18 +176,18 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
             id="agreeToPolicy"
             checked={agreeToTerms}
             onCheckedChange={(checked) => setAgreeToTerms(!!checked)}
-            disabled={loading} // Disable checkbox when loading
-            className="h-5 w-5 text-blue-500 focus:ring-2 focus:ring-blue-500 rounded-md"
+            disabled={loading}
           />
           <div>
             <label
               htmlFor="agreeToPolicy"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Accept terms and conditions
             </label>
-            <p className="text-sm text-gray-500">
-              You agree to our Terms of Service and Privacy Policy.
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              By checking this box, you agree to our Terms of Service and
+              Privacy Policy.
             </p>
           </div>
         </div>
@@ -189,14 +195,14 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
         {/* Submit Button */}
         <Button
           type="submit"
-          className={`w-full py-3 font-semibold text-white rounded-lg ${
+          className={`w-full py-3 font-semibold rounded-md ${
             loading
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-500'
+              : 'hover:bg-blue-600 text-white'
           }`}
           disabled={loading}
         >
-          {loading ? <Loader2 /> : 'Check In'}
+          {loading ? <Loader2 className="animate-spin" /> : 'Check In'}
         </Button>
       </form>
     </div>
