@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       const { data: newUser, error: newUserError } =
         await supabaseAdmin.auth.admin.createUser({
           email,
-          password: process.env.TEMP_PASSWORD, // Use a temporary password
+          password: process.env.TEMP_PASSWORD || 'Temp@12345', // Use a temporary password
           email_confirm: !isDevelopment,
         });
 
