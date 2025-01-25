@@ -12,13 +12,10 @@ import {
 import EditProfileDialog from './EditProfileDialog';
 import ChangePasswordDialog from './ChangePasswordDialog';
 import { useUser } from '@/context/UserContext';
-import {
-  changeUserPassword,
-  logoutUser,
-  updateUserProfile,
-} from '@/services/authService';
+import { changeUserPassword, logoutUser } from '@/services/authService';
 import { toast } from 'react-toastify';
 import { uploadImage } from '@/lib/supabase/storage/client';
+import { updateUserDetails } from '@/lib/supabase/helpers/user';
 
 const UserProfileMenu: React.FC = () => {
   const router = useRouter();
@@ -33,12 +30,17 @@ const UserProfileMenu: React.FC = () => {
     try {
       let uploadedAvatarUrl = user?.avatar_url || '';
 
+      if (!user) {
+        console.error('userId is required');
+        return;
+      }
+
       if (avatarFile) {
         const { imageUrl, error } = await uploadImage({
           file: avatarFile,
           bucket: 'avatars',
           folder: 'profile',
-          userId: user?.id || '',
+          userId: user.id,
         });
 
         if (error) {
@@ -47,8 +49,18 @@ const UserProfileMenu: React.FC = () => {
         uploadedAvatarUrl = imageUrl;
       }
 
-      await updateUserProfile({ name, avatarUrl: uploadedAvatarUrl });
-      updateUser({ name, avatar_url: uploadedAvatarUrl });
+      const updateError = await updateUserDetails({
+        userId: user.id,
+        name,
+        avatarUrl: uploadedAvatarUrl,
+      });
+      if (updateError) throw updateError;
+
+      // Dynamically update the UserContext
+      updateUser({
+        name,
+        avatar_url: uploadedAvatarUrl,
+      });
       toast.success('Profile updated successfully!');
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -104,7 +116,6 @@ const UserProfileMenu: React.FC = () => {
         initialName={user?.name || ''}
         initialAvatarUrl={user?.avatar_url || ''}
       />
-      ;
       <ChangePasswordDialog
         isOpen={isChangingPassword}
         onClose={() => setIsChangingPassword(false)}
