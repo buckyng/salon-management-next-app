@@ -1,16 +1,13 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { createSupabaseClient } from '@/lib/supabase/server';
 import { z } from 'zod';
-import { adminAuthClient } from '@/lib/supabase/admin';
-
-const isDevelopment = process.env.NODE_ENV === 'development';
+import { createSupabaseClient } from '@/lib/supabase/server';
 
 // Schema for validating the request body
 const inviteSchema = z.object({
   email: z.string().email(),
-  groupId: z.string().uuid(), // Ensure valid UUID for the organization ID
+  groupId: z.string().uuid(), // Ensure valid UUID for the group ID
 });
 
 export async function POST(request: Request) {
@@ -44,24 +41,40 @@ export async function POST(request: Request) {
 
     let userId = existingUser?.id;
 
-    // If user doesn't exist, create a new user
+    // If the user does not exist, call the edge function to create a new user
     if (!userId) {
-      const { data: newUser, error: newUserError } =
-        await adminAuthClient.createUser({
-          email,
-          password: process.env.TEMP_PASSWORD || 'Temp@12345', // Use a temporary password
-          email_confirm: !isDevelopment,
-        });
+      const edgeFunctionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/create-user`;
 
-      if (newUserError) {
-        console.error('Error creating user:', newUserError);
+      const response = await fetch(edgeFunctionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`, // Securely use service role key
+        },
+        body: JSON.stringify({ email, password: process.env.TEMP_PASSWORD }), 
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error from create-user edge function:', errorData);
         return NextResponse.json(
-          { error: newUserError.message },
+          { error: errorData.message || 'Failed to create user' },
           { status: 500 }
         );
       }
 
-      userId = newUser.user?.id;
+      const result = await response.json();
+
+      console.log('Result from create-user function:', result);
+      userId = result.userId;
+
+      if (!userId) {
+        console.error('No userId returned from create-user function');
+        return NextResponse.json(
+          { error: 'Failed to retrieve user ID from create-user function' },
+          { status: 500 }
+        );
+      }
     }
 
     // Add the user to the organization
