@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase/server';
 import { z } from 'zod';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { adminAuthClient } from '@/lib/supabase/admin';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     // If user doesn't exist, create a new user
     if (!userId) {
       const { data: newUser, error: newUserError } =
-        await supabaseAdmin.auth.admin.createUser({
+        await adminAuthClient.createUser({
           email,
           password: process.env.TEMP_PASSWORD || 'Temp@12345', // Use a temporary password
           email_confirm: !isDevelopment,
