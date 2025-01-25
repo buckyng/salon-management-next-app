@@ -11,10 +11,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { toast } from 'react-toastify';
-import { updatePassword } from '@/lib/supabase/servers/auth';
 import { Loader2 } from 'lucide-react';
+import { resetPassword } from '@/lib/supabase/servers/auth';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const ResetPasswordPage = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isPending, setIsPending] = useState(false);
@@ -33,12 +36,16 @@ const ResetPasswordPage = () => {
     setIsPending(true);
 
     try {
-      const { errorMessage } = await updatePassword(newPassword);
+      const { errorMessage } = await resetPassword(
+        newPassword,
+        searchParams.get('code') as string
+      );
 
       if (errorMessage) {
         toast.error(errorMessage);
       } else {
         toast.success('Password updated successfully!');
+        router.push('/');
         setNewPassword('');
         setConfirmPassword('');
       }
