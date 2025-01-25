@@ -41,9 +41,7 @@ export async function middleware(request: NextRequest) {
     !user &&
     !request.nextUrl.pathname.includes('/login') &&
     !request.nextUrl.pathname.includes('/reset-password') &&
-    !request.nextUrl.pathname.includes('/forgot-password') &&
-    !request.nextUrl.pathname.includes('/accept-invite') &&
-    !request.nextUrl.pathname.includes('/register')
+    !request.nextUrl.pathname.includes('/forgot-password')
   ) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
