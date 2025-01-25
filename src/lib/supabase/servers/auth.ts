@@ -44,10 +44,17 @@ export async function sendPasswordResetEmail(
   return {};
 }
 
-export async function updatePassword(
-  newPassword: string
+export async function resetPassword(
+  newPassword: string,
+  code: string
 ): Promise<{ errorMessage?: string }> {
   const supabase = await createSupabaseClient();
+
+  const { error: CodeError } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (CodeError) {
+    return { errorMessage: CodeError.message };
+  }
 
   const { error } = await supabase.auth.updateUser({
     password: newPassword,

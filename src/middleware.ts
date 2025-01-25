@@ -3,15 +3,7 @@ import { createSupabaseClient } from './lib/supabase/server';
 
 // Define public routes
 const isPublicRoute = (url: string) => {
-  const publicRoutes = [
-    '/sign-in',
-    '/forgot-password',
-    '/reset-password',
-    '/',
-    '/manifest.json',
-    '/favicon.ico',
-    '/icons',
-  ];
+  const publicRoutes = ['/', '/manifest.json', '/favicon.ico', '/icons'];
 
   return publicRoutes.some((route) => url.startsWith(route));
 };
@@ -42,6 +34,18 @@ export async function middleware(request: NextRequest) {
   if (userError) {
     console.error('Error fetching user data:', userError.message);
     return NextResponse.redirect(new URL('/sign-in', request.url));
+  }
+
+  //skip authentication for reset password
+  if (
+    !user &&
+    !request.nextUrl.pathname.includes('/login') &&
+    !request.nextUrl.pathname.includes('/reset-password') &&
+    !request.nextUrl.pathname.includes('/forgot-password')
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
   }
 
   const groups = user?.user.app_metadata.groups || {};
