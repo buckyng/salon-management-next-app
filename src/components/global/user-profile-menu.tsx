@@ -18,6 +18,7 @@ import {
   updateUserProfile,
 } from '@/services/authService';
 import { toast } from 'react-toastify';
+import { uploadImage } from '@/lib/supabase/storage/client';
 
 const UserProfileMenu: React.FC = () => {
   const router = useRouter();
@@ -28,9 +29,31 @@ const UserProfileMenu: React.FC = () => {
 
   if (loading) return null;
 
-  const handleProfileSave = async (name: string) => {
-    await updateUserProfile({ name, avatarUrl: user?.avatar_url || '' });
-    updateUser({ name });
+  const handleProfileSave = async (name: string, avatarFile: File | null) => {
+    try {
+      let uploadedAvatarUrl = user?.avatar_url || '';
+
+      if (avatarFile) {
+        const { imageUrl, error } = await uploadImage({
+          file: avatarFile,
+          bucket: 'avatars',
+          folder: 'profile',
+          userId: user?.id || '',
+        });
+
+        if (error) {
+          throw new Error('Error uploading avatar');
+        }
+        uploadedAvatarUrl = imageUrl;
+      }
+
+      await updateUserProfile({ name, avatarUrl: uploadedAvatarUrl });
+      updateUser({ name, avatar_url: uploadedAvatarUrl });
+      toast.success('Profile updated successfully!');
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      toast.error('Failed to update profile. Please try again.');
+    }
   };
 
   const handlePasswordChange = async (
@@ -74,14 +97,14 @@ const UserProfileMenu: React.FC = () => {
           <DropdownMenuItem onClick={handleLogout}>Log Out</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
       <EditProfileDialog
         isOpen={isEditingProfile}
         onClose={() => setIsEditingProfile(false)}
         onSave={handleProfileSave}
         initialName={user?.name || ''}
+        initialAvatarUrl={user?.avatar_url || ''}
       />
-
+      ;
       <ChangePasswordDialog
         isOpen={isChangingPassword}
         onClose={() => setIsChangingPassword(false)}
