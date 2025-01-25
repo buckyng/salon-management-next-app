@@ -28,14 +28,16 @@ const CheckInPage = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Left Section */}
-      <div className="hidden lg:flex w-3/8  items-center justify-center">
-        <OrganizationLogo
-          logoSrc={activeGroup?.logo_url ?? ''}
-          altText={`${activeGroup?.name || 'Organization'} Logo`}
-        />
-        <h1 className="text-4xl font-bold text-center">
-          Welcome to {activeGroup?.name || 'Our Salon'}
-        </h1>
+      <div className="hidden lg:flex flex-col w-3/8 items-center justify-center space-y-4 bg-gray-50 dark:bg-gray-800 p-6">
+        <div className="flex flex-col items-center space-y-6">
+          <OrganizationLogo
+            logoSrc={activeGroup?.logo_url ?? ''}
+            altText={`${activeGroup?.name || 'Organization'} Logo`}
+          />
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white text-center">
+            Welcome to {activeGroup?.name || 'Our Salon'}
+          </h1>
+        </div>
       </div>
 
       {/* Right Section */}
@@ -47,7 +49,7 @@ const CheckInPage = () => {
             <>
               {step === 1 && (
                 <>
-                  <h2 className="text-xl font-semibold text-center mb-4">
+                  <h2 className="text-xl font-semibold text-center mb-4 text-gray-800 dark:text-gray-100">
                     Please enter your Phone Number
                   </h2>
                   <Input
@@ -65,7 +67,6 @@ const CheckInPage = () => {
                     }}
                     maxLength={10} // Extra safeguard for 10 digits
                   />
-
                   <Button
                     onClick={handlePhoneSubmit}
                     className="w-full"
