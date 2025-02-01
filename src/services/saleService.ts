@@ -49,7 +49,7 @@ export const groupSales = (salesData: EnrichedSales[]) => {
     if (comboGroup) {
       // Add the sale to the existing group
       comboGroup.sales.push(sale);
-      comboGroup.totalAmount += sale.amount;
+      comboGroup.totalAmount! += sale.amount!;
     } else {
       // Create a new group for the combo
       acc.push({

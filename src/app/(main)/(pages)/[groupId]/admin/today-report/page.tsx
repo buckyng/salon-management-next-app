@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DataTable } from '@/components/ui/data-table';
-import { EmployeeSummary, EodReport } from '@/lib/types';
+import { EmployeeSummary, EodReport, SaleData } from '@/lib/types';
 import {
   checkEodReportExists,
   fetchEodReport,
@@ -10,18 +10,22 @@ import {
 } from '@/services/reportService';
 import { ColumnDef } from '@tanstack/react-table';
 import BackButton from '@/components/global/BackButton';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { useGroup } from '@/context/GroupContext';
-import { EmployeeSalesPopover } from '../reports/[date]/_components/EmployeeSalesPopover';
-import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
+import { getCurrentLocalDate } from '@/lib/utils/dateUtils';
+
+import { Separator } from '@/components/ui/separator';
+import { formatCurrency } from '@/lib/utils/formatUtils';
+import ReportSummary from '@/components/global/ReportSummary';
+import LoadingSpinner from '@/components/global/LoadingSpinner';
+import EmployeeSalesDrawer from '@/components/global/EmployeeSalesDrawer';
+import { Button } from '@/components/ui/button';
 
 const TodayReport = () => {
   const [employeeSummaries, setEmployeeSummaries] = useState<EmployeeSummary[]>(
     []
   );
-  const [date, setDate] = useState('');
+  const date = getCurrentLocalDate();
   const [eodExists, setEodExists] = useState(false);
   const [eodData, setEodData] = useState<EodReport>();
   const [checked, setChecked] = useState(false);
@@ -29,12 +33,12 @@ const TodayReport = () => {
   const [loading, setLoading] = useState(false);
   const { activeGroup } = useGroup();
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDate(e.target.value);
-    setChecked(false);
-  };
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
+  const [selectedSales, setSelectedSales] = useState<SaleData[] | null>(null);
 
-  const handleFetchReport = async () => {
+  const handleFetchReport = useCallback(async () => {
     setLoading(true);
     if (!activeGroup?.id || !date) {
       return;
@@ -47,7 +51,6 @@ const TodayReport = () => {
       setEodExists(exists);
 
       if (exists) {
-        //fetch eod report
         const eodData = await fetchEodReport(activeGroup.id || '', date);
         setEodData(eodData);
       }
@@ -69,6 +72,19 @@ const TodayReport = () => {
     } finally {
       setLoading(false);
     }
+  }, [activeGroup?.id, date]);
+
+  // Fetch report when the component mounts
+  useEffect(() => {
+    if (activeGroup?.id) {
+      handleFetchReport();
+    }
+  }, [activeGroup?.id, handleFetchReport]);
+
+  const handleOpenDrawer = (employeeName: string, sales: SaleData[]) => {
+    setSelectedEmployee(employeeName);
+    setSelectedSales(sales);
+    setIsDrawerOpen(true);
   };
 
   const columns: ColumnDef<EmployeeSummary>[] = [
@@ -77,73 +93,61 @@ const TodayReport = () => {
     {
       header: 'Details',
       cell: ({ row }) => (
-        <EmployeeSalesPopover
-          employeeName={row.original.employeeName}
-          sales={row.original.sales}
-        />
+        <Button
+          onClick={() =>
+            handleOpenDrawer(
+              row.original.employeeName,
+              row.original.sales || []
+            )
+          }
+        >
+          View Sales
+        </Button>
       ),
     },
   ];
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <LoadingSpinner fullScreen />;
   }
 
   return (
     <div className="container mx-auto mt-6">
       <BackButton />
-      <div className="mt-4">
-        <Label>Select Date</Label>
-        <Input
-          type="date"
-          value={date}
-          onChange={handleDateChange}
-          disabled={loading}
-        />
-        <Button
-          className="mt-4"
-          onClick={handleFetchReport}
-          disabled={!date || loading}
-        >
-          Check Report
-        </Button>
-      </div>
-
       {checked && (
         <div className="mt-6">
           {eodExists ? (
             <div>
               <h1 className="text-2xl font-bold mb-4">Report for {date}</h1>
-              <div className="mt-4">
-                <p>Total Sales: ${eodData?.total_sale}</p>
-                <p>Cash: ${eodData?.cash}</p>
-                <p>Debit: ${eodData?.debit}</p>
-                <p>Other Income: ${eodData?.other_income}</p>
-                <p>Income Note: ${eodData?.income_note}</p>
-                <p>Expense: ${eodData?.expense}</p>
-                <p>Expense Note: ${eodData?.expense_note}</p>
-                <p>Service Discount: ${eodData?.service_discount}</p>
-                <p>Giftcard Buy: ${eodData?.giftcard_buy}</p>
-                <p>Giftcard Redeem: ${eodData?.giftcard_redeem}</p>
-                <p>Result: ${eodData?.result}</p>
-              </div>
+              <ReportSummary report={eodData || null} />
             </div>
           ) : (
             <p>No EOD report found for {date}</p>
           )}
-
+          <Separator className="my-4" />
           {employeeSummaries.length !== 0 ? (
             <div className="mt-4">
-              <h1 className="text-xl font-bold mb-4">
-                Total Sales from employee sales: {totalSale}
+              <h1 className="text-highlight">
+                Total Sales from employee sales: {formatCurrency(totalSale)}
               </h1>
-              <DataTable columns={columns} data={employeeSummaries} />
+              <div className="pb-20">
+                <DataTable columns={columns} data={employeeSummaries} />
+              </div>
             </div>
           ) : (
             <p>No sales data found for {date}</p>
           )}
         </div>
       )}
+
+      {/* Employee Sales Drawer */}
+      <EmployeeSalesDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        employeeName={selectedEmployee || 'Unknown'}
+        selectedDate={date}
+        sales={selectedSales || []}
+      />
     </div>
   );
 };

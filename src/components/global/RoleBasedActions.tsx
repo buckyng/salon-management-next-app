@@ -85,14 +85,14 @@ const RoleBasedActions: React.FC<RoleBasedActionsProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-white rounded-lg shadow">
-      <h2 className="text-xl font-semibold text-gray-800">Available Actions</h2>
+    <div className="flex flex-col gap-4 p-4 rounded-lg shadow">
+      <h2 className="text-xl font-semibold">Available Actions</h2>
       <div className="flex flex-col gap-2">
         {accessibleRoutes.map(({ name, route }) => (
           <Button
             key={route}
             onClick={() => router.push(route)}
-            className="py-3 px-4 text-left font-medium text-white rounded hover:bg-indigo-700 focus:ring focus:ring-indigo-400"
+            className="py-3 px-4 text-left rounded hover:bg-indigo-700 focus:ring focus:ring-indigo-400"
           >
             {name}
           </Button>

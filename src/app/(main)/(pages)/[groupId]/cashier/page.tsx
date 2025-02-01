@@ -23,7 +23,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { useCheckEodReport } from '@/lib/hooks/useCheckEodReport';
+import { useEodReport } from '@/context/EodReportContext';
+import LoadingSpinner from '@/components/global/LoadingSpinner';
+import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils/formatUtils';
+import { Label } from '@/components/ui/label';
 
 const CashierPage: React.FC = () => {
   const { activeGroup } = useGroup();
@@ -31,15 +35,19 @@ const CashierPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingSale, setEditingSale] = useState<SaleData | null>(null);
   const [newAmount, setNewAmount] = useState<string>('');
+  const [newComboNum, setNewComboNum] = useState<string>('');
 
   const [sales, setSales] = useState<GroupedSale[]>([]); // Properly typed state
   const [loading, setLoading] = useState<boolean>(false); // Properly typed state
   const currentDate = getCurrentLocalDate();
 
-  const { eodExists, isEodLoading } = useCheckEodReport({
-    groupId: activeGroup?.id || null,
-    date: currentDate,
-  });
+  const { eodExists, checkAndSetEodExists } = useEodReport();
+
+  useEffect(() => {
+    if (activeGroup?.id) {
+      checkAndSetEodExists(activeGroup.id, currentDate);
+    }
+  }, [activeGroup, currentDate, checkAndSetEodExists]);
 
   useEffect(() => {
     if (!activeGroup) return;
@@ -55,7 +63,14 @@ const CashierPage: React.FC = () => {
           date: currentDate,
           paid: false,
         });
-        const groupedSales = groupSales(initialSales);
+
+        // 🔹 Sort sales from most recent to oldest before grouping
+        const sortedSales = initialSales.sort(
+          (a, b) =>
+            new Date(b.created_at!).getTime() -
+            new Date(a.created_at!).getTime()
+        );
+        const groupedSales = groupSales(sortedSales);
 
         setSales(groupedSales);
       } catch (error) {
@@ -88,8 +103,8 @@ const CashierPage: React.FC = () => {
         // Update the existing group by adding the new sale
         const updatedGroup = {
           ...existingGroup,
-          sales: [...existingGroup.sales, newSale],
-          totalAmount: existingGroup.totalAmount + newSale.amount,
+          sales: [newSale, ...existingGroup.sales],
+          totalAmount: existingGroup.totalAmount! + newSale.amount!,
         };
 
         // Replace the updated group in the list
@@ -99,12 +114,12 @@ const CashierPage: React.FC = () => {
       } else {
         // Create a new group for this comboNum
         return [
-          ...prev,
           {
             comboNum: newSale.combo_num,
             sales: [newSale],
             totalAmount: newSale.amount,
           },
+          ...prev,
         ];
       }
     });
@@ -129,7 +144,7 @@ const CashierPage: React.FC = () => {
                     ...group,
                     sales: updatedSales,
                     totalAmount: updatedSales.reduce(
-                      (total, sale) => total + sale.amount,
+                      (total, sale) => total + sale.amount!,
                       0
                     ),
                   }
@@ -173,44 +188,55 @@ const CashierPage: React.FC = () => {
 
   const handleEditSale = (sale: SaleData) => {
     setEditingSale(sale);
-    setNewAmount(sale.amount.toString());
+    setNewAmount(sale.amount!.toString());
+    setNewComboNum(sale.combo_num?.toString() || '');
     setIsEditing(true); // Open the dialog
   };
 
   const handleSaveAmount = async () => {
     if (!editingSale || !newAmount) return;
 
+    const parsedComboNum =
+      newComboNum.trim() !== '' ? parseInt(newComboNum, 10) : null;
+    const parsedAmount = parseFloat(newAmount);
+
     try {
       await updateSaleStatus({
         saleId: editingSale.id,
         updates: {
-          amount: parseFloat(newAmount),
+          amount: parsedAmount,
+          combo_num: parsedComboNum,
           updated_at: new Date().toISOString(),
         },
       });
 
-      setSales((prev) =>
-        prev.map((group) => {
-          if (group.comboNum === editingSale.combo_num) {
-            return {
-              ...group,
-              sales: group.sales.map((s) =>
-                s.id === editingSale.id
-                  ? { ...s, amount: parseFloat(newAmount) }
-                  : s
-              ),
-              totalAmount: group.sales.reduce(
-                (total, s) =>
-                  s.id === editingSale.id
-                    ? total + parseFloat(newAmount) - s.amount
-                    : total + s.amount,
-                0
-              ),
-            };
-          }
-          return group;
-        })
-      );
+      // 🔹 Find `userName` before updating state
+      const existingSale = sales
+        .flatMap((group) => group.sales)
+        .find((sale) => sale.id === editingSale.id);
+      const userName = existingSale ? existingSale.userName : 'Unknown';
+
+      // 🔹 Create the updated sale object
+      const updatedSale: EnrichedSales = {
+        ...editingSale,
+        amount: parsedAmount,
+        combo_num: parsedComboNum,
+        userName, // ✅ Ensure userName exists
+      };
+
+      // 🔹 Update state using `groupSales`
+      setSales((prevSales) => {
+        // Remove the old sale from previous sales
+        const updatedSales = prevSales
+          .flatMap((group) => group.sales)
+          .filter((s) => s.id !== editingSale.id);
+
+        // Add the updated sale
+        updatedSales.push(updatedSale);
+
+        // Use the helper function to **rebuild the groups correctly**
+        return groupSales(updatedSales);
+      });
 
       toast.success('Sale updated successfully!');
     } catch (error) {
@@ -252,12 +278,8 @@ const CashierPage: React.FC = () => {
     },
   ];
 
-  if (loading || isEodLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <p className="text-lg text-gray-600">Loading...</p>
-      </div>
-    );
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
   }
 
   if (eodExists) {
@@ -271,13 +293,10 @@ const CashierPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6 pb-20">
       <h1 className="text-2xl font-bold text-center">
-        Cashier - {activeGroup?.name || 'Loading...'}
+        {activeGroup?.name || 'Loading...'} - {currentDate}
       </h1>
-      <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-        Date: {currentDate}
-      </p>
       {sales.length === 0 ? (
         <div className="text-center text-gray-500 bg-gray-100 dark:bg-gray-700 p-4 rounded-md">
           <p>No sales to display for today.</p>
@@ -289,9 +308,14 @@ const CashierPage: React.FC = () => {
             className="bg-white dark:bg-gray-700 border rounded-md p-4 shadow"
           >
             <div className="flex flex-wrap items-center justify-between">
-              <h2 className="text-lg font-semibold mb-2">
-                Combo {group.comboNum || 'No Combo'} - Total: $
-                {group.totalAmount.toFixed(2)}
+              <h2
+                className={cn(
+                  'text-lg font-semibold mb-2',
+                  group.comboNum ? 'text-red-500' : ''
+                )}
+              >
+                Combo {group.comboNum || 'No Combo'} - Total:
+                {formatCurrency(group.totalAmount)}
               </h2>
               {group.comboNum && (
                 <Button
@@ -305,8 +329,11 @@ const CashierPage: React.FC = () => {
             </div>
             <DataTable
               columns={columns}
-              data={group.sales}
-              enablePagination={false}
+              data={group.sales.sort(
+                (a, b) =>
+                  new Date(b.created_at!).getTime() -
+                  new Date(a.created_at!).getTime()
+              )}
             />
           </div>
         ))
@@ -324,11 +351,22 @@ const CashierPage: React.FC = () => {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
+              <Label htmlFor="newAmount">New Amount</Label>
               <Input
                 value={newAmount}
                 onChange={(e) => setNewAmount(e.target.value)}
                 type="number"
                 placeholder="Enter new amount"
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-4">
+              <Label htmlFor="newComboNum">New combo Number</Label>
+              <Input
+                value={newComboNum}
+                onChange={(e) => setNewComboNum(e.target.value)}
+                type="number"
+                placeholder="Enter new combo number"
                 className="w-full"
               />
             </div>
