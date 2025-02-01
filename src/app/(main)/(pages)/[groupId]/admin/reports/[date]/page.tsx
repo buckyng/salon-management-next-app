@@ -12,6 +12,7 @@ import ReportSummary from '@/components/global/ReportSummary';
 import LoadingSpinner from '@/components/global/LoadingSpinner';
 import EmployeeSalesDrawer from '@/components/global/EmployeeSalesDrawer';
 import { Button } from '@/components/ui/button';
+import { toast } from 'react-toastify';
 
 const ReportByDatePage = () => {
   const params = useParams();
@@ -33,15 +34,16 @@ const ReportByDatePage = () => {
   const { selectedReport } = useReport();
 
   useEffect(() => {
-    const fetchDetails = async () => {
-      if (!groupId || !date) return;
+    if (!groupId || !date) return;
 
+    const fetchDetails = async () => {
       setLoading(true);
       try {
         const data = await fetchReportDetails(groupId, date);
         setEmployeeSummaries(data);
       } catch (error) {
         console.error('Error fetching report details:', error);
+        toast.error('Failed to fetch employee details.');
       } finally {
         setLoading(false);
       }
@@ -87,7 +89,7 @@ const ReportByDatePage = () => {
   return (
     <div className="container mx-auto mt-6">
       <BackButton />
-      <h1 className="text-2xl font-bold mb-4">Report for {date}</h1>
+      <h2 className="text-2xl font-semibold mb-4">Report for {date}</h2>
       <div className="mt-4 mb-4">
         <ReportSummary report={selectedReport || null} />
       </div>

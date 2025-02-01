@@ -156,3 +156,22 @@ export async function fetchEodReport(groupId: string, date: string) {
     throw error;
   }
 }
+
+
+export const fetchExportData = async (
+  groupId: string,
+  startDate: string,
+  endDate: string
+) => {
+  const apiBaseUrl ='http://localhost:3000'; // Fallback for local dev
+
+  const queryParams = new URLSearchParams({ groupId, startDate, endDate });
+
+  const res = await fetch(`${apiBaseUrl}/api/reports/owner?${queryParams.toString()}`);
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch export data');
+  }
+
+  return res.json();
+};
