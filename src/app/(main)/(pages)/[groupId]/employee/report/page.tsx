@@ -6,44 +6,46 @@ import { useUser } from '@/context/UserContext';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { ColumnDef } from '@tanstack/react-table';
-import { formatToLocalTime } from '@/lib/utils/dateUtils';
-import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
 import { fetchEmployeeReport, fetchSalesByUser } from '@/services/saleService';
 import { Loader2 } from 'lucide-react';
+import DateRangePicker from '@/components/ui/DateRangePicker';
+import { DateRange } from 'react-day-picker';
+import { formatCurrency } from '@/lib/utils/formatUtils';
+import EmployeeSalesDrawer from '@/components/global/EmployeeSalesDrawer';
+import { SaleData } from '@/lib/types';
 
 type EmployeeReport = {
   date: string;
   totalSales: number;
 };
 
-type SaleData = {
-  createdAt: string;
-  amount: number;
-  note?: string | null;
-};
-
 const EmployeeReportPage = () => {
   const { activeGroup } = useGroup();
   const { user } = useUser();
 
-  const [startDate, setStartDate] = useState<Date | undefined>();
-  const [endDate, setEndDate] = useState<Date | undefined>();
   const [reports, setReports] = useState<EmployeeReport[]>([]);
   const [totalSales, setTotalSales] = useState<number>(0);
   const [detailedSales, setDetailedSales] = useState<SaleData[] | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(),
+  });
   const [loading, setLoading] = useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   const fetchReport = async () => {
     if (!activeGroup?.id || !user) return;
 
     setLoading(true);
     try {
-      const formattedStartDate = startDate
-        ? format(startDate, 'yyyy-MM-dd')
+      const formattedStartDate = dateRange?.from
+        ? format(dateRange?.from, 'yyyy-MM-dd')
         : null;
-      const formattedEndDate = endDate ? format(endDate, 'yyyy-MM-dd') : null;
+      const formattedEndDate = dateRange?.to
+        ? format(dateRange?.to, 'yyyy-MM-dd')
+        : null;
 
       if (!formattedStartDate || !formattedEndDate) {
         console.error('Invalid date range');
@@ -56,7 +58,6 @@ const EmployeeReportPage = () => {
         startDate: formattedStartDate,
         endDate: formattedEndDate,
       });
-
 
       const total = data.reduce(
         (sum: number, sale: EmployeeReport) => sum + sale.totalSales,
@@ -75,8 +76,8 @@ const EmployeeReportPage = () => {
   const handleRowClick = async (date: string) => {
     if (!activeGroup?.id || !user?.id) return;
 
-    setSelectedDate(date); // Set the selected date for display
-
+    setSelectedDate(date);
+    setIsDrawerOpen(true);
     try {
       const sales = await fetchSalesByUser({
         activeGroupId: activeGroup.id,
@@ -90,14 +91,6 @@ const EmployeeReportPage = () => {
     }
   };
 
-  const handleStartDateChange = (date: Date | undefined) => {
-    setStartDate(date);
-  };
-
-  const handleEndDateChange = (date: Date | undefined) => {
-    setEndDate(date);
-  };
-
   const columns: ColumnDef<EmployeeReport>[] = [
     {
       header: 'Date',
@@ -106,7 +99,7 @@ const EmployeeReportPage = () => {
     {
       header: 'Total Sales',
       accessorKey: 'totalSales',
-      cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
+      cell: ({ getValue }) => `${formatCurrency(getValue<number>())}`,
     },
     {
       header: 'Actions',
@@ -126,14 +119,7 @@ const EmployeeReportPage = () => {
       </h1>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mt-6">
-        <div>
-          <label className="block mb-2 text-sm font-medium">Start Date</label>
-          <DatePicker value={startDate} onChange={handleStartDateChange} />
-        </div>
-        <div>
-          <label className="block mb-2 text-sm font-medium">End Date</label>
-          <DatePicker value={endDate} onChange={handleEndDateChange} />
-        </div>
+        <DateRangePicker value={dateRange} onChange={setDateRange} />
         <div className="mt-6">
           <Button onClick={fetchReport} disabled={loading}>
             {loading ? <Loader2 /> : 'Fetch Report'}
@@ -141,33 +127,22 @@ const EmployeeReportPage = () => {
         </div>
       </div>
 
-      <h2 className="mt-6 text-lg font-bold">
-        Total Sales for selected periods: ${totalSales.toFixed(2)}
+      <h2 className="mt-6 text-highlight">
+        Total Sales for selected periods: {formatCurrency(totalSales)}
       </h2>
 
       <div className="mt-6 overflow-x-auto">
         <DataTable columns={columns} data={reports} />
       </div>
 
-      {detailedSales && (
-        <div className="mt-6">
-          <h2 className="mb-2 text-lg font-bold">
-            Detailed Sales for {selectedDate}
-          </h2>
-          <DataTable
-            columns={[
-              {
-                header: 'Time',
-                accessorKey: 'created_at',
-                cell: ({ getValue }) => formatToLocalTime(getValue<string>()),
-              },
-              { header: 'Amount', accessorKey: 'amount' },
-              { header: 'Note', accessorKey: 'note' },
-            ]}
-            data={detailedSales}
-          />
-        </div>
-      )}
+      {/* Employee Sales Drawer */}
+      <EmployeeSalesDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        sales={detailedSales || []}
+        selectedDate={selectedDate}
+        employeeName=""
+      />
     </div>
   );
 };

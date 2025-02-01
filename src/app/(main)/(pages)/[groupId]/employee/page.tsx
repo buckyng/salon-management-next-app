@@ -10,6 +10,7 @@ import { SaleData } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { fetchSalesByUser } from '@/services/saleService';
 import { sortByKey } from '@/lib/utils/funcUtils';
+import { formatCurrency } from '@/lib/utils/formatUtils';
 
 const EmployeeHomePage = () => {
   const { user } = useUser();
@@ -18,7 +19,7 @@ const EmployeeHomePage = () => {
   const [sales, setSales] = useState<SaleData[]>([]);
   const [totalSales, setTotalSales] = useState<number>(0);
   const [numOfSales, setNumOfSales] = useState<number>(0);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
 
   const currentDate = getCurrentLocalDate();
 
@@ -45,7 +46,7 @@ const EmployeeHomePage = () => {
     if (!user || !activeGroup?.id) return;
 
     const fetchSales = async () => {
-      setLoading(true); // Start loading state
+      setLoading(true);
       try {
         const salesData = await fetchSalesByUser({
           activeGroupId: activeGroup.id,
@@ -56,14 +57,14 @@ const EmployeeHomePage = () => {
         const sortedByCreatedAt = sortByKey(
           salesData,
           'created_at',
-          'desc'
+          'asc'
         ) as SaleData[];
 
         setSales(sortedByCreatedAt);
         setNumOfSales(sortedByCreatedAt.length);
 
         const total = salesData.reduce(
-          (sum: number, sale: SaleData) => sum + sale.amount,
+          (sum: number, sale: SaleData) => sum + sale.amount!,
           0
         );
         setTotalSales(total);
@@ -87,23 +88,14 @@ const EmployeeHomePage = () => {
       <p className="text-center mb-4">Date: {currentDate}</p>
 
       <div className="my-4 text-center">
-        <h2 className="text-lg font-bold">
-          Total Sales: ${totalSales.toFixed(2)}
+        <h2 className="text-highlight">
+          Total Sales: {formatCurrency(totalSales)}
         </h2>
         <p className="text-center mb-4">Number of sales: {numOfSales}</p>
       </div>
 
       <div className="mt-4 overflow-x-auto">
-        {loading ? (
-          <Loader2 />
-        ) : (
-          <DataTable
-            columns={columns}
-            data={sales}
-            enablePagination={true}
-            pageSize={8}
-          />
-        )}
+        {loading ? <Loader2 /> : <DataTable columns={columns} data={sales} />}
       </div>
     </div>
   );

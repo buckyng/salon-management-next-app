@@ -12,6 +12,7 @@ import {
 } from '@/services/saleService';
 import { SaleData } from '@/lib/types';
 import { updateEndOfDayReport } from '@/services/reportService';
+import { useEodReport } from '@/context/EodReportContext';
 
 interface InitialDataProps {
   cash?: string;
@@ -63,6 +64,8 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
   const [resultMessage, setResultMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const { setEodExists } = useEodReport();
+
   const handlePreCheck = async () => {
     if (!groupId) return;
 
@@ -105,7 +108,7 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
     try {
       const sales = await fetchOrganizationSales({ groupId, date });
       return sales.reduce(
-        (sum: number, sale: SaleData) => sum + sale.amount,
+        (sum: number, sale: SaleData) => sum + sale.amount!,
         0
       );
     } catch (error) {
@@ -164,7 +167,8 @@ const ReportCashier: React.FC<ReportCashierProps> = ({
         });
         toast.success('End-of-Day Report submitted successfully!');
       }
-
+      // Update EOD context after successful submission
+      setEodExists(true);
       onSubmitSuccess?.();
     } catch (error) {
       console.error('Error submitting report:', error);

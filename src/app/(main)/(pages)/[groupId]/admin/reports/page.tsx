@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DataTable } from '@/components/ui/data-table';
-import { DatePicker } from '@/components/ui/date-picker';
 import { Button } from '@/components/ui/button';
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
@@ -12,12 +11,19 @@ import { EodReport } from '@/lib/types';
 import { fetchOwnerReport } from '@/services/reportService';
 import { useReport } from '@/context/ReportContext';
 import GoBackButton from '@/components/ui/GoBackButton';
+import { DateRange } from 'react-day-picker';
+import DateRangePicker from '@/components/ui/DateRangePicker';
+import { formatCurrency } from '@/lib/utils/formatUtils';
+import LoadingSpinner from '@/components/global/LoadingSpinner';
+import { Loader2 } from 'lucide-react';
 
 const OwnerReportPage = () => {
   const { activeGroup } = useGroup();
   const router = useRouter();
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(),
+  });
   const [reportData, setReportData] = useState<EodReport[]>([]);
   const [totalSales, setTotalSales] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -29,7 +35,7 @@ const OwnerReportPage = () => {
     {
       header: 'Total Sales',
       accessorKey: 'total_sale',
-      cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
+      cell: ({ getValue }) => `${formatCurrency(getValue<number>())}`,
     },
     {
       header: 'Actions',
@@ -45,12 +51,12 @@ const OwnerReportPage = () => {
   ];
 
   const fetchReport = async () => {
-    if (!activeGroup?.id || !startDate || !endDate) return;
+    if (!activeGroup?.id || !dateRange?.from || !dateRange?.to) return;
 
     setLoading(true);
     try {
-      const formattedStartDate = format(startDate, 'yyyy-MM-dd');
-      const formattedEndDate = format(endDate, 'yyyy-MM-dd');
+      const formattedStartDate = format(dateRange.from, 'yyyy-MM-dd');
+      const formattedEndDate = format(dateRange.to, 'yyyy-MM-dd');
 
       const report = await fetchOwnerReport(
         activeGroup.id,
@@ -78,16 +84,8 @@ const OwnerReportPage = () => {
     router.push(`/${activeGroup?.id}/admin/reports/${date}`);
   };
 
-  const handleStartDateChange = (date: Date | undefined) => {
-    setStartDate(date);
-  };
-
-  const handleEndDateChange = (date: Date | undefined) => {
-    setEndDate(date);
-  };
-
   if (!activeGroup) {
-    return <p>Loading group...</p>;
+    return <LoadingSpinner fullScreen />;
   }
 
   return (
@@ -97,28 +95,28 @@ const OwnerReportPage = () => {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div>
-          <label className="block mb-2 text-sm font-medium">Start Date</label>
-          <DatePicker value={startDate} onChange={handleStartDateChange} />
-        </div>
-        <div>
-          <label className="block mb-2 text-sm font-medium">End Date</label>
-          <DatePicker value={endDate} onChange={handleEndDateChange} />
+          <label className="block mb-2 text-sm font-medium">
+            Select Date Range
+          </label>
+          <DateRangePicker value={dateRange} onChange={setDateRange} />
         </div>
         <div className="mt-6">
           <Button onClick={fetchReport} disabled={loading}>
-            {loading ? 'Loading...' : 'Fetch Report'}
+            {loading ? <Loader2 /> : 'Fetch Report'}
           </Button>
         </div>
       </div>
 
-      <h2 className="mt-6 text-lg font-bold">
-        Total Sales for selected periods: ${totalSales.toFixed(2)}
+      <h2 className="mt-6 font-bold text-highlight">
+        Total Sales for selected periods: {formatCurrency(totalSales)}
       </h2>
 
       {loading ? (
-        <p className="text-center">Loading report...</p>
+        <LoadingSpinner fullScreen />
       ) : (
-        <DataTable columns={columns} data={reportData} />
+        <div className="pb-20">
+          <DataTable columns={columns} data={reportData} />
+        </div>
       )}
     </div>
   );
