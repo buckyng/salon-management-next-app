@@ -96,9 +96,7 @@ function LoginPage() {
             <Button
               type="submit"
               className={`w-full py-3 font-semibold rounded-lg ${
-                isPending
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600 text-white focus:ring-2 focus:ring-blue-500'
+                isPending ? 'bg-gray-400 cursor-not-allowed' : 'focus:ring-2'
               }`}
               disabled={isPending}
             >

@@ -12,7 +12,8 @@ import {
   updateSaleStatus,
 } from '@/services/saleService';
 import { getCurrentLocalDate } from '@/lib/utils/dateUtils';
-import { useCheckEodReport } from '@/lib/hooks/useCheckEodReport';
+import { useEodReport } from '@/context/EodReportContext';
+import LoadingSpinner from '@/components/global/LoadingSpinner';
 
 const HistoryCashierPage = () => {
   const { activeGroup } = useGroup();
@@ -21,10 +22,13 @@ const HistoryCashierPage = () => {
   const [loading, setLoading] = useState(false);
   const currentDate = getCurrentLocalDate();
 
-  const { eodExists, isEodLoading } = useCheckEodReport({
-    groupId: activeGroup?.id || null,
-    date: currentDate,
-  });
+  const { eodExists, checkAndSetEodExists } = useEodReport();
+
+  useEffect(() => {
+    if (activeGroup?.id) {
+      checkAndSetEodExists(activeGroup.id, currentDate);
+    }
+  }, [activeGroup, currentDate, checkAndSetEodExists]);
 
   useEffect(() => {
     if (!activeGroup) return;
@@ -40,7 +44,14 @@ const HistoryCashierPage = () => {
           paid: true,
         });
 
-        setSales(salesData);
+        // 🔹 Sort sales from most recent to oldest before grouping
+        const sortedSales = salesData.sort(
+          (a, b) =>
+            new Date(b.created_at!).getTime() -
+            new Date(a.created_at!).getTime()
+        );
+
+        setSales(sortedSales);
       } catch (error) {
         console.error('Error fetching sales:', error);
         toast.error('Failed to fetch sales data.');
@@ -101,13 +112,9 @@ const HistoryCashierPage = () => {
   }
 
   if (!activeGroup) {
-    return <p>Loading group...</p>;
+    return <LoadingSpinner fullScreen />;
   }
 
-  if (isEodLoading) {
-    return <p className="text-center mt-4">Loading...</p>;
-  }
-  
   if (eodExists) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">

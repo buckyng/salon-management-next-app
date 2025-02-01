@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useUser } from '@/context/UserContext';
@@ -8,7 +8,8 @@ import { useGroup } from '@/context/GroupContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { addSale } from '@/services/saleService';
-import { useCheckEodReport } from '@/lib/hooks/useCheckEodReport';
+import { useEodReport } from '@/context/EodReportContext';
+import LoadingSpinner from '@/components/global/LoadingSpinner';
 import { getCurrentLocalDate } from '@/lib/utils/dateUtils';
 
 const AddSalePage = () => {
@@ -22,10 +23,14 @@ const AddSalePage = () => {
   const [loading, setLoading] = useState(false);
   const currentDate = getCurrentLocalDate();
 
-  const { eodExists, isEodLoading } = useCheckEodReport({
-    groupId: activeGroup?.id || null,
-    date: currentDate,
-  });
+  const { eodExists, checkAndSetEodExists } = useEodReport();
+
+  // Fetch and update the EOD status when component mounts
+  useEffect(() => {
+    if (activeGroup?.id) {
+      checkAndSetEodExists(activeGroup.id, currentDate);
+    }
+  }, [activeGroup, currentDate, checkAndSetEodExists]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,10 +50,8 @@ const AddSalePage = () => {
       return;
     }
 
-    //check if eodExists
-
     if (eodExists) {
-      toast.error('End of Day report is submitted. Nomore sale can be added');
+      toast.error('End of Day report is submitted. No more sale can be added');
       return;
     }
 
@@ -73,19 +76,7 @@ const AddSalePage = () => {
   };
 
   if (!activeGroup?.id) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (isEodLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
-      </div>
-    );
+    return <LoadingSpinner fullScreen />;
   }
 
   return (

@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { DataTable } from '@/components/ui/data-table';
-import { EmployeeSummary } from '@/lib/types';
+import { EmployeeSummary, SaleData } from '@/lib/types';
 import { fetchReportDetails } from '@/services/reportService';
 import { ColumnDef } from '@tanstack/react-table';
 import { useReport } from '@/context/ReportContext';
-import { EmployeeSalesPopover } from './_components/EmployeeSalesPopover';
 import BackButton from '@/components/global/BackButton';
+import ReportSummary from '@/components/global/ReportSummary';
+import LoadingSpinner from '@/components/global/LoadingSpinner';
+import EmployeeSalesDrawer from '@/components/global/EmployeeSalesDrawer';
+import { Button } from '@/components/ui/button';
 
 const ReportByDatePage = () => {
   const params = useParams();
@@ -22,10 +25,17 @@ const ReportByDatePage = () => {
   );
   const [loading, setLoading] = useState(false);
 
+  // Drawer State
+  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
+  const [selectedSales, setSelectedSales] = useState<SaleData[]>([]);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const { selectedReport } = useReport();
 
   useEffect(() => {
     const fetchDetails = async () => {
+      if (!groupId || !date) return;
+
       setLoading(true);
       try {
         const data = await fetchReportDetails(groupId, date);
@@ -40,42 +50,57 @@ const ReportByDatePage = () => {
     fetchDetails();
   }, [groupId, date]);
 
+  const handleOpenDrawer = (employeeName: string, sales: SaleData[]) => {
+    setSelectedEmployee(employeeName);
+    setSelectedSales(sales);
+    setIsDrawerOpen(true);
+  };
+
   const columns: ColumnDef<EmployeeSummary>[] = [
     { header: 'Employee Name', accessorKey: 'employeeName' },
-    { header: 'Total Sale', accessorKey: 'totalSale' },
+    {
+      header: 'Total Sale',
+      accessorKey: 'totalSale',
+      cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
+    },
     {
       header: 'Details',
       cell: ({ row }) => (
-        <EmployeeSalesPopover
-          employeeName={row.original.employeeName}
-          sales={row.original.sales}
-        />
+        <Button
+          onClick={() =>
+            handleOpenDrawer(
+              row.original.employeeName,
+              row.original.sales || []
+            )
+          }
+        >
+          View Sales
+        </Button>
       ),
     },
   ];
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <LoadingSpinner fullScreen />;
   }
 
   return (
     <div className="container mx-auto mt-6">
       <BackButton />
       <h1 className="text-2xl font-bold mb-4">Report for {date}</h1>
-      <div className="mt-4">
-        <p>Total Sales: ${selectedReport?.total_sale}</p>
-        <p>Cash: ${selectedReport?.cash}</p>
-        <p>Debit: ${selectedReport?.debit}</p>
-        <p>Other Income: ${selectedReport?.other_income}</p>
-        <p>Income Note: ${selectedReport?.income_note}</p>
-        <p>Expense: ${selectedReport?.expense}</p>
-        <p>Expense Note: ${selectedReport?.expense_note}</p>
-        <p>Service Discount: ${selectedReport?.service_discount}</p>
-        <p>Giftcard Buy: ${selectedReport?.giftcard_buy}</p>
-        <p>Giftcard Redeem: ${selectedReport?.giftcard_redeem}</p>
-        <p>Result: ${selectedReport?.result}</p>
+      <div className="mt-4 mb-4">
+        <ReportSummary report={selectedReport || null} />
       </div>
       <DataTable columns={columns} data={employeeSummaries} />
+
+      {/* Employee Sales Drawer */}
+      <EmployeeSalesDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        sales={selectedSales}
+        selectedDate={date}
+        employeeName={selectedEmployee || ''}
+      />
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { InviteMember } from './_components/InviteMember';
 import { Membership } from '@/lib/types';
 import { useGroup } from '@/context/GroupContext';
 import { fetchMemberships, fetchRoles } from '@/services/userService';
+import BackButton from '@/components/global/BackButton';
 
 const ManageUsersPage = () => {
   const { activeGroup } = useGroup();
@@ -56,6 +57,7 @@ const ManageUsersPage = () => {
 
   return (
     <div className="container px-4 mx-auto mt-10">
+      <BackButton />
       <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
       <InviteMember groupId={activeGroup.id} />
       <div className="mt-8">

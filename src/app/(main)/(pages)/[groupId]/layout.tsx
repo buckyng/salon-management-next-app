@@ -3,6 +3,7 @@
 import React, { ReactNode } from 'react';
 import { GroupProvider } from '@/context/GroupContext';
 import BottomNavBar from '@/components/global/bottom-nav-bar';
+import { EodReportProvider } from '@/context/EodReportContext';
 
 const Layout = ({
   children,
@@ -14,8 +15,10 @@ const Layout = ({
   return (
     <div className="flex flex-col h-screen">
       {/* Scrollable container for main content */}
-      <main className="flex-1 overflow-y-auto pb-16">
-        <GroupProvider groupId={params.groupId}>{children}</GroupProvider>
+      <main className="flex-1 overflow-y-auto pb-20">
+        <GroupProvider groupId={params.groupId}>
+          <EodReportProvider>{children}</EodReportProvider>
+        </GroupProvider>
       </main>
 
       {/* Fixed BottomNavBar */}

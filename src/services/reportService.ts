@@ -84,11 +84,11 @@ export const fetchReportDetails = async (
       };
     }
 
-    employeeMap[sale.user_id].totalSale += sale.amount;
+    employeeMap[sale.user_id].totalSale += sale.amount!;
     employeeMap[sale.user_id].sales.push(sale);
   });
 
-  return Object.values(employeeMap);
+  return Object.values(employeeMap).sort((a, b) => b.totalSale - a.totalSale);
 };
 
 export const fetchSalesForEmployee = async ({

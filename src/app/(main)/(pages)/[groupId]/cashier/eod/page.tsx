@@ -1,29 +1,32 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGroup } from '@/context/GroupContext';
 import { getCurrentLocalDate } from '@/lib/utils/dateUtils';
-import { useCheckEodReport } from '@/lib/hooks/useCheckEodReport';
 import ReportCashier from '@/components/global/ReportCashier';
+import { useEodReport } from '@/context/EodReportContext';
+import LoadingSpinner from '@/components/global/LoadingSpinner';
 
 const ReportCashierPage: React.FC = () => {
   const router = useRouter();
   const { activeGroup } = useGroup();
   const currentDate = getCurrentLocalDate();
 
-  const { eodExists, isEodLoading } = useCheckEodReport({
-    groupId: activeGroup?.id || null,
-    date: currentDate,
-  });
+  const { eodExists, checkAndSetEodExists } = useEodReport();
+
+  useEffect(() => {
+    if (activeGroup?.id) {
+      checkAndSetEodExists(activeGroup.id, currentDate);
+    }
+  }, [activeGroup, currentDate, checkAndSetEodExists]);
 
   const handleSuccess = () => {
+    if (!activeGroup?.id) return;
+    // Update context instantly after submitting the report
+    checkAndSetEodExists(activeGroup?.id || '', currentDate);
     router.push(`/${activeGroup?.id}/cashier`);
   };
-
-  if (isEodLoading) {
-    return <p className="text-center mt-4">Loading...</p>;
-  }
 
   if (eodExists) {
     return (
@@ -35,8 +38,8 @@ const ReportCashierPage: React.FC = () => {
     );
   }
 
-  if (!activeGroup) {
-    return <p>Loading group...</p>;
+  if (!activeGroup?.id) {
+    return <LoadingSpinner fullScreen />;
   }
 
   return (
@@ -54,7 +57,7 @@ const ReportCashierPage: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
           <ReportCashier
             date={currentDate}
-            groupId={activeGroup.id}
+            groupId={activeGroup?.id || ''}
             onSubmitSuccess={handleSuccess}
           />
         </div>

@@ -10,6 +10,7 @@ import {
   Notebook,
   Receipt,
   LayoutDashboard,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -78,7 +79,7 @@ const pageNavItems: Record<string, NavItem[]> = {
     },
     {
       name: 'Add Sale',
-      icon: <DollarSign size={20} />,
+      icon: <Plus size={20} />,
       route: '/[groupId]/employee/add-sale',
     },
     {
@@ -140,13 +141,13 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeGroupId }) => {
             key={item.name}
             onClick={() => router.push(item.route)}
             className={cn(
-              'flex flex-col items-center px-4 py-2 text-sm font-medium transition-all',
+              'flex flex-col items-center px-5 py-3 text-lg transition-all rounded-md',
               pathname === item.route
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                : 'text-gray-600 dark:text-gray-300 hover:text-blue-500'
+                ? 'text-blue-600 dark:text-blue-400 font-bold'
+                : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-800'
             )}
           >
-            <div className="w-6 h-6">{item.icon}</div>
+            <div className="w-7 h-7">{item.icon}</div>
             <span className="mt-1">{item.name}</span>
           </button>
         ))}

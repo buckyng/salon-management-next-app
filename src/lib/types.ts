@@ -46,7 +46,7 @@ export interface EnrichedSales extends SaleData {
 export interface GroupedSale {
   comboNum?: number | null;
   sales: EnrichedSales[];
-  totalAmount: number;
+  totalAmount: number | null;
 }
 
 export interface OwnerReport {
