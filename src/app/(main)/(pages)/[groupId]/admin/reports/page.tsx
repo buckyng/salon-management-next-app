@@ -134,8 +134,6 @@ const OwnerReportPage = () => {
         })
       );
 
-      console.log('Exporting data:', eodReports, employeeSales);
-
       // Send data to Google Sheets API
       const response = await fetch('/api/reports/export-to-sheets', {
         method: 'POST',

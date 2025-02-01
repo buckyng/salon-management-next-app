@@ -1,15 +1,7 @@
 import { createSupabaseClient } from '@/lib/supabase/server';
+import { EodReport } from '@/lib/types';
 import { google } from 'googleapis';
 import { NextRequest, NextResponse } from 'next/server';
-
-// Define Types
-interface EodReport {
-  date: string;
-  total_sale: number;
-  total_cash: number;
-  total_card: number;
-  total_other: number;
-}
 
 interface EmployeeSale {
   employeeName: string;
@@ -159,18 +151,32 @@ export async function POST(req: NextRequest) {
                 [
                   'Date',
                   'Total Sales',
-                  'Total Cash',
-                  'Total Card',
-                  'Total Other',
+                  'Cash',
+                  'Debit report',
+                  'Service Discount',
+                  'Gift Card buy',
+                  'Gift Card redeem',
+                  'Expenses',
+                  'Other Income',
+                  'Expenses notes',
+                  'Other Income notes',
+                  'Result',
                 ],
               ] // Add headers if empty
             : []),
           ...eodReports.map((report: EodReport) => [
             report.date,
             report.total_sale,
-            report.total_cash,
-            report.total_card,
-            report.total_other,
+            report.cash,
+            report.debit,
+            report.service_discount,
+            report.giftcard_buy,
+            report.giftcard_redeem,
+            report.expense, 
+            report.other_income,
+            report.expense_note || '',
+            report.income_note || '',
+            report.result,
           ]),
         ]
       : [];
