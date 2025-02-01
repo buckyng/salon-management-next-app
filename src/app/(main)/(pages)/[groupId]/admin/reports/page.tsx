@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { useGroup } from '@/context/GroupContext';
-import { EmployeeSummary, EodReport } from '@/lib/types';
+import { EodReport } from '@/lib/types';
 import { fetchOwnerReport, fetchReportDetails } from '@/services/reportService';
 import { useReport } from '@/context/ReportContext';
 import GoBackButton from '@/components/ui/GoBackButton';
@@ -15,11 +15,12 @@ import DateRangePicker from '@/components/ui/DateRangePicker';
 import { formatCurrency } from '@/lib/utils/formatUtils';
 import LoadingSpinner from '@/components/global/LoadingSpinner';
 import { Loader2 } from 'lucide-react';
-import ReportByDatePage from './[date]/page';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 const OwnerReportPage = () => {
   const { activeGroup } = useGroup();
+  const router = useRouter();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(),
     to: new Date(),
@@ -28,13 +29,6 @@ const OwnerReportPage = () => {
   const [totalSales, setTotalSales] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
-
-  // Selected report details
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [employeeSummaries, setEmployeeSummaries] = useState<EmployeeSummary[]>(
-    []
-  );
-  const [fetchingDetails, setFetchingDetails] = useState(false);
 
   const { setSelectedReport } = useReport();
 
@@ -52,9 +46,7 @@ const OwnerReportPage = () => {
         <Button
           onClick={() => handleViewDetails(row.original.date, row.original)}
         >
-          {fetchingDetails && selectedDate === row.original.date
-            ? 'Loading...'
-            : 'View Details'}
+          View Details
         </Button>
       ),
     },
@@ -89,22 +81,9 @@ const OwnerReportPage = () => {
     }
   };
 
-  const handleViewDetails = async (date: string, eodReport: EodReport) => {
+  const handleViewDetails = (date: string, eodReport: EodReport) => {
     setSelectedReport(eodReport);
-    setSelectedDate(date);
-    setFetchingDetails(true);
-
-    if (!activeGroup) return;
-
-    try {
-      const employeeData = await fetchReportDetails(activeGroup.id, date);
-      setEmployeeSummaries(employeeData);
-    } catch (error) {
-      console.error('Error fetching employee details:', error);
-      toast.error('Failed to fetch employee details.');
-    } finally {
-      setFetchingDetails(false);
-    }
+    router.push(`/${activeGroup?.id}/admin/reports/${date}`);
   };
 
   const handleExportToSheets = async () => {
@@ -199,12 +178,6 @@ const OwnerReportPage = () => {
               </h2>
               <div className="pb-20">
                 <DataTable columns={columns} data={reportData} />
-                {selectedDate && (
-                  <ReportByDatePage
-                    employeeSummaries={employeeSummaries}
-                    date={selectedDate}
-                  />
-                )}
               </div>
             </>
           )}
