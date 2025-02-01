@@ -30,6 +30,13 @@ export interface EmployeeSummary {
   sales: SaleData[]; // Array of sales
 }
 
+export interface ExportedEmployeeSummary {
+  employeeId: string;
+  employeeName: string;
+  totalSale: number;
+  date: string;
+}
+
 export interface EmployeeSales {
   total: number;
   sales: SaleData[]; // Assuming SaleData is already defined

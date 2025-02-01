@@ -18,6 +18,7 @@ const rolePermissions: Record<Role, RouteRolePermission[]> = {
     { name: 'Reports', route: '/[groupId]/admin/reports' },
     { name: 'Update Logo', route: '/[groupId]/admin/update-logo' },
     { name: 'Update Eod', route: '/[groupId]/admin/update-eod' },
+    { name: 'Google sheet setting', route: '/[groupId]/admin/settings' },
   ],
   employee: [{ name: 'Employee Dashboard', route: '/[groupId]/employee' }],
   cashier: [

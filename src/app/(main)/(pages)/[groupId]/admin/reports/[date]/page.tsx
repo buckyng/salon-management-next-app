@@ -1,54 +1,29 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useState } from 'react';
 import { DataTable } from '@/components/ui/data-table';
 import { EmployeeSummary, SaleData } from '@/lib/types';
-import { fetchReportDetails } from '@/services/reportService';
 import { ColumnDef } from '@tanstack/react-table';
 import { useReport } from '@/context/ReportContext';
-import BackButton from '@/components/global/BackButton';
 import ReportSummary from '@/components/global/ReportSummary';
-import LoadingSpinner from '@/components/global/LoadingSpinner';
 import EmployeeSalesDrawer from '@/components/global/EmployeeSalesDrawer';
 import { Button } from '@/components/ui/button';
 
-const ReportByDatePage = () => {
-  const params = useParams();
-  const groupId = Array.isArray(params.groupId)
-    ? params.groupId[0]
-    : params.groupId;
-  const date = Array.isArray(params.date) ? params.date[0] : params.date;
+interface ReportByDateProps {
+  employeeSummaries: EmployeeSummary[];
+  date: string | null;
+}
 
-  const [employeeSummaries, setEmployeeSummaries] = useState<EmployeeSummary[]>(
-    []
-  );
-  const [loading, setLoading] = useState(false);
-
+const ReportByDatePage: React.FC<ReportByDateProps> = ({
+  employeeSummaries,
+  date,
+}) => {
   // Drawer State
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
   const [selectedSales, setSelectedSales] = useState<SaleData[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const { selectedReport } = useReport();
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (!groupId || !date) return;
-
-      setLoading(true);
-      try {
-        const data = await fetchReportDetails(groupId, date);
-        setEmployeeSummaries(data);
-      } catch (error) {
-        console.error('Error fetching report details:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDetails();
-  }, [groupId, date]);
 
   const handleOpenDrawer = (employeeName: string, sales: SaleData[]) => {
     setSelectedEmployee(employeeName);
@@ -80,14 +55,13 @@ const ReportByDatePage = () => {
     },
   ];
 
-  if (loading) {
-    return <LoadingSpinner fullScreen />;
-  }
+  // if (loading) {
+  //   return <LoadingSpinner fullScreen />;
+  // }
 
   return (
     <div className="container mx-auto mt-6">
-      <BackButton />
-      <h1 className="text-2xl font-bold mb-4">Report for {date}</h1>
+      <h2 className="text-2xl font-semibold mb-4">Report for {date}</h2>
       <div className="mt-4 mb-4">
         <ReportSummary report={selectedReport || null} />
       </div>
@@ -98,7 +72,7 @@ const ReportByDatePage = () => {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         sales={selectedSales}
-        selectedDate={date}
+        selectedDate=""
         employeeName={selectedEmployee || ''}
       />
     </div>

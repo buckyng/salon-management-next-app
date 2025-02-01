@@ -65,7 +65,6 @@ export async function POST(request: Request) {
 
       const result = await response.json();
 
-      console.log('Result from create-user function:', result);
       userId = result.userId;
 
       if (!userId) {
