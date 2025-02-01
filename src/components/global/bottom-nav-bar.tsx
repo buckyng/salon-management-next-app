@@ -135,13 +135,13 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeGroupId }) => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
-      <div className="flex justify-around items-center py-3">
+      <div className="flex justify-around items-center py-1">
         {navItems.map((item) => (
           <button
             key={item.name}
             onClick={() => router.push(item.route)}
             className={cn(
-              'flex flex-col items-center px-5 py-3 text-lg transition-all rounded-md',
+              'flex flex-col items-center px-5 py-1 text-lg transition-all rounded-md',
               pathname === item.route
                 ? 'text-blue-600 dark:text-blue-400 font-bold'
                 : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-800'

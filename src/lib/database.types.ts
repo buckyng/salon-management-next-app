@@ -328,6 +328,7 @@ export type Database = {
       groups: {
         Row: {
           created_at: string
+          google_sheet_id: string | null
           id: string
           logo_url: string | null
           metadata: Json
@@ -336,6 +337,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          google_sheet_id?: string | null
           id?: string
           logo_url?: string | null
           metadata?: Json
@@ -344,6 +346,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          google_sheet_id?: string | null
           id?: string
           logo_url?: string | null
           metadata?: Json
@@ -402,7 +405,7 @@ export type Database = {
       }
       sales: {
         Row: {
-          amount: number | null
+          amount: number
           combo_num: number | null
           created_at: string | null
           created_date: string | null
@@ -414,7 +417,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          amount?: number | null
+          amount: number
           combo_num?: number | null
           created_at?: string | null
           created_date?: string | null
@@ -426,7 +429,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          amount?: number | null
+          amount?: number
           combo_num?: number | null
           created_at?: string | null
           created_date?: string | null
