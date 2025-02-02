@@ -48,8 +48,8 @@ const CheckInManagementPage = () => {
         return [...updatedCheckIns].sort((a, b) => {
           if (a.is_in_service === b.is_in_service) {
             return (
-              new Date(a.created_at ?? '1970-01-01').getTime() -
-              new Date(b.created_at ?? '1970-01-01').getTime()
+              new Date(b.created_at ?? '1970-01-01').getTime() -
+              new Date(a.created_at ?? '1970-01-01').getTime()
             );
           }
           // Ensure `is_in_service: false` comes first
@@ -92,8 +92,8 @@ const CheckInManagementPage = () => {
         const sortedCheckIns = enrichedCheckIns.sort((a, b) => {
           if (a.is_in_service === b.is_in_service) {
             return (
-              new Date(a.created_at ?? '1970-01-01').getTime() -
-              new Date(b.created_at ?? '1970-01-01').getTime()
+              new Date(b.created_at ?? '1970-01-01').getTime() -
+              new Date(a.created_at ?? '1970-01-01').getTime()
             );
           }
           return a.is_in_service ? 1 : -1;
@@ -119,6 +119,7 @@ const CheckInManagementPage = () => {
             ...newCheckIn,
             created_date: newCheckIn.created_at, // Add the 'created_date' property
             clientName: `${clientData.first_name} ${clientData.last_name}`,
+            clientPhone: clientData.phone,
             visitsBeforeToday: clientData.number_of_visits || 0,
             lastVisitRating: clientData.last_visit_rating || null,
             clients: {
@@ -140,8 +141,8 @@ const CheckInManagementPage = () => {
             return updatedCheckIns.sort((a, b) => {
               if (a.is_in_service === b.is_in_service) {
                 return (
-                  new Date(a.created_at ?? '1970-01-01').getTime() -
-                  new Date(b.created_at ?? '1970-01-01').getTime()
+                  new Date(b.created_at ?? '1970-01-01').getTime() -
+                  new Date(a.created_at ?? '1970-01-01').getTime()
                 );
               }
               return a.is_in_service ? 1 : -1;
