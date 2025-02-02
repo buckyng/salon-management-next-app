@@ -11,6 +11,7 @@ interface CheckIn {
 
 interface EnrichedCheckIn extends CheckIn {
   clientName: string;
+  clientPhone: string;
 }
 
 const subscribeToCheckIns = (
@@ -22,16 +23,16 @@ const subscribeToCheckIns = (
   // Function to fetch client data for enrichment
   const fetchClientData = async (
     clientId: string
-  ): Promise<{ first_name: string; last_name: string }> => {
+  ): Promise<{ first_name: string; last_name: string; phone: string }> => {
     const { data: client, error } = await supabase
       .from('clients')
-      .select('first_name, last_name')
+      .select('first_name, last_name, phone')
       .eq('id', clientId)
       .single();
 
     if (error) {
       console.error('Error fetching client data:', error);
-      return { first_name: 'Unknown', last_name: 'Client' };
+      return { first_name: 'Unknown', last_name: 'Client', phone: '' };
     }
 
     return client;
@@ -56,6 +57,7 @@ const subscribeToCheckIns = (
         const enrichedCheckIn: EnrichedCheckIn = {
           ...newCheckIn,
           clientName: `${clientData.first_name} ${clientData.last_name}`.trim(),
+          clientPhone: clientData.phone,
         };
 
         // Invoke the callback with enriched data
