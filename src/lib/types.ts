@@ -67,6 +67,7 @@ export type CheckIn = Tables<'check_ins'>;
 
 export type EnrichedCheckIn = CheckIn & {
   clientName: string;
+  clientPhone: string;
   visitsBeforeToday: number;
   lastVisitRating: number | null;
   clients: {

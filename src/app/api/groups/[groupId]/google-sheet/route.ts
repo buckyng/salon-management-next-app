@@ -7,14 +7,11 @@ export async function GET(
 ) {
   const supabase = await createSupabaseClient();
 
-  console.log('Fetching Google Sheet ID for group:', params.groupId);
   const { data, error } = await supabase
     .from('groups')
     .select('google_sheet_id')
     .eq('id', params.groupId)
     .single();
-
-  console.log('Supabase raw response:', data, 'Error:', error);
 
   if (error) {
     console.error('Error fetching Google Sheet ID:', error);
