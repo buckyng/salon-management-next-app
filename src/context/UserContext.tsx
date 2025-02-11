@@ -1,6 +1,7 @@
 'use client';
 
 import { createSupabaseClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 interface UserMetadata {
@@ -30,6 +31,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const router = useRouter();
+
   useEffect(() => {
     const fetchUserMetadata = async () => {
       try {
@@ -37,11 +40,23 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
         const supabase = createSupabaseClient();
 
+        // Ensure session exists first
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
+        if (sessionError || !sessionData?.session) {
+          console.error('Failed to retrieve session.');
+          router.push('/login'); // Redirect to sign-in page
+          return;
+        }
+
         // Fetch the authenticated user
         const { data: authData, error: authError } =
           await supabase.auth.getUser();
-        if (authError || !authData?.user)
-          throw new Error('Failed to get authenticated user.');
+        if (authError || !authData?.user) {
+          console.error('Failed to get authenticated user.');
+          router.push('/login'); // Redirect to sign-in page
+          return;
+        }
 
         const userId = authData.user.id;
 

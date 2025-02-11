@@ -24,6 +24,13 @@ export const useCheckInLogic = () => {
     setStep(1);
   };
 
+  const handlePhoneNumberChange = (input: string) => {
+    // Allow only digits and limit to 10 characters
+    if (/^\d{0,10}$/.test(input)) {
+      setPhoneNumber(input);
+    }
+  };
+
   const handlePhoneSubmit = async () => {
     if (!phoneNumber || !activeGroup?.id) return;
 
@@ -41,6 +48,11 @@ export const useCheckInLogic = () => {
 
       setClient(clientData);
       setStep(2);
+
+      // Automatically check in existing client
+      if (clientData) {
+        await autoCheckInExistingClient(clientData);
+      }
     } catch (error) {
       console.error('Error querying client:', error);
       toast.error('Failed to fetch client.');
@@ -49,50 +61,22 @@ export const useCheckInLogic = () => {
     }
   };
 
-  const handleClientSave = async (
-    clientData: Partial<Client>,
-    groupDetails: { agree_to_terms: boolean }
-  ) => {
-    setLoading(true);
+  const autoCheckInExistingClient = async (existingClient: Client) => {
     try {
-      if (!activeGroup?.id) {
-        throw new Error('Missing organizationId');
-      }
-
-      const clientId = await saveClient({
-        groupId: activeGroup.id,
-        clientData,
-        groupDetails,
-      });
-
-      await handleCheckIn(clientId);
-    } catch (error) {
-      console.error('Error saving client:', error);
-      toast.error('Failed to save client.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCheckInExistingClient = async (updatedClient: Client) => {
-    setLoading(true);
-    try {
-      if (!activeGroup?.id || !client) {
+      if (!activeGroup?.id || !existingClient) {
         throw new Error('Missing groupId or client');
       }
 
       const clientId = await saveClient({
         groupId: activeGroup.id,
-        clientData: updatedClient,
+        clientData: existingClient,
         groupDetails: { agree_to_terms: true },
       });
 
       await handleCheckIn(clientId);
     } catch (error) {
-      console.error('Error during check-in:', error);
-      toast.error('Failed to check in client.');
-    } finally {
-      setLoading(false);
+      console.error('Error during auto check-in:', error);
+      toast.error('Failed to automatically check in client.');
     }
   };
 
@@ -120,15 +104,13 @@ export const useCheckInLogic = () => {
   };
 
   return {
-    activeGroup,
-    message,
-    step,
-    client,
     phoneNumber,
-    loading,
     setPhoneNumber,
+    handlePhoneNumberChange,
     handlePhoneSubmit,
-    handleClientSave,
-    handleCheckInExistingClient,
+    client,
+    step,
+    message,
+    loading,
   };
 };

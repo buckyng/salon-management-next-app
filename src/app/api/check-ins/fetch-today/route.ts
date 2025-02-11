@@ -23,12 +23,21 @@ export async function GET(req: NextRequest) {
       .select(
         `
       *,
-      clients(first_name, last_name, phone, client_group_details(number_of_visits, last_visit_rating))
-      `
+      clients(
+        first_name, 
+        last_name, 
+        phone, 
+        client_group_details!inner(
+          number_of_visits, 
+          last_visit_rating
+        )
+      )
+    `
       )
       .eq('group_id', groupId)
       .eq('created_date', today)
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: true })
+      .filter('clients.client_group_details.group_id', 'eq', groupId);
 
     if (error) {
       console.error('Error fetching check-ins:', error);
