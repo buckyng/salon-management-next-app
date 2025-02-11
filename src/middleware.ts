@@ -30,39 +30,54 @@ export async function middleware(request: NextRequest) {
   }
 
   // Fetch user metadata for group information
-  const { data: user, error: userError } = await supabase.auth.getUser();
-  if (userError) {
-    console.error('Error fetching user data:', userError.message);
+  try {
+    // Fetch authenticated user data
+    const { data: user, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error(
+        'Error fetching user data:',
+        userError?.message || 'No user found.'
+      );
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // Skip authentication for reset password routes
+    if (
+      !user &&
+      !request.nextUrl.pathname.includes('/login') &&
+      !request.nextUrl.pathname.includes('/reset-password') &&
+      !request.nextUrl.pathname.includes('/forgot-password')
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+
+    const groups = user.user?.app_metadata.groups || {};
+
+    // Redirect based on group information
+    if (Object.keys(groups).length === 1) {
+      // If the user belongs to only one group, redirect to its dashboard
+      const groupId = Object.keys(groups)[0];
+      return NextResponse.redirect(
+        new URL(`/${groupId}/dashboard`, request.url)
+      );
+    }
+
+    if (Object.keys(groups).length > 1) {
+      // If the user belongs to multiple groups, redirect to the group picker page
+      return NextResponse.redirect(new URL('/group-picker', request.url));
+    }
+
+    // If the user does not belong to any group, redirect them to a support/contact page
+    return NextResponse.redirect(new URL('/no-groups', request.url));
+  } catch (error) {
+    console.error('Error during authentication middleware:', error);
+    // Log the user out if something goes wrong
+    await supabase.auth.signOut();
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
-
-  //skip authentication for reset password
-  if (
-    !user &&
-    !request.nextUrl.pathname.includes('/login') &&
-    !request.nextUrl.pathname.includes('/reset-password') &&
-    !request.nextUrl.pathname.includes('/forgot-password')
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
-  }
-
-  const groups = user?.user.app_metadata.groups || {};
-
-  if (Object.keys(groups).length === 1) {
-    // If the user belongs to only one group, redirect to its dashboard
-    const groupId = Object.keys(groups)[0];
-    return NextResponse.redirect(new URL(`/${groupId}/dashboard`, request.url));
-  }
-
-  if (Object.keys(groups).length > 1) {
-    // If the user belongs to multiple groups, redirect to the group picker page
-    return NextResponse.redirect(new URL('/group-picker', request.url));
-  }
-
-  // If the user does not belong to any group, redirect them to a support/contact page
-  return NextResponse.redirect(new URL('/no-groups', request.url));
 }
 
 export const config = {

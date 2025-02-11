@@ -2,8 +2,6 @@
 
 import React from 'react';
 import NewClientForm from './_components/NewClientForm';
-import WelcomeBack from './_components/WelcomeBack';
-
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,7 +20,6 @@ const CheckInPage = () => {
     setPhoneNumber,
     handlePhoneSubmit,
     handleClientSave,
-    handleCheckInExistingClient,
   } = useCheckInLogic();
 
   return (
@@ -48,6 +45,7 @@ const CheckInPage = () => {
               <h1 className="text-2xl text-center text-green-500">{message}</h1>
             ) : (
               <>
+                {/* Step 1: Phone Number Input */}
                 {step === 1 && (
                   <>
                     <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-center mb-4 text-gray-800 dark:text-gray-100 px-4 sm:px-6">
@@ -61,12 +59,11 @@ const CheckInPage = () => {
                       disabled={loading}
                       onChange={(e) => {
                         const input = e.target.value;
-                        // Allow only digits and limit to 10 characters
                         if (/^\d{0,10}$/.test(input)) {
                           setPhoneNumber(input);
                         }
                       }}
-                      maxLength={10} // Extra safeguard for 10 digits
+                      maxLength={10}
                     />
                     <Button
                       onClick={handlePhoneSubmit}
@@ -81,12 +78,8 @@ const CheckInPage = () => {
                     </Button>
                   </>
                 )}
-                {step === 2 && client && (
-                  <WelcomeBack
-                    client={client}
-                    onUpdate={handleCheckInExistingClient}
-                  />
-                )}
+
+                {/* Step 2: If New Client, Show Form */}
                 {step === 2 && !client && (
                   <NewClientForm
                     phoneNumber={phoneNumber}
