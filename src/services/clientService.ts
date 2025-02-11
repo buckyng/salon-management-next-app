@@ -78,3 +78,44 @@ export const fetchClientById = async (groupId: string, clientId: string) => {
   if (!response.ok) throw new Error('Failed to fetch client');
   return await response.json();
 };
+
+export const fetchClientCheckInHistory = async (
+  groupId: string,
+  clientId: string
+) => {
+  try {
+    const response = await fetch(
+      `/api/clients/${groupId}/${clientId}/check-in-history`
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch check-in history');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching client check-in history:', error);
+    return [];
+  }
+};
+
+export const updateClientInfo = async ({
+  clientId,
+  updatedClient,
+}: {
+  clientId: string;
+  updatedClient: { first_name: string; last_name: string; phone: string };
+}): Promise<boolean> => {
+  const response = await fetch(`/api/clients/update`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId, updatedClient }),
+  });
+
+  if (!response.ok) {
+    console.error('Failed to update client information.');
+    return false;
+  }
+
+  return true;
+};

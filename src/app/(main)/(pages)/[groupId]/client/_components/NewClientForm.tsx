@@ -158,24 +158,27 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
             <h2 className="text-xl font-semibold text-center">
               Accept Terms and Conditions
             </h2>
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="agreeToPolicy"
-                checked={agreeToTerms}
-                onCheckedChange={(checked) => setAgreeToTerms(!!checked)}
-                disabled={loading}
-              />
+            <div className="flex items-start space-x-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg shadow">
+              <div className="flex items-center">
+                <Checkbox
+                  id="agreeToPolicy"
+                  checked={agreeToTerms}
+                  onCheckedChange={(checked) => setAgreeToTerms(!!checked)}
+                  disabled={loading}
+                  className="w-6 h-6 border-2 border-gray-500 dark:border-gray-400"
+                />
+              </div>
               <label
                 htmlFor="agreeToPolicy"
-                className="text-sm text-gray-700 dark:text-gray-300"
+                className="text-sm text-gray-800 dark:text-gray-200 leading-6"
               >
                 By checking this box, you confirm that you have read and agree
                 to our
-                <a href="/terms" className="text-blue-500 underline">
+                <a className="text-blue-600 font-medium underline ml-1">
                   Terms of Service
-                </a>{' '}
+                </a>
                 and
-                <a href="/privacy" className="text-blue-500 underline">
+                <a className="text-blue-600 font-medium underline ml-1">
                   Privacy Policy
                 </a>
                 . You also consent to receive transactional emails related to
