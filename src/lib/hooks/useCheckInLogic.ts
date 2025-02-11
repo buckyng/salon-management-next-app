@@ -49,34 +49,15 @@ export const useCheckInLogic = () => {
       setClient(clientData);
       setStep(2);
 
-      // Automatically check in existing client
+      // ✅ Automatically check in existing clients
       if (clientData) {
-        await autoCheckInExistingClient(clientData);
+        await handleCheckIn(clientData.id);
       }
     } catch (error) {
       console.error('Error querying client:', error);
       toast.error('Failed to fetch client.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const autoCheckInExistingClient = async (existingClient: Client) => {
-    try {
-      if (!activeGroup?.id || !existingClient) {
-        throw new Error('Missing groupId or client');
-      }
-
-      const clientId = await saveClient({
-        groupId: activeGroup.id,
-        clientData: existingClient,
-        groupDetails: { agree_to_terms: true },
-      });
-
-      await handleCheckIn(clientId);
-    } catch (error) {
-      console.error('Error during auto check-in:', error);
-      toast.error('Failed to automatically check in client.');
     }
   };
 
@@ -103,11 +84,38 @@ export const useCheckInLogic = () => {
     }
   };
 
+  const handleClientSave = async (
+    clientData: Partial<Client>,
+    groupDetails: { agree_to_terms: boolean }
+  ) => {
+    setLoading(true);
+    try {
+      if (!activeGroup?.id) {
+        throw new Error('Missing organizationId');
+      }
+
+      const clientId = await saveClient({
+        groupId: activeGroup.id,
+        clientData,
+        groupDetails,
+      });
+
+      await handleCheckIn(clientId);
+    } catch (error) {
+      console.error('Error saving client:', error);
+      toast.error('Failed to save client.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
+    activeGroup,
     phoneNumber,
     setPhoneNumber,
     handlePhoneNumberChange,
     handlePhoneSubmit,
+    handleClientSave,
     client,
     step,
     message,
