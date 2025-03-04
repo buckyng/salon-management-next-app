@@ -2,8 +2,6 @@
 
 import React from 'react';
 import NewClientForm from './_components/NewClientForm';
-import WelcomeBack from './_components/WelcomeBack';
-
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,14 +20,13 @@ const CheckInPage = () => {
     setPhoneNumber,
     handlePhoneSubmit,
     handleClientSave,
-    handleCheckInExistingClient,
   } = useCheckInLogic();
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen">
+    <div className="flex flex-col md:flex-row h-screen">
       {/* Left Section */}
-      <div className="hidden lg:flex flex-col w-3/8 items-center justify-center space-y-4 bg-gray-50 dark:bg-gray-800 p-6">
-        <div className="flex flex-col items-center space-y-6">
+      <div className="flex flex-col w-full md:w-1/3 lg:w-3/8 bg-gray-50 dark:bg-gray-800 p-6">
+        <div className="flex flex-col items-center space-y-6 w-full">
           <OrganizationLogo
             logoSrc={activeGroup?.logo_url ?? ''}
             altText={`${activeGroup?.name || 'Organization'} Logo`}
