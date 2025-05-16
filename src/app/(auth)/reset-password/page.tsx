@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,14 +13,34 @@ import {
 import { toast } from 'react-toastify';
 import { Loader2 } from 'lucide-react';
 import { resetPassword } from '@/lib/supabase/servers/auth';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { createSupabaseClient } from '@/lib/supabase/client';
+import { UserMetadata } from '@supabase/supabase-js';
 
 const ResetPasswordPage = () => {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isPending, setIsPending] = useState(false);
+
+  const [user, setUser] = useState<UserMetadata | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createSupabaseClient();
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error) {
+        toast.error('Failed to fetch user info.');
+      } else {
+        setUser(user);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
@@ -37,8 +57,8 @@ const ResetPasswordPage = () => {
 
     try {
       const { errorMessage } = await resetPassword(
-        newPassword,
-        searchParams.get('code') as string
+        user?.email as string,
+        newPassword
       );
 
       if (errorMessage) {
