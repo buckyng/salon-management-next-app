@@ -73,129 +73,132 @@ const NewClientForm: React.FC<NewClientFormProps> = ({
   };
 
   return (
-    <div className="container mx-auto px-6 py-10 sm:px-8 lg:px-10">
-      <div className="max-w-md mx-auto space-y-6 bg-white dark:bg-gray-800 p-6 shadow-md rounded-lg">
-        {/* Step 1: First Name */}
-        {step === 1 && (
-          <>
-            <h2 className="text-xl font-semibold text-center">
-              Please Enter First Name
-            </h2>
-            <Input
-              type="text"
-              placeholder="First Name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="w-full"
-              disabled={loading}
-            />
+    <div className="max-w-lg mx-auto space-y-8 bg-white dark:bg-gray-800 p-8 shadow-lg rounded-xl">
+      {/* Step 1: First Name */}
+      {step === 1 && (
+        <>
+          <h2 className="text-2xl font-bold text-center ">
+            Please Enter First Name
+          </h2>
+          <Input
+            type="text"
+            placeholder="First Name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="w-full text-lg px-4 py-3 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"
+            disabled={loading}
+          />
+          <Button
+            onClick={handleNextStep}
+            className="w-full text-lg font-semibold px-6 py-3"
+            disabled={loading}
+          >
+            Next
+          </Button>
+        </>
+      )}
+
+      {/* Step 2: Last Name */}
+      {step === 2 && (
+        <>
+          <h2 className="text-2xl font-bold text-center">
+            Please Enter Last Name
+          </h2>
+          <Input
+            type="text"
+            placeholder="Last Name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="w-full text-lg px-4 py-3 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"
+            disabled={loading}
+          />
+          <Button
+            onClick={handleNextStep}
+            className="w-full text-lg font-semibold px-6 py-3"
+            disabled={loading}
+          >
+            Next
+          </Button>
+        </>
+      )}
+
+      {/* Step 3: Email (Optional) */}
+      {step === 3 && (
+        <>
+          <h2 className="text-2xl font-bold text-center">
+            Please Enter Email (Optional)
+          </h2>
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full text-lg px-4 py-3 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"
+            disabled={loading}
+          />
+          <div className="flex justify-between mt-4">
             <Button
               onClick={handleNextStep}
-              className="w-full mt-4"
+              variant="secondary"
+              className="text-lg px-6 py-3 font-semibold rounded-lg"
               disabled={loading}
+            >
+              Skip
+            </Button>
+            <Button
+              onClick={() => setStep(step + 1)}
+              disabled={loading}
+              className="text-lg px-6 py-3  font-semibold rounded-lg"
             >
               Next
             </Button>
-          </>
-        )}
+          </div>
+        </>
+      )}
 
-        {/* Step 2: Last Name */}
-        {step === 2 && (
-          <>
-            <h2 className="text-xl font-semibold text-center">
-              Please Enter Last Name
-            </h2>
-            <Input
-              type="text"
-              placeholder="Last Name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-full"
-              disabled={loading}
-            />
-            <Button
-              onClick={handleNextStep}
-              className="w-full mt-4"
-              disabled={loading}
-            >
-              Next
-            </Button>
-          </>
-        )}
-
-        {/* Step 3: Email (Optional) */}
-        {step === 3 && (
-          <>
-            <h2 className="text-xl font-semibold text-center">
-              Please Enter Email (Optional)
-            </h2>
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full"
-              disabled={loading}
-            />
-            <div className="flex justify-between mt-4">
-              <Button
-                onClick={handleNextStep}
-                variant="secondary"
+      {/* Step 4: Terms and Check In */}
+      {step === 4 && (
+        <>
+          <h2 className="text-2xl font-bold text-center">
+            Accept Terms and Conditions
+          </h2>
+          <div className="flex items-start space-x-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg shadow">
+            <div className="flex items-center">
+              <Checkbox
+                id="agreeToPolicy"
+                checked={agreeToTerms}
+                onCheckedChange={(checked) => setAgreeToTerms(!!checked)}
                 disabled={loading}
-              >
-                Skip
-              </Button>
-              <Button onClick={() => setStep(step + 1)} disabled={loading}>
-                Next
-              </Button>
+                className="w-6 h-6 border-2 border-gray-500 dark:border-gray-400"
+              />
             </div>
-          </>
-        )}
-
-        {/* Step 4: Terms and Check In */}
-        {step === 4 && (
-          <>
-            <h2 className="text-xl font-semibold text-center">
-              Accept Terms and Conditions
-            </h2>
-            <div className="flex items-start space-x-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg shadow">
-              <div className="flex items-center">
-                <Checkbox
-                  id="agreeToPolicy"
-                  checked={agreeToTerms}
-                  onCheckedChange={(checked) => setAgreeToTerms(!!checked)}
-                  disabled={loading}
-                  className="w-6 h-6 border-2 border-gray-500 dark:border-gray-400"
-                />
-              </div>
-              <label
-                htmlFor="agreeToPolicy"
-                className="text-sm text-gray-800 dark:text-gray-200 leading-6"
-              >
-                By checking this box, you confirm that you have read and agree
-                to our
-                <a className="text-blue-600 font-medium underline ml-1">
-                  Terms of Service
-                </a>
-                and
-                <a className="text-blue-600 font-medium underline ml-1">
-                  Privacy Policy
-                </a>
-                . You also consent to receive transactional emails related to
-                your check-in. You can withdraw your consent for promotional
-                emails at any time.
-              </label>
-            </div>
-            <Button
-              onClick={handleSubmit}
-              className="w-full mt-4 bg-green-500 text-white"
-              disabled={loading}
+            <label
+              htmlFor="agreeToPolicy"
+              className="text-sm text-gray-800 dark:text-gray-200 leading-6"
             >
-              {loading ? <Loader2 className="animate-spin" /> : 'Check In'}
-            </Button>
-          </>
-        )}
-      </div>
+              By checking this box, you confirm that you have read and agree to
+              our
+              <a className="text-blue-600 font-medium underline ml-1">
+                Terms of Service
+              </a>
+              <span className="mx-1">and</span>
+              <a className="text-blue-600 font-medium underline ml-1">
+                Privacy Policy
+              </a>
+              . You also consent to receive transactional emails related to your
+              check-in. You can withdraw your consent for promotional emails at
+              any time.
+            </label>
+          </div>
+          <Button
+            onClick={handleSubmit}
+            className="w-full text-lg px-6 py-3 bg-green-500 text-white"
+            disabled={loading}
+          >
+            {loading ? <Loader2 className="animate-spin" /> : 'Check In'}
+          </Button>
+        </>
+      )}
     </div>
   );
 };
