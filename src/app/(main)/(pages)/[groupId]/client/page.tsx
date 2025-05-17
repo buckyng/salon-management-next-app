@@ -2,7 +2,6 @@
 
 import React from 'react';
 import NewClientForm from './_components/NewClientForm';
-import WelcomeBack from './_components/WelcomeBack';
 
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,7 +21,6 @@ const CheckInPage = () => {
     setPhoneNumber,
     handlePhoneSubmit,
     handleClientSave,
-    handleCheckInExistingClient,
   } = useCheckInLogic();
 
   return (
@@ -81,12 +79,6 @@ const CheckInPage = () => {
                     )}
                   </Button>
                 </>
-              )}
-              {step === 2 && client && (
-                <WelcomeBack
-                  client={client}
-                  onUpdate={handleCheckInExistingClient}
-                />
               )}
               {step === 2 && !client && (
                 <NewClientForm

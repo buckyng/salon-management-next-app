@@ -40,7 +40,14 @@ export const useCheckInLogic = () => {
       });
 
       setClient(clientData);
-      setStep(2);
+
+      if (clientData) {
+        //if clientData is found, checkin the client
+        handleCheckIn(clientData.id);
+      } else {
+        //if clientData is not found, set step to 2
+        setStep(2);
+      }
     } catch (error) {
       console.error('Error querying client:', error);
       toast.error('Failed to fetch client.');
