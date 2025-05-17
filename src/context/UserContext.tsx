@@ -114,7 +114,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     fetchUserMetadata();
-  }, []);
+  }, [router]);
 
   const updateUser = (updates: Partial<UserMetadata>) => {
     setUser((prev) => (prev ? { ...prev, ...updates } : prev));
