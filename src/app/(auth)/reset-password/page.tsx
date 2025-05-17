@@ -83,6 +83,7 @@ const ResetPasswordPage = () => {
         {/* Header */}
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold">Reset Password</CardTitle>
+          <h1> Hi {user?.email}</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
             Set a new password for your account.
           </p>
