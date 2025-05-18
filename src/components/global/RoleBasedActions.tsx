@@ -25,6 +25,8 @@ const rolePermissions: Record<Role, RouteRolePermission[]> = {
     { name: 'Cashier Dashboard', route: '/[groupId]/cashier' },
     { name: 'Check-In Dashboard', route: '/[groupId]/checkin' },
     { name: 'Combined dashboard', route: '/[groupId]/cashier-combined' },
+    { name: 'Employee Schedule', route: '/[groupId]/cashier/schedule' },
+    { name: 'Employee Turns', route: '/[groupId]/cashier/turns' },
   ],
   client: [{ name: 'Client Dashboard', route: '/[groupId]/client' }],
 };
