@@ -11,6 +11,7 @@ import {
   createTurn,
   fetchScheduledEmployees,
   fetchTodayTurns,
+  sendTurnNotification,
 } from '@/services/turnService';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -85,6 +86,8 @@ export default function TurnsPage() {
     start(async () => {
       try {
         await completeTurn(row.id);
+        await sendTurnNotification(row.user_id);
+
         setTurns((p) =>
           p
             .map((t) => (t.id === row.id ? { ...t, completed: true } : t))

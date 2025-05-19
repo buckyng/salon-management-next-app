@@ -60,3 +60,13 @@ export const completeTurn = async (turnId: string) => {
 
   if (!res.ok) throw new Error('Failed to complete turn');
 };
+
+export const sendTurnNotification = async (employeeId: string) => {
+  const res = await fetch('/api/notifications/send-turn', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ employeeId }),
+  });
+
+  if (!res.ok) throw new Error('Failed to send notification turn');
+};
