@@ -68,5 +68,8 @@ export const sendTurnNotification = async (employeeId: string) => {
     body: JSON.stringify({ employeeId }),
   });
 
-  if (!res.ok) throw new Error('Failed to send notification turn');
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || 'Failed to send notification');
+  }
 };
