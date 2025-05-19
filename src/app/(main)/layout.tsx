@@ -3,6 +3,7 @@
 import React from 'react';
 import InfoBar from '@/components/infobar';
 import { UserProvider } from '@/context/UserContext';
+import OneSignalInit from '@/components/global/OneSignalInit';
 
 type Props = { children: React.ReactNode };
 
@@ -17,6 +18,7 @@ const Layout = (props: Props) => {
 
         {/* Scrollable Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+          <OneSignalInit />
           {props.children}
         </main>
       </div>
