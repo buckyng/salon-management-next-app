@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
     contents: { en: 'Your next client is ready!' },
   };
 
+  console.log('Sending notification to OneSignal:', body);
+
   const r = await fetch('https://onesignal.com/api/v1/notifications', {
     method: 'POST',
     headers: {
@@ -50,6 +52,8 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify(body),
   });
+
+  console.log('OneSignal response:', r.status, r.statusText);
 
   const resp: { invalid_player_ids?: string[] } = await r.json();
 
