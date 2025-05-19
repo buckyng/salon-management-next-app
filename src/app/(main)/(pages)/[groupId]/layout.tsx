@@ -4,9 +4,9 @@ import React, { ReactNode } from 'react';
 import { GroupProvider } from '@/context/GroupContext';
 import BottomNavBar from '@/components/global/bottom-nav-bar';
 import { EodReportProvider } from '@/context/EodReportContext';
-import { useUser } from '@/context/UserContext';
-import useBeams from '@/lib/hooks/useBeams';
-import useBeamsMessages from '@/lib/hooks/useBeamsMessages';
+// import { useUser } from '@/context/UserContext';
+// import useBeams from '@/lib/hooks/useBeams';
+// import useBeamsMessages from '@/lib/hooks/useBeamsMessages';
 
 const Layout = ({
   children,
@@ -15,9 +15,9 @@ const Layout = ({
   children: ReactNode;
   params: { groupId: string };
 }) => {
-  const { user } = useUser();
-  useBeams(user?.id ?? null);
-  useBeamsMessages();
+  // const { user } = useUser();
+  // useBeams(user?.id ?? null);
+  // useBeamsMessages();
   return (
     <div className="flex flex-col h-screen">
       {/* Scrollable container for main content */}

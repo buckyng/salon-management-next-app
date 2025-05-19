@@ -2,11 +2,17 @@
 
 import React from 'react';
 import InfoBar from '@/components/infobar';
-import { UserProvider } from '@/context/UserContext';
+import { UserProvider, useUser } from '@/context/UserContext';
+import useBeams from '@/lib/hooks/useBeams';
+import useBeamsMessages from '@/lib/hooks/useBeamsMessages';
 
 type Props = { children: React.ReactNode };
 
 const Layout = (props: Props) => {
+  const { user } = useUser();
+  useBeams(user?.id ?? null);
+  useBeamsMessages();
+
   return (
     <UserProvider>
       <div className="flex flex-col h-screen">
