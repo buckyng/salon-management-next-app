@@ -57,6 +57,8 @@ export async function POST(req: NextRequest) {
 
   const resp: { invalid_player_ids?: string[] } = await r.json();
 
+  console.log('OneSignal response body:', resp);
+
   /* 4 ▸ Prune stale device IDs, if any */
   if (resp.invalid_player_ids?.length) {
     await supabase

@@ -8,14 +8,10 @@ import OneSignal, {
 } from 'react-onesignal';
 import { toast } from 'react-toastify';
 
-/* Extend Window once, local to this module */
-type InitFlagWindow = Window & { __osInit?: boolean };
-const w = window as InitFlagWindow;
-
-/* Cast OneSignal default export to full API */
+/*──────────────── typed cast ────────────────*/
 const OS = OneSignal as unknown as IOneSignalOneSignal;
 
-/* helper */
+/*──────────────── helper ────────────────*/
 const savePlayerId = async (id: string) =>
   fetch('/api/notifications/save-player', {
     method: 'POST',
@@ -23,12 +19,16 @@ const savePlayerId = async (id: string) =>
     body: JSON.stringify({ playerId: id }),
   }).catch(console.error);
 
+/*──────────────── component ────────────────*/
 export default function OneSignalInit() {
   useEffect(() => {
-    if (w.__osInit) return; // already initialised
+    /* step ④ – guard so we init exactly once */
+    const w = window as Window & { __osInit?: boolean };
+    if (w.__osInit) return;
     w.__osInit = true;
 
     (async () => {
+      /* step ② – tell SDK the exact file name you placed in /public */
       const opts: IInitObject = {
         appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID!,
         allowLocalhostAsSecureOrigin: true,
@@ -36,20 +36,23 @@ export default function OneSignalInit() {
 
       await OS.init(opts);
 
+      /* ask permission if undecided */
       if (OS.Notifications.permissionNative === 'default') {
         await OS.Notifications.requestPermission();
       }
 
+      /* save current id */
       const id = OS.User.PushSubscription.id;
       if (id) savePlayerId(id);
 
+      /* keep DB in sync */
       OS.User.PushSubscription.addEventListener(
         'change',
-        (ev: SubscriptionChangeEvent) => {
-          if (ev.current.id) savePlayerId(ev.current.id);
-        }
+        (ev: SubscriptionChangeEvent) =>
+          ev.current.id && savePlayerId(ev.current.id)
       );
 
+      /* foreground toast */
       OS.Notifications.addEventListener(
         'foregroundWillDisplay',
         ({ notification }) =>
@@ -58,5 +61,5 @@ export default function OneSignalInit() {
     })();
   }, []);
 
-  return null;
+  return null; // no visible UI
 }

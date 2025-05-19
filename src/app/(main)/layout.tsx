@@ -3,9 +3,14 @@
 import React from 'react';
 import InfoBar from '@/components/infobar';
 import { UserProvider } from '@/context/UserContext';
-import OneSignalInit from '@/components/global/OneSignalInit';
+import dynamic from 'next/dynamic';
 
 type Props = { children: React.ReactNode };
+
+const OneSignalInit = dynamic(
+  () => import('@/components/global/OneSignalInit'),
+  { ssr: false }
+);
 
 const Layout = (props: Props) => {
   return (
