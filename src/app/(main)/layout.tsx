@@ -2,7 +2,7 @@
 
 import React from 'react';
 import InfoBar from '@/components/infobar';
-import { UserProvider, useUser } from '@/context/UserContext';
+import { useUser } from '@/context/UserContext';
 import useBeams from '@/lib/hooks/useBeams';
 import useBeamsMessages from '@/lib/hooks/useBeamsMessages';
 
@@ -14,19 +14,17 @@ const Layout = (props: Props) => {
   useBeamsMessages();
 
   return (
-    <UserProvider>
-      <div className="flex flex-col h-screen">
-        {/* Fixed InfoBar */}
-        <header className="sticky top-0 z-10 bg-white shadow-md dark:bg-gray-900">
-          <InfoBar />
-        </header>
+    <div className="flex flex-col h-screen">
+      {/* Fixed InfoBar */}
+      <header className="sticky top-0 z-10 bg-white shadow-md dark:bg-gray-900">
+        <InfoBar />
+      </header>
 
-        {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800">
-          {props.children}
-        </main>
-      </div>
-    </UserProvider>
+      {/* Scrollable Content */}
+      <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+        {props.children}
+      </main>
+    </div>
   );
 };
 
