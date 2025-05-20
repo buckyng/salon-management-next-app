@@ -25,6 +25,14 @@ export default function useBeams(userId: string | null, readyCb?: () => void) {
         serviceWorkerRegistration: swReg,
       });
 
+      if (Notification.permission === 'default') {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+          console.warn('Notifications not granted');
+          return; // abort subscribing until they allow
+        }
+      }
+
       await beams.start();
       await beams.addDeviceInterest(`user-${userId}`);
 

@@ -3,7 +3,6 @@ import localFont from 'next/font/local';
 import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { ToastContainer } from 'react-toastify';
-import { UserProvider } from '@/context/UserContext';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -24,7 +23,7 @@ const APP_DESCRIPTION = 'Manage your salon with easy!';
 export const metadata: Metadata = {
   applicationName: APP_NAME,
   title: {
-    default: APP_DEFAULT_TITLE,
+    default: APP_DEFAULT_TITLE, 
     template: APP_TITLE_TEMPLATE,
   },
   description: APP_DESCRIPTION,
@@ -73,16 +72,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ToastContainer position="top-right" autoClose={3000} />
-        <UserProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </UserProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
