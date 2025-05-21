@@ -16,6 +16,11 @@ export default function useBeams(userId: string | null, readyCb?: () => void) {
   useEffect(() => {
     if (!userId) return;
 
+    if (window.beamsClient) {
+      readyCb?.();
+      return;
+    }
+
     /* cleanup holder */
     let stop: (() => void) | undefined;
 
