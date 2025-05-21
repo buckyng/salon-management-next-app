@@ -11,6 +11,8 @@ import { Loader2 } from 'lucide-react';
 import { fetchSalesByUser } from '@/services/saleService';
 import { sortByKey } from '@/lib/utils/funcUtils';
 import { formatCurrency } from '@/lib/utils/formatUtils';
+import subscribeToTurnCompletions from '@/lib/supabase/services/realtimeTurns';
+import { toast } from 'react-toastify';
 
 const EmployeeHomePage = () => {
   const { user } = useUser();
@@ -40,6 +42,19 @@ const EmployeeHomePage = () => {
       cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
     },
   ];
+
+  // ① subscribe to realtime “complete” turn events for the current user
+  useEffect(() => {
+    if (!activeGroup?.id || !user?.id) return;
+    const unsubscribe = subscribeToTurnCompletions(
+      activeGroup.id,
+      user.id,
+      () => {
+        toast.success(`✅ It is your turn now!`);
+      }
+    );
+    return () => unsubscribe();
+  }, [activeGroup?.id, user?.id]);
 
   // Fetch sales data
   useEffect(() => {
