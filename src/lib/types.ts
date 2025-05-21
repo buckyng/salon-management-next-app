@@ -80,3 +80,5 @@ export type EnrichedCheckIn = CheckIn & {
     }[];
   };
 };
+
+export type EnrichedTurn = Tables<'employee_turns'>;
