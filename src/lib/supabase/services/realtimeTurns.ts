@@ -36,6 +36,7 @@ const subscribeToTurnCompletions = (
         filter: `group_id=eq.${groupId},user_id=eq.${userId},completed=eq.true`,
       },
       (payload) => {
+        console.log('🔔 realtime update payload:', payload);
         callback(payload.new as Turn);
       }
     )
@@ -43,6 +44,7 @@ const subscribeToTurnCompletions = (
 
   // return a cleanup function
   return () => {
+    console.log('🛑 unsubscribing from turns_complete channel');
     supabase.removeChannel(channel);
   };
 };
