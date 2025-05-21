@@ -13,7 +13,8 @@ export async function listSchedulesByGroup(groupId: string) {
   return supabase
     .from('employee_schedules')
     .select('user_id, weekday')
-    .eq('group_id', groupId);
+    .eq('group_id', groupId)
+    .eq('role', 'employee');
 }
 
 export async function upsertWeekday(
