@@ -81,8 +81,29 @@ const UserProfileMenu: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    await logoutUser();
-    router.push('/login');
+    try {
+      // 1. Beams cleanup
+      const beams = window.beamsClient;
+      if (beams && user?.id) {
+        await beams.removeDeviceInterest(`user-${user.id}`);
+        await beams.stop();
+      }
+
+      // 2. Supabase logout + clear localStorage
+      await logoutUser();
+      router.push('/login');
+    } catch (err: unknown) {
+      // Narrow the unknown to an Error (or string) so TS is happy
+      let message: string;
+      if (err instanceof Error) {
+        message = err.message;
+      } else {
+        message = String(err);
+      }
+
+      console.error('Logout failed:', err);
+      toast.error(`Failed to log out: ${message}`);
+    }
   };
 
   return (

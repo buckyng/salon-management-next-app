@@ -17,6 +17,8 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import subscribeToTurnCompletions from '@/lib/supabase/services/realtimeTurns';
+import { useUser } from '@/context/UserContext';
 
 type Emp = { id: string; name: string; avatar_url: string | null };
 type Turn = {
@@ -33,6 +35,7 @@ const WEEKDAY_FMT: Intl.DateTimeFormatOptions = {
 
 export default function TurnsPage() {
   const { activeGroup } = useGroup();
+  const { user } = useUser();
   const [employees, setEmployees] = useState<Emp[]>([]);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,6 +45,19 @@ export default function TurnsPage() {
   const weekday = new Date()
     .toLocaleDateString('en-US', WEEKDAY_FMT)
     .toLowerCase();
+
+  // ① subscribe to realtime “complete” events for the current user
+  useEffect(() => {
+    if (!activeGroup?.id || !user?.id) return;
+    const unsubscribe = subscribeToTurnCompletions(
+      activeGroup.id,
+      user.id,
+      () => {
+        toast.success(`✅ It is your turn now!`);
+      }
+    );
+    return () => unsubscribe();
+  }, [activeGroup?.id, user?.id]);
 
   useEffect(() => {
     if (!activeGroup?.id) return;

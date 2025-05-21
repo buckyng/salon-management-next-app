@@ -3,6 +3,12 @@
 import { useEffect } from 'react';
 import { Client as BeamsClient } from '@pusher/push-notifications-web';
 
+declare global {
+  interface Window {
+    beamsClient?: BeamsClient;
+  }
+}
+
 /**
  * Subscribe browser to the logged-in user’s Beams interest.
  */
@@ -35,6 +41,8 @@ export default function useBeams(userId: string | null, readyCb?: () => void) {
 
       await beams.start();
       await beams.addDeviceInterest(`user-${userId}`);
+      // make accessible for logout cleanup
+      window.beamsClient = beams;
 
       stop = () => {
         void beams.stop();
