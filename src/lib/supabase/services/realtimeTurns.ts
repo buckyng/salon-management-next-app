@@ -24,6 +24,7 @@ const subscribeToTurnCompletions = (
   callback: (turn: Turn) => void
 ) => {
   const supabase = createSupabaseClient();
+  console.log('▶️  Realtime setup for', { groupId, userId });
 
   const channel = supabase
     .channel(`realtime:turns:${groupId}:${userId}`)

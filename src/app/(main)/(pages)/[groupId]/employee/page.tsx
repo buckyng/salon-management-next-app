@@ -45,20 +45,6 @@ const EmployeeHomePage = () => {
     },
   ];
 
-  // ① subscribe to realtime “complete” turn events for the current user
-  useEffect(() => {
-    if (!activeGroup?.id || !user?.id) return;
-    const unsubscribe = subscribeToTurnCompletions(
-      activeGroup.id,
-      user.id,
-      (turn: RealtimeTurn) => {
-        const time = new Date(turn.created_at).toLocaleTimeString();
-        toast.success(`✅ Your turn at ${time} is now complete!`);
-      }
-    );
-    return () => unsubscribe();
-  }, [activeGroup?.id, user?.id]);
-
   // Fetch sales data
   useEffect(() => {
     if (!user || !activeGroup?.id) return;
@@ -94,6 +80,16 @@ const EmployeeHomePage = () => {
     };
 
     fetchSales();
+
+    const unsubscribe = subscribeToTurnCompletions(
+      activeGroup.id,
+      user.id,
+      (turn: RealtimeTurn) => {
+        const time = new Date(turn.created_at).toLocaleTimeString();
+        toast.success(`✅ Your turn at ${time} is now complete!`);
+      }
+    );
+    return () => unsubscribe();
   }, [user, activeGroup?.id, currentDate]);
 
   return (
