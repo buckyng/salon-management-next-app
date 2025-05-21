@@ -1,3 +1,4 @@
+// src/lib/hooks/useBeams.ts
 'use client';
 
 import { useEffect } from 'react';
@@ -7,58 +8,86 @@ declare global {
   interface Window {
     beamsClient?: BeamsClient;
   }
+  interface Navigator {
+    /** iOS “Add to Home Screen” standalone flag */
+    standalone?: boolean;
+  }
 }
 
 /**
- * Subscribe browser to the logged-in user’s Beams interest.
+ * Subscribe this browser to user-specific Beams interest, but only
+ * if the environment really supports Web Push (and for Safari, only
+ * when running as an installed PWA).
  */
-export default function useBeams(userId: string | null, readyCb?: () => void) {
+export default function useBeams(userId: string | null) {
   useEffect(() => {
     if (!userId) return;
 
-    if (window.beamsClient) {
-      readyCb?.();
+    // 1️⃣ Basic Web Push feature‐detect
+    const supportsWebPush =
+      'serviceWorker' in navigator &&
+      'PushManager' in window &&
+      'Notification' in window;
+    if (!supportsWebPush) {
+      console.warn('[Beams] Web Push not supported in this browser');
       return;
     }
 
-    /* cleanup holder */
-    let stop: (() => void) | undefined;
+    // 2️⃣ Safari PWA check: only run if "standalone" mode
+    const ua = navigator.userAgent;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      navigator.standalone === true;
+    if (isSafari && !isStandalone) {
+      console.warn(
+        '[Beams] Safari push only works in an installed PWA (display-mode: standalone)'
+      );
+      return;
+    }
+
+    // 3️⃣ Don’t re-init if we already have a client in window
+    if (window.beamsClient) {
+      console.log('[Beams] already initialized');
+      return;
+    }
+
+    let beams: BeamsClient;
 
     (async () => {
-      /* register the SW first */
-      const swReg = await navigator.serviceWorker.register(
-        '/push-notifications-sw.js'
-      );
+      try {
+        // 4️⃣ Instantiate
+        beams = new BeamsClient({
+          instanceId: process.env.NEXT_PUBLIC_BEAMS_INSTANCE_ID!,
+        });
 
-      /* initialise Beams */
-      const beams = new BeamsClient({
-        instanceId: process.env.NEXT_PUBLIC_BEAMS_INSTANCE_ID!,
-        serviceWorkerRegistration: swReg,
-      });
-
-      if (Notification.permission === 'default') {
-        const perm = await Notification.requestPermission();
-        if (perm !== 'granted') {
-          console.warn('Notifications not granted');
-          return; // abort subscribing until they allow
+        // 5️⃣ Request permission if needed
+        if (Notification.permission === 'default') {
+          const perm = await Notification.requestPermission();
+          if (perm !== 'granted') {
+            console.warn('[Beams] user denied notification permission');
+            return;
+          }
         }
+
+        // 6️⃣ Start (this registers the SW under /service-worker.js)
+        await beams.start();
+        console.log('[Beams] start() succeeded');
+
+        // 7️⃣ Subscribe to the per-user interest
+        await beams.addDeviceInterest(`user-${userId}`);
+        console.log('[Beams] subscribed to interest:', `user-${userId}`);
+
+        // 8️⃣ Expose for cleanup (e.g. on logout)
+        window.beamsClient = beams;
+      } catch (err) {
+        console.error('[Beams] init/subscription error:', err);
       }
+    })();
 
-      await beams.start();
-      await beams.addDeviceInterest(`user-${userId}`);
-      // make accessible for logout cleanup
-      window.beamsClient = beams;
-
-      stop = () => {
-        void beams.stop();
-      };
-
-      readyCb?.();
-    })().catch(console.error);
-
-    /* React-compliant synchronous cleanup */
     return () => {
-      if (stop) stop();
+      beams?.stop();
+      delete window.beamsClient;
     };
-  }, [userId, readyCb]);
+  }, [userId]);
 }
