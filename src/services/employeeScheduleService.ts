@@ -5,7 +5,8 @@ export async function listEmployeesByGroup(groupId: string) {
   return supabase
     .from('group_users')
     .select('profile:profiles(id, name)')
-    .eq('group_id', groupId);
+    .eq('group_id', groupId)
+    .eq('role', 'employee');
 }
 
 export async function listSchedulesByGroup(groupId: string) {
@@ -13,8 +14,7 @@ export async function listSchedulesByGroup(groupId: string) {
   return supabase
     .from('employee_schedules')
     .select('user_id, weekday')
-    .eq('group_id', groupId)
-    .eq('role', 'employee');
+    .eq('group_id', groupId);
 }
 
 export async function upsertWeekday(
