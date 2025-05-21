@@ -23,7 +23,7 @@ const APP_DESCRIPTION = 'Manage your salon with easy!';
 export const metadata: Metadata = {
   applicationName: APP_NAME,
   title: {
-    default: APP_DEFAULT_TITLE,
+    default: APP_DEFAULT_TITLE, 
     template: APP_TITLE_TEMPLATE,
   },
   description: APP_DESCRIPTION,
