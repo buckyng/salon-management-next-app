@@ -11,10 +11,6 @@ import { Loader2 } from 'lucide-react';
 import { fetchSalesByUser } from '@/services/saleService';
 import { sortByKey } from '@/lib/utils/funcUtils';
 import { formatCurrency } from '@/lib/utils/formatUtils';
-import subscribeToTurnCompletions, {
-  Turn as RealtimeTurn,
-} from '@/lib/supabase/services/realtimeTurns';
-import { toast } from 'react-toastify';
 
 const EmployeeHomePage = () => {
   const { user } = useUser();
@@ -80,16 +76,6 @@ const EmployeeHomePage = () => {
     };
 
     fetchSales();
-
-    const unsubscribe = subscribeToTurnCompletions(
-      activeGroup.id,
-      user.id,
-      (turn: RealtimeTurn) => {
-        const time = new Date(turn.created_at).toLocaleTimeString();
-        toast.success(`✅ Your turn at ${time} is now complete!`);
-      }
-    );
-    return () => unsubscribe();
   }, [user, activeGroup?.id, currentDate]);
 
   return (

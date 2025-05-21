@@ -1,4 +1,3 @@
-// src/lib/hooks/useBeams.ts
 'use client';
 
 import { useEffect } from 'react';
@@ -10,45 +9,51 @@ declare global {
   }
 }
 
-export default function useBeams(userId: string | null) {
+/**
+ * Subscribe browser to the logged-in user’s Beams interest.
+ */
+export default function useBeams(userId: string | null, readyCb?: () => void) {
   useEffect(() => {
     if (!userId) return;
 
-    let stopped = false;
+    /* cleanup holder */
+    let stop: (() => void) | undefined;
 
     (async () => {
-      try {
-        // 1️⃣ register your service worker
-        const swReg = await navigator.serviceWorker.register(
-          '/push-notifications-sw.js'
-        );
+      /* register the SW first */
+      const swReg = await navigator.serviceWorker.register(
+        '/push-notifications-sw.js'
+      );
 
-        // 2️⃣ create the client
-        const beams = new BeamsClient({
-          instanceId: process.env.NEXT_PUBLIC_BEAMS_INSTANCE_ID!,
-          serviceWorkerRegistration: swReg,
-          // allowLocalhostAsSecureOrigin: true, // uncomment if testing on localhost
-        });
+      /* initialise Beams */
+      const beams = new BeamsClient({
+        instanceId: process.env.NEXT_PUBLIC_BEAMS_INSTANCE_ID!,
+        serviceWorkerRegistration: swReg,
+      });
 
-        // 3️⃣ *first* start()
-        await beams.start();
-
-        // 4️⃣ *then* add interests
-        await beams.addDeviceInterest(`user-${userId}`);
-
-        // 5️⃣ expose for cleanup
-        window.beamsClient = beams;
-      } catch (e) {
-        console.error('Beams initialization failed:', e);
+      if (Notification.permission === 'default') {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+          console.warn('Notifications not granted');
+          return; // abort subscribing until they allow
+        }
       }
-    })();
 
+      await beams.start();
+      await beams.addDeviceInterest(`user-${userId}`);
+      // make accessible for logout cleanup
+      window.beamsClient = beams;
+
+      stop = () => {
+        void beams.stop();
+      };
+
+      readyCb?.();
+    })().catch(console.error);
+
+    /* React-compliant synchronous cleanup */
     return () => {
-      if (window.beamsClient && !stopped) {
-        void window.beamsClient.stop();
-        delete window.beamsClient;
-        stopped = true;
-      }
+      if (stop) stop();
     };
-  }, [userId]);
+  }, [userId, readyCb]);
 }
