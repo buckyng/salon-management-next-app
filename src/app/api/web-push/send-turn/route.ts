@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No subscription' }, { status: 404 });
   }
 
+  console.log('Sending push to', userId, data.subscription);
+
   try {
     await webpush.sendNotification(
       data.subscription,

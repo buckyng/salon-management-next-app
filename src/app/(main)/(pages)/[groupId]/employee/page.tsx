@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DataTable } from '@/components/ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 import { useUser } from '@/context/UserContext';
@@ -24,17 +24,24 @@ const EmployeeHomePage = () => {
 
   const currentDate = getCurrentLocalDate();
 
-  const { error } = usePushSubscription(async (sub) => {
-    await fetch('/api/web-push/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        subscription: sub,
-        groupId: activeGroup!.id,
-        userId: user!.id,
-      }),
-    });
-  });
+  // ONLY re-create when groupId or userId actually change:
+  const handleSubscription = useCallback(
+    async (sub: PushSubscriptionJSON) => {
+      if (!activeGroup?.id || !user?.id) return;
+      await fetch('/api/web-push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscription: sub,
+          groupId: activeGroup.id,
+          userId: user.id,
+        }),
+      });
+    },
+    [activeGroup?.id, user?.id]
+  );
+
+  const { error } = usePushSubscription(handleSubscription);
 
   const columns: ColumnDef<SaleData>[] = [
     {

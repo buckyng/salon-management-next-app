@@ -174,21 +174,24 @@ export type Database = {
       employee_turns: {
         Row: {
           completed: boolean;
-          created_at: string;
+          created_at: string | null;
+          created_date: string | null;
           group_id: string;
           id: string;
           user_id: string;
         };
         Insert: {
           completed?: boolean;
-          created_at?: string;
+          created_at?: string | null;
+          created_date?: string | null;
           group_id: string;
           id?: string;
           user_id: string;
         };
         Update: {
           completed?: boolean;
-          created_at?: string;
+          created_at?: string | null;
+          created_date?: string | null;
           group_id?: string;
           id?: string;
           user_id?: string;
@@ -440,6 +443,7 @@ export type Database = {
           email: string;
           id: string;
           name: string | null;
+          onesignal_ids: string[] | null;
           phone: string | null;
         };
         Insert: {
@@ -448,6 +452,7 @@ export type Database = {
           email: string;
           id?: string;
           name?: string | null;
+          onesignal_ids?: string[] | null;
           phone?: string | null;
         };
         Update: {
@@ -456,9 +461,49 @@ export type Database = {
           email?: string;
           id?: string;
           name?: string | null;
+          onesignal_ids?: string[] | null;
           phone?: string | null;
         };
         Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          group_id: string;
+          id: string;
+          subscription: Json;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          group_id: string;
+          id?: string;
+          subscription: Json;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          group_id?: string;
+          id?: string;
+          subscription?: Json;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'push_subscriptions_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'groups';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'push_subscriptions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       roles: {
         Row: {
@@ -540,6 +585,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      add_unique_player_id: {
+        Args: { uid: string; pid: string };
+        Returns: undefined;
+      };
       check_eod_report_exists: {
         Args: { group_id_input: string; date_input: string };
         Returns: boolean;
