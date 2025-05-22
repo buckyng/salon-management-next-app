@@ -61,11 +61,27 @@ export const completeTurn = async (turnId: string) => {
   if (!res.ok) throw new Error('Failed to complete turn');
 };
 
+// export const sendTurnNotification = async (employeeId: string) => {
+//   const res = await fetch('/api/notifications/send-turn', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({ employeeId }),
+//   });
+
+//   if (!res.ok) {
+//     const { error } = await res.json();
+//     throw new Error(error || 'Failed to send notification');
+//   }
+// };
+
+
 export const sendTurnNotification = async (employeeId: string) => {
-  const res = await fetch('/api/notifications/send-turn', {
+  const res = await fetch('/api/web-push/send-turn', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ employeeId }),
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      userId: employeeId
+    }),
   });
 
   if (!res.ok) {

@@ -1,6 +1,14 @@
 {
   "name": "Salon Management App",
-  "short_name": "SM App",
+  "short_name": "SalonApp",
+  "description": "Multi-tenant salon management application",
+  "lang": "en-US",
+  "start_url": "/?utm_source=web_app_manifest",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#FFFFFF",
+  "background_color": "#FFFFFF",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -12,10 +20,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "theme_color": "#FFFFFF",
-  "background_color": "#FFFFFF",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }

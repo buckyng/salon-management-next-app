@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 import { fetchSalesByUser } from '@/services/saleService';
 import { sortByKey } from '@/lib/utils/funcUtils';
 import { formatCurrency } from '@/lib/utils/formatUtils';
+import { usePushSubscription } from '@/lib/hooks/usePushSubscription';
 
 const EmployeeHomePage = () => {
   const { user } = useUser();
@@ -22,6 +23,18 @@ const EmployeeHomePage = () => {
   const [loading, setLoading] = useState(false);
 
   const currentDate = getCurrentLocalDate();
+
+  const { error } = usePushSubscription(async (sub) => {
+    await fetch('/api/web-push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscription: sub,
+        groupId: activeGroup!.id,
+        userId: user!.id,
+      }),
+    });
+  });
 
   const columns: ColumnDef<SaleData>[] = [
     {
@@ -80,6 +93,7 @@ const EmployeeHomePage = () => {
 
   return (
     <div className="container mx-auto mt-4 px-4 sm:px-6 lg:px-8">
+      {error && <p className="text-red-500">{error}</p>}
       <h1 className="text-xl font-bold text-center sm:text-2xl mb-4">
         {activeGroup?.name
           ? `${activeGroup.name} - Today's Sales`
