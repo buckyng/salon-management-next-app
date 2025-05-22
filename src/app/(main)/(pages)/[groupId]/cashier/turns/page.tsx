@@ -17,14 +17,9 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { EnrichedTurn } from '@/lib/types';
 
 type Emp = { id: string; name: string; avatar_url: string | null };
-type Turn = {
-  id: string;
-  user_id: string;
-  created_at: string;
-  completed: boolean;
-};
 
 const WEEKDAY_FMT: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -34,7 +29,7 @@ const WEEKDAY_FMT: Intl.DateTimeFormatOptions = {
 export default function TurnsPage() {
   const { activeGroup } = useGroup();
   const [employees, setEmployees] = useState<Emp[]>([]);
-  const [turns, setTurns] = useState<Turn[]>([]);
+  const [turns, setTurns] = useState<EnrichedTurn[]>([]);
   const [loading, setLoading] = useState(false);
   const [isPending, start] = useTransition();
 
@@ -64,9 +59,11 @@ export default function TurnsPage() {
     load();
   }, [activeGroup, todayISO, weekday]);
 
-  const sortTurns = (a: Turn, b: Turn) => {
+  const sortTurns = (a: EnrichedTurn, b: EnrichedTurn) => {
     if (a.completed !== b.completed) return a.completed ? 1 : -1;
-    return a.created_at.localeCompare(b.created_at);
+    return a.created_at && b.created_at
+      ? a.created_at.localeCompare(b.created_at)
+      : 0;
   };
 
   const handleCardClick = (emp: Emp) =>
@@ -82,7 +79,7 @@ export default function TurnsPage() {
       }
     });
 
-  const handleDone = (row: Turn) =>
+  const handleDone = (row: EnrichedTurn) =>
     start(async () => {
       try {
         await completeTurn(row.id);
