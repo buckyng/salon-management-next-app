@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataTable } from '@/components/ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 import { useUser } from '@/context/UserContext';
@@ -12,6 +12,7 @@ import { fetchSalesByUser } from '@/services/saleService';
 import { sortByKey } from '@/lib/utils/funcUtils';
 import { formatCurrency } from '@/lib/utils/formatUtils';
 import { usePushSubscription } from '@/lib/hooks/usePushSubscription';
+import { EnableNotificationsButton } from '@/components/global/EnableNotificationButton';
 
 const EmployeeHomePage = () => {
   const { user } = useUser();
@@ -24,24 +25,18 @@ const EmployeeHomePage = () => {
 
   const currentDate = getCurrentLocalDate();
 
-  // ONLY re-create when groupId or userId actually change:
-  const handleSubscription = useCallback(
-    async (sub: PushSubscriptionJSON) => {
-      if (!activeGroup?.id || !user?.id) return;
-      await fetch('/api/web-push/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subscription: sub,
-          groupId: activeGroup.id,
-          userId: user.id,
-        }),
-      });
-    },
-    [activeGroup?.id, user?.id]
-  );
-
-  const { error } = usePushSubscription(handleSubscription);
+  const { error } = usePushSubscription(async (sub) => {
+    if (!user?.id || !activeGroup?.id) return;
+    await fetch('/api/web-push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscription: sub,
+        userId: user.id,
+        groupId: activeGroup.id,
+      }),
+    });
+  });
 
   const columns: ColumnDef<SaleData>[] = [
     {
@@ -101,8 +96,12 @@ const EmployeeHomePage = () => {
   return (
     <div className="container mx-auto mt-4 px-4 sm:px-6 lg:px-8">
       {error && <p className="text-red-500">{error}</p>}
+      <EnableNotificationsButton
+        userId={user?.id || ''}
+        groupId={activeGroup?.id || ''}
+      />
       <h1 className="text-xl font-bold text-center sm:text-2xl mb-4">
-        {activeGroup?.name
+        {activeGroup && activeGroup.name
           ? `${activeGroup.name} - Today's Sales`
           : "Today's Sales"}
       </h1>

@@ -10,12 +10,13 @@ webpush.setVapidDetails(
 );
 
 export async function POST(req: NextRequest) {
-  const { userId } = await req.json();
+  const { userId, groupId } = await req.json();
   const supabase = await createSupabaseClient();
   const { data, error } = await supabase
     .from('push_subscriptions')
     .select('subscription')
     .eq('user_id', userId)
+    .eq('group_id', groupId)
     .single();
 
   if (error || !data) {
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
       JSON.stringify({
         title: 'Your turn is up!',
         body: `Turn is ready`,
-        icon: '/android-chrome-192x192.png',
+        icon: '/icons/icon-192x192.png',
       })
     );
     return NextResponse.json({ success: true });

@@ -1,54 +1,68 @@
+// src/lib/hooks/usePushSubscription.ts
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export type PushSubscriptionJSON = ReturnType<PushSubscription['toJSON']>;
+export interface PushSubscriptionJSON {
+  endpoint: string;
+  expirationTime: number | null;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
 
+interface UsePushSubscriptionReturn {
+  error?: string;
+}
+
+/**
+ * On mount, if notifications are already granted and a subscription exists,
+ * fetch it from the service worker and invoke your callback so you can re-save it.
+ */
 export function usePushSubscription(
-  onChange: (sub: PushSubscriptionJSON) => Promise<void>
-) {
-  const [error, setError] = useState<string | null>(null);
+  onSubscription: (sub: PushSubscriptionJSON) => Promise<void>
+): UsePushSubscriptionReturn {
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      setError('Push API not supported in this browser');
+    if (
+      typeof window === 'undefined' ||
+      !('serviceWorker' in navigator) ||
+      !('PushManager' in window)
+    ) {
+      setError('Push notifications are not supported by this browser.');
       return;
     }
 
-    let reg: ServiceWorkerRegistration;
+    // Only proceed if the user has already granted permission
+    if (Notification.permission !== 'granted') {
+      return;
+    }
+
+    let cancelled = false;
 
     navigator.serviceWorker
-      .register('/notification-sw.js')
-      .then((r) => {
-        reg = r;
-        return Notification.requestPermission();
-      })
-      .then((permission) => {
-        if (permission !== 'granted') throw new Error('Permission denied');
-        return reg.pushManager.getSubscription();
-      })
-      .then((sub) => {
-        if (sub) return sub;
-        // replace with your VAPID public key:
-        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC!;
-        return reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidKey),
-        });
-      })
-      .then((sub) => onChange(sub.toJSON()))
-      .catch((err) => setError((err as Error).message));
+      .ready
+      .then(async (registration) => {
+        // check for an existing subscription
+        const subscription = await registration.pushManager.getSubscription();
+        if (!subscription) return;
 
-    // no teardown needed
-  }, [onChange]);
+        const json = subscription.toJSON() as PushSubscriptionJSON;
+        if (!cancelled) {
+          await onSubscription(json);
+        }
+      })
+      .catch((err) => {
+        console.error('Error checking existing subscription', err);
+        setError('Failed to load existing subscription.');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [onSubscription]);
 
   return { error };
-}
-
-// utility to decode your VAPID key
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const raw = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-  const buf = atob(raw);
-  return Uint8Array.from([...buf].map((c) => c.charCodeAt(0)));
 }

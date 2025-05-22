@@ -75,12 +75,13 @@ export const completeTurn = async (turnId: string) => {
 // };
 
 
-export const sendTurnNotification = async (employeeId: string) => {
+export const sendTurnNotification = async (employeeId: string, groupId: string) => {
   const res = await fetch('/api/web-push/send-turn', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({
-      userId: employeeId
+      userId: employeeId,
+      groupId: groupId,
     }),
   });
 

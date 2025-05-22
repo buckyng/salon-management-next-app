@@ -83,7 +83,9 @@ export default function TurnsPage() {
     start(async () => {
       try {
         await completeTurn(row.id);
-        await sendTurnNotification(row.user_id);
+        if (activeGroup) {
+          await sendTurnNotification(row.user_id, activeGroup.id);
+        }
 
         setTurns((p) =>
           p
