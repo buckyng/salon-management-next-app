@@ -16,6 +16,7 @@ import { changeUserPassword, logoutUser } from '@/services/authService';
 import { toast } from 'react-toastify';
 import { uploadImage } from '@/lib/supabase/storage/client';
 import { updateUserDetails } from '@/lib/supabase/helpers/user';
+import EnableNotificationsButton from './EnableNotificationsButton';
 
 const UserProfileMenu: React.FC = () => {
   const router = useRouter();
@@ -126,6 +127,9 @@ const UserProfileMenu: React.FC = () => {
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsChangingPassword(true)}>
             Change Password
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <EnableNotificationsButton />
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleLogout}>Log Out</DropdownMenuItem>
         </DropdownMenuContent>
