@@ -1,5 +1,7 @@
 import { EnrichedTurn, Profile } from '@/lib/types'; // create this if you want strong types
 
+const DEFAULT_MESSAGE = process.env.NEXT_PUBLIC_DEFAULT_TURN_SMS_MESSAGE!;
+
 /* 🔹 fetch employees scheduled for today */
 export const fetchScheduledEmployees = async ({
   groupId,
@@ -65,12 +67,16 @@ export const sendTurnNotification = async (
   employeeId: string,
   customText: string | null | undefined
 ) => {
+  // if customText is null/undefined/empty/whitespace, fall back:
+  const messageToSend =
+    customText && customText.trim().length > 0 ? customText : DEFAULT_MESSAGE;
+
   const res = await fetch('/api/notifications/send-sms', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       userId: employeeId,
-      message: customText ?? '🎉 Your next client is ready!',
+      message: messageToSend,
     }),
   });
 
