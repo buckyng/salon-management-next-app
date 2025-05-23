@@ -1,5 +1,7 @@
 import { Tables } from './database.types';
 
+export type Profile = Tables<'profiles'>;
+
 export interface Membership {
   id: string;
   user_id: string;

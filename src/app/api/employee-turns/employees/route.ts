@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     /* 2 ▸ Pull their profile info */
     const { data: profiles, error: profErr } = await supabase
       .from('profiles')
-      .select('id, name, avatar_url')
+      .select('id, name, avatar_url, default_notification_message')
       .in('id', userIds);
 
     if (profErr) {

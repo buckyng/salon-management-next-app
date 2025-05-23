@@ -440,6 +440,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          default_notification_message: string | null
           email: string
           id: string
           name: string | null
@@ -448,6 +449,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          default_notification_message?: string | null
           email: string
           id?: string
           name?: string | null
@@ -456,6 +458,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          default_notification_message?: string | null
           email?: string
           id?: string
           name?: string | null

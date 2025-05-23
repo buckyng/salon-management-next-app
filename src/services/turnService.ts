@@ -1,4 +1,4 @@
-import { EnrichedTurn } from '@/lib/types'; // create this if you want strong types
+import { EnrichedTurn, Profile } from '@/lib/types'; // create this if you want strong types
 
 /* 🔹 fetch employees scheduled for today */
 export const fetchScheduledEmployees = async ({
@@ -13,7 +13,7 @@ export const fetchScheduledEmployees = async ({
   const data = await res.json();
 
   if (!res.ok) throw new Error('Failed to fetch employees');
-  return data as { id: string; name: string; avatar_url: string | null }[];
+  return data as Profile[];
 };
 
 /* 🔹 fetch today’s turns */
@@ -61,13 +61,16 @@ export const completeTurn = async (turnId: string) => {
   if (!res.ok) throw new Error('Failed to complete turn');
 };
 
-export const sendTurnNotification = async (employeeId: string) => {
+export const sendTurnNotification = async (
+  employeeId: string,
+  customText: string | null | undefined
+) => {
   const res = await fetch('/api/notifications/send-sms', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       userId: employeeId,
-      message: '🎉 Your next client is ready!',
+      message: customText ?? '🎉 Your next client is ready!',
     }),
   });
 
