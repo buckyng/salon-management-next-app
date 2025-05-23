@@ -137,14 +137,23 @@ export default function TurnsPage() {
         md:grid-cols-4      /* 4 cols on iPad Air */
         lg:grid-cols-5      /* 5 cols on desktop */
         gap-3 md:gap-4      /* tighter gap on small screens */
+        auto-rows-min
+        self-start
         overflow-y-auto     /* scroll if more than 20 rows */
       "
       >
         {employees.map((emp) => (
           <Card
             key={emp.id}
-            className="items-center p-2 md:p-3 cursor-pointer hover:bg-muted/70"
             onClick={() => handleCardClick(emp)}
+            className="
+              aspect-square      /* force a 1:1 aspect ratio */
+              flex flex-col
+              items-center justify-center
+              p-2 md:p-3
+              cursor-pointer
+              hover:bg-muted/70
+            "
           >
             <Avatar className="h-10 w-10 md:h-12 md:w-12 mb-1 md:mb-2">
               <AvatarImage
