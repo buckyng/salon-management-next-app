@@ -18,9 +18,7 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { EnrichedTurn } from '@/lib/types';
-
-type Emp = { id: string; name: string; avatar_url: string | null };
+import { EnrichedTurn, Profile } from '@/lib/types';
 
 const WEEKDAY_FMT: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -29,7 +27,7 @@ const WEEKDAY_FMT: Intl.DateTimeFormatOptions = {
 
 export default function TurnsPage() {
   const { activeGroup } = useGroup();
-  const [employees, setEmployees] = useState<Emp[]>([]);
+  const [employees, setEmployees] = useState<Profile[]>([]);
   const [turns, setTurns] = useState<EnrichedTurn[]>([]);
   const [loading, setLoading] = useState(false);
   const [isPending, start] = useTransition();
@@ -67,7 +65,7 @@ export default function TurnsPage() {
       : 0;
   };
 
-  const handleCardClick = (emp: Emp) =>
+  const handleCardClick = (emp: Profile) =>
     start(async () => {
       try {
         const newRow = await createTurn({
@@ -93,7 +91,9 @@ export default function TurnsPage() {
 
         // 2️⃣ Try sending notification, but don’t let it block the above
         try {
-          await sendTurnNotification(row.user_id);
+          const emp = employees.find((e) => e.id === row.user_id);
+          const customMessage = emp?.default_notification_message;
+          await sendTurnNotification(row.user_id, customMessage);
         } catch (notifyErr: unknown) {
           console.error('Notification failed:', notifyErr);
           // Show the real error message if it’s an Error
@@ -110,19 +110,19 @@ export default function TurnsPage() {
       }
     });
 
-    const handleUndo = (row: EnrichedTurn) =>
-      start(async () => {
-        try {
-          await undoTurn({ turnId: row.id })
-          setTurns((p) =>
-            p
-              .map((t) => (t.id === row.id ? { ...t, completed: false } : t))
-              .sort(sortTurns)
-          )
-        } catch {
-          toast.error('Failed to undo turn')
-        }
-      })
+  const handleUndo = (row: EnrichedTurn) =>
+    start(async () => {
+      try {
+        await undoTurn({ turnId: row.id });
+        setTurns((p) =>
+          p
+            .map((t) => (t.id === row.id ? { ...t, completed: false } : t))
+            .sort(sortTurns)
+        );
+      } catch {
+        toast.error('Failed to undo turn');
+      }
+    });
 
   if (loading) return <LoadingSpinner fullScreen />;
 
@@ -147,9 +147,12 @@ export default function TurnsPage() {
             onClick={() => handleCardClick(emp)}
           >
             <Avatar className="h-10 w-10 md:h-12 md:w-12 mb-1 md:mb-2">
-              <AvatarImage src={emp.avatar_url ?? undefined} alt={emp.name} />
+              <AvatarImage
+                src={emp.avatar_url ?? undefined}
+                alt={emp.name ?? ''}
+              />
               <AvatarFallback className="text-xs md:text-sm">
-                {emp.name.charAt(0)}
+                {emp.name?.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <p className="text-center text-xs md:text-sm font-medium line-clamp-1">
@@ -177,7 +180,9 @@ export default function TurnsPage() {
                 <tr
                   key={row.id}
                   className={`border-t ${
-                    row.completed ? 'line-through text-muted-foreground text-red-500' : ''
+                    row.completed
+                      ? 'line-through text-muted-foreground text-red-500'
+                      : ''
                   }`}
                 >
                   <td className="p-2">{formatToLocalTime(row.created_at)}</td>
@@ -199,16 +204,16 @@ export default function TurnsPage() {
                         disabled={isPending}
                         onClick={() => handleDone(row)}
                       >
-                        Done
+                        Call
                       </Button>
                     )}
                   </td>
                 </tr>
-              )
+              );
             })}
           </tbody>
         </Table>
       </div>
     </div>
-  )
+  );
 }
