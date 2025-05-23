@@ -26,7 +26,11 @@ const UserProfileMenu: React.FC = () => {
 
   if (loading) return null;
 
-  const handleProfileSave = async (name: string, avatarFile: File | null) => {
+  const handleProfileSave = async (
+    name: string,
+    avatarFile: File | null,
+    phone: string
+  ) => {
     try {
       let uploadedAvatarUrl = user?.avatar_url || '';
 
@@ -53,6 +57,7 @@ const UserProfileMenu: React.FC = () => {
         userId: user.id,
         name,
         avatarUrl: uploadedAvatarUrl,
+        phone,
       });
       if (updateError) throw updateError;
 
@@ -82,14 +87,6 @@ const UserProfileMenu: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      // 1. Beams cleanup
-      const beams = window.beamsClient;
-      if (beams && user?.id) {
-        await beams.removeDeviceInterest(`user-${user.id}`);
-        await beams.stop();
-      }
-
-      // 2. Supabase logout + clear localStorage
       await logoutUser();
       router.push('/login');
     } catch (err: unknown) {
@@ -108,7 +105,7 @@ const UserProfileMenu: React.FC = () => {
 
   return (
     <div>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Avatar>
             <AvatarImage
@@ -136,6 +133,7 @@ const UserProfileMenu: React.FC = () => {
         onSave={handleProfileSave}
         initialName={user?.name || ''}
         initialAvatarUrl={user?.avatar_url || ''}
+        initialPhone={user?.phone || ''}
       />
       <ChangePasswordDialog
         isOpen={isChangingPassword}

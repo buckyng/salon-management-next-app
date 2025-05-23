@@ -81,7 +81,7 @@ const EmployeeHomePage = () => {
   return (
     <div className="container mx-auto mt-4 px-4 sm:px-6 lg:px-8">
       <h1 className="text-xl font-bold text-center sm:text-2xl mb-4">
-        {activeGroup?.name
+        {activeGroup && activeGroup.name
           ? `${activeGroup.name} - Today's Sales`
           : "Today's Sales"}
       </h1>
