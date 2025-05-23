@@ -11,10 +11,11 @@ interface UserMetadata {
     id: string;
     name: string | null;
     roles: string[];
-    logo_url: string | null;
+    logo_url: string | null;    
   }[]; // Group ID mapped to roles
   name: string | null; // From profiles table
   avatar_url: string | null; // From profiles table
+  phone: string | null;
 }
 
 interface UserContextValue {
@@ -63,7 +64,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         // Fetch profile data from the profiles table
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('name, avatar_url')
+          .select('name, avatar_url, phone')
           .eq('id', userId)
           .single();
 
@@ -99,6 +100,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           groups,
           name: profileData?.name || null,
           avatar_url: profileData?.avatar_url || null,
+          phone: profileData?.phone || null,
         };
 
         setUser(metadata);

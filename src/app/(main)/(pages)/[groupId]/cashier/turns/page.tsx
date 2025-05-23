@@ -12,19 +12,15 @@ import {
   fetchScheduledEmployees,
   fetchTodayTurns,
   sendTurnNotification,
+  undoTurn,
 } from '@/services/turnService';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { EnrichedTurn } from '@/lib/types';
 
 type Emp = { id: string; name: string; avatar_url: string | null };
-type Turn = {
-  id: string;
-  user_id: string;
-  created_at: string;
-  completed: boolean;
-};
 
 const WEEKDAY_FMT: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -34,7 +30,7 @@ const WEEKDAY_FMT: Intl.DateTimeFormatOptions = {
 export default function TurnsPage() {
   const { activeGroup } = useGroup();
   const [employees, setEmployees] = useState<Emp[]>([]);
-  const [turns, setTurns] = useState<Turn[]>([]);
+  const [turns, setTurns] = useState<EnrichedTurn[]>([]);
   const [loading, setLoading] = useState(false);
   const [isPending, start] = useTransition();
 
@@ -64,9 +60,11 @@ export default function TurnsPage() {
     load();
   }, [activeGroup, todayISO, weekday]);
 
-  const sortTurns = (a: Turn, b: Turn) => {
+  const sortTurns = (a: EnrichedTurn, b: EnrichedTurn) => {
     if (a.completed !== b.completed) return a.completed ? 1 : -1;
-    return a.created_at.localeCompare(b.created_at);
+    return a.created_at && b.created_at
+      ? a.created_at.localeCompare(b.created_at)
+      : 0;
   };
 
   const handleCardClick = (emp: Emp) =>
@@ -82,21 +80,49 @@ export default function TurnsPage() {
       }
     });
 
-  const handleDone = (row: Turn) =>
+  const handleDone = (row: EnrichedTurn) =>
     start(async () => {
       try {
+        // 1️⃣ Complete the turn & update UI
         await completeTurn(row.id);
-        await sendTurnNotification(row.user_id);
-
         setTurns((p) =>
           p
             .map((t) => (t.id === row.id ? { ...t, completed: true } : t))
             .sort(sortTurns)
         );
-      } catch {
+
+        // 2️⃣ Try sending notification, but don’t let it block the above
+        try {
+          await sendTurnNotification(row.user_id);
+        } catch (notifyErr: unknown) {
+          console.error('Notification failed:', notifyErr);
+          // Show the real error message if it’s an Error
+          const message =
+            notifyErr instanceof Error
+              ? notifyErr.message
+              : 'Couldn’t send notification to the user';
+          toast.error(message);
+        }
+      } catch (err) {
+        // Only if completeTurn itself fails
+        console.error('Failed to complete turn:', err);
         toast.error('Failed to complete turn');
       }
     });
+
+    const handleUndo = (row: EnrichedTurn) =>
+      start(async () => {
+        try {
+          await undoTurn({ turnId: row.id })
+          setTurns((p) =>
+            p
+              .map((t) => (t.id === row.id ? { ...t, completed: false } : t))
+              .sort(sortTurns)
+          )
+        } catch {
+          toast.error('Failed to undo turn')
+        }
+      })
 
   if (loading) return <LoadingSpinner fullScreen />;
 
@@ -151,13 +177,22 @@ export default function TurnsPage() {
                 <tr
                   key={row.id}
                   className={`border-t ${
-                    row.completed ? 'line-through text-muted-foreground' : ''
+                    row.completed ? 'line-through text-muted-foreground text-red-500' : ''
                   }`}
                 >
                   <td className="p-2">{formatToLocalTime(row.created_at)}</td>
                   <td className="p-2">{emp.name}</td>
                   <td className="p-2 text-right">
-                    {!row.completed && (
+                    {row.completed ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={isPending}
+                        onClick={() => handleUndo(row)}
+                      >
+                        Undo
+                      </Button>
+                    ) : (
                       <Button
                         size="sm"
                         variant="secondary"
@@ -169,11 +204,11 @@ export default function TurnsPage() {
                     )}
                   </td>
                 </tr>
-              );
+              )
             })}
           </tbody>
         </Table>
       </div>
     </div>
-  );
+  )
 }

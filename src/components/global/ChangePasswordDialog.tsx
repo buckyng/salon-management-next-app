@@ -1,17 +1,30 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 interface ChangePasswordDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  onChangePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<void>;
 }
 
-const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({ isOpen, onClose, onChangePassword }) => {
+const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
+  isOpen,
+  onClose,
+  onChangePassword,
+}) => {
   const [currentPassword, setCurrentPassword] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [saving, setSaving] = useState(false);
@@ -35,7 +48,12 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({ isOpen, onC
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>
@@ -43,7 +61,9 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({ isOpen, onC
         <div className="space-y-4">
           {error && <p className="text-sm text-red-500">{error}</p>}
           <div>
-            <label className="block text-sm font-medium">Current Password</label>
+            <label className="block text-sm font-medium">
+              Current Password
+            </label>
             <Input
               type="password"
               value={currentPassword}

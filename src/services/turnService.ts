@@ -62,14 +62,27 @@ export const completeTurn = async (turnId: string) => {
 };
 
 export const sendTurnNotification = async (employeeId: string) => {
-  const res = await fetch('/api/notifications/send-turn', {
+  const res = await fetch('/api/notifications/send-sms', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ employeeId }),
+    body: JSON.stringify({
+      userId: employeeId,
+      message: '🎉 Your next client is ready!',
+    }),
   });
 
   if (!res.ok) {
     const { error } = await res.json();
     throw new Error(error || 'Failed to send notification');
   }
+};
+
+export const undoTurn = async ({ turnId }: { turnId: string }) => {
+  const res = await fetch('/api/employee-turns/undo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ turnId }),
+  });
+  if (!res.ok) throw new Error('Failed to undo turn.');
+  return res.json();
 };
