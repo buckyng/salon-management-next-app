@@ -1,3 +1,5 @@
+import { EnrichedTurn } from '../types';
+
 export function sortByKey<T>(
   data: T[],
   key: keyof T,
@@ -31,4 +33,25 @@ export function sortByKey<T>(
 
     return order === 'asc' ? (valA > valB ? 1 : -1) : valA < valB ? 1 : -1;
   });
+}
+
+export function sortTurns(a: EnrichedTurn, b: EnrichedTurn) {
+  // 1) incomplete (completed=false) come first
+  if (a.completed !== b.completed) {
+    return a.completed ? 1 : -1;
+  }
+
+  // 2) within incomplete group: oldest→newest
+  if (!a.completed) {
+    return (
+      new Date(a.created_at!).getTime() -
+      new Date(b.created_at!).getTime()
+    );
+  }
+
+  // 3) within completed group: newest→oldest
+  return (
+    new Date(b.created_at!).getTime() -
+    new Date(a.created_at!).getTime()
+  );
 }

@@ -15,6 +15,7 @@ export const formatToLocalTime = (utcDate: string | null): string => {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
+    hour12: false,
     timeZone,
   }); // Adjusts to local timezone and formats as HH:MM
   return localTime;
