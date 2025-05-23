@@ -61,27 +61,13 @@ export const completeTurn = async (turnId: string) => {
   if (!res.ok) throw new Error('Failed to complete turn');
 };
 
-// export const sendTurnNotification = async (employeeId: string) => {
-//   const res = await fetch('/api/notifications/send-turn', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({ employeeId }),
-//   });
-
-//   if (!res.ok) {
-//     const { error } = await res.json();
-//     throw new Error(error || 'Failed to send notification');
-//   }
-// };
-
-
-export const sendTurnNotification = async (employeeId: string, groupId: string) => {
-  const res = await fetch('/api/web-push/send-turn', {
+export const sendTurnNotification = async (employeeId: string) => {
+  const res = await fetch('/api/notifications/send-sms', {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       userId: employeeId,
-      groupId: groupId,
+      message: '🎉 Your next client is ready!',
     }),
   });
 
@@ -89,4 +75,14 @@ export const sendTurnNotification = async (employeeId: string, groupId: string) 
     const { error } = await res.json();
     throw new Error(error || 'Failed to send notification');
   }
+};
+
+export const undoTurn = async ({ turnId }: { turnId: string }) => {
+  const res = await fetch('/api/employee-turns/undo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ turnId }),
+  });
+  if (!res.ok) throw new Error('Failed to undo turn.');
+  return res.json();
 };

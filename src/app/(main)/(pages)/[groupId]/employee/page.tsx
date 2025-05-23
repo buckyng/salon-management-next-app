@@ -11,8 +11,6 @@ import { Loader2 } from 'lucide-react';
 import { fetchSalesByUser } from '@/services/saleService';
 import { sortByKey } from '@/lib/utils/funcUtils';
 import { formatCurrency } from '@/lib/utils/formatUtils';
-import { usePushSubscription } from '@/lib/hooks/usePushSubscription';
-import { EnableNotificationsButton } from '@/components/global/EnableNotificationButton';
 
 const EmployeeHomePage = () => {
   const { user } = useUser();
@@ -24,19 +22,6 @@ const EmployeeHomePage = () => {
   const [loading, setLoading] = useState(false);
 
   const currentDate = getCurrentLocalDate();
-
-  const { error } = usePushSubscription(async (sub) => {
-    if (!user?.id || !activeGroup?.id) return;
-    await fetch('/api/web-push/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        subscription: sub,
-        userId: user.id,
-        groupId: activeGroup.id,
-      }),
-    });
-  });
 
   const columns: ColumnDef<SaleData>[] = [
     {
@@ -95,11 +80,6 @@ const EmployeeHomePage = () => {
 
   return (
     <div className="container mx-auto mt-4 px-4 sm:px-6 lg:px-8">
-      {error && <p className="text-red-500">{error}</p>}
-      <EnableNotificationsButton
-        userId={user?.id || ''}
-        groupId={activeGroup?.id || ''}
-      />
       <h1 className="text-xl font-bold text-center sm:text-2xl mb-4">
         {activeGroup && activeGroup.name
           ? `${activeGroup.name} - Today's Sales`

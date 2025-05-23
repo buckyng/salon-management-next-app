@@ -4,12 +4,14 @@ type UpdateUserDetailsProps = {
   userId: string;
   name: string;
   avatarUrl: string;
+  phone: string;
 };
 
 export async function updateUserDetails({
   userId,
   name,
   avatarUrl,
+  phone
 }: UpdateUserDetailsProps) {
   const supabase = createSupabaseClient();
 
@@ -18,6 +20,7 @@ export async function updateUserDetails({
     .update({
       name,
       avatar_url: avatarUrl,
+      phone,
     })
     .eq('id', userId);
 
