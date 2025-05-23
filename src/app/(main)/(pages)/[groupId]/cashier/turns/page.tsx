@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { EnrichedTurn, Profile } from '@/lib/types';
+import { sortTurns } from '@/lib/utils/funcUtils';
 
 const WEEKDAY_FMT: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -58,13 +59,6 @@ export default function TurnsPage() {
     load();
   }, [activeGroup, todayISO, weekday]);
 
-  const sortTurns = (a: EnrichedTurn, b: EnrichedTurn) => {
-    if (a.completed !== b.completed) return a.completed ? 1 : -1;
-    return a.created_at && b.created_at
-      ? a.created_at.localeCompare(b.created_at)
-      : 0;
-  };
-
   const handleCardClick = (emp: Profile) =>
     start(async () => {
       try {
@@ -72,7 +66,8 @@ export default function TurnsPage() {
           groupId: activeGroup!.id,
           userId: emp.id,
         });
-        setTurns((p) => [...p, newRow].sort(sortTurns));
+
+        setTurns((prev) => [...prev, newRow].sort(sortTurns));
       } catch (err) {
         toast.error('Failed to add turn' + err);
       }
@@ -83,8 +78,8 @@ export default function TurnsPage() {
       try {
         // 1️⃣ Complete the turn & update UI
         await completeTurn(row.id);
-        setTurns((p) =>
-          p
+        setTurns((prev) =>
+          prev
             .map((t) => (t.id === row.id ? { ...t, completed: true } : t))
             .sort(sortTurns)
         );
@@ -114,8 +109,8 @@ export default function TurnsPage() {
     start(async () => {
       try {
         await undoTurn({ turnId: row.id });
-        setTurns((p) =>
-          p
+        setTurns((prev) =>
+          prev
             .map((t) => (t.id === row.id ? { ...t, completed: false } : t))
             .sort(sortTurns)
         );
