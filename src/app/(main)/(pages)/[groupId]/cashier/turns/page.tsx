@@ -105,6 +105,23 @@ export default function TurnsPage() {
       }
     });
 
+  const handleDoneNoSms = (row: EnrichedTurn) =>
+    start(async () => {
+      try {
+        // 1️⃣ Complete the turn & update UI
+        await completeTurn(row.id);
+        setTurns((prev) =>
+          prev
+            .map((t) => (t.id === row.id ? { ...t, completed: true } : t))
+            .sort(sortTurns)
+        );
+      } catch (err) {
+        // Only if completeTurn itself fails
+        console.error('Failed to complete turn:', err);
+        toast.error('Failed to complete turn');
+      }
+    });
+
   const handleUndo = (row: EnrichedTurn) =>
     start(async () => {
       try {
@@ -202,14 +219,26 @@ export default function TurnsPage() {
                         Undo
                       </Button>
                     ) : (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={isPending}
-                        onClick={() => handleDone(row)}
-                      >
-                        Call
-                      </Button>
+                      <>
+                        <div className="inline-flex items-center justify-end space-x-2">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            disabled={isPending}
+                            onClick={() => handleDone(row)}
+                          >
+                            Call
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            disabled={isPending}
+                            onClick={() => handleDoneNoSms(row)}
+                          >
+                            No txt
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </td>
                 </tr>
